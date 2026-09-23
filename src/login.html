@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link 
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
@@ -11,12 +10,207 @@
         crossorigin="anonymous"
         referrerpolicy="no-referrer"
     >
-
     <link href="/src/output.css" rel="stylesheet">
-
     <title>Reen Bank | Login</title>
 </head>
-<body>
-    
+<body class="min-h-screen bg-[url('./asset/images/register.png')] bg-cover bg-center">
+   <section class="min-h-screen">
+
+    <div class="container mx-auto px-5 py-8 sm:px-8 sm:py-12 lg:px-12 xl:px-20">
+
+        <div class="flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+
+            <!-- ========================= -->
+            <!-- LEFT SIDE -->
+            <!-- ========================= -->
+
+            <div class="w-full lg:w-1/2">
+
+                <!-- Logo -->
+                <div>
+                    <img
+                        src="./asset/images/logo.png"
+                        alt="Reen Bank logo"
+                        class="w-32"
+                    >
+                </div>
+
+
+                <!-- Welcome Text -->
+                <div class="mt-12 sm:mt-16 lg:mt-[140px]">
+
+                    <span class="text-lg font-semibold text-[#2CC48A] sm:text-xl">
+                        Reen Bank
+                    </span>
+
+                    <h1 class="mt-3 text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-6xl">
+                        Welcome Back
+                    </h1>
+
+                    <p class="mt-4 max-w-xl text-sm leading-7 text-gray-600 sm:text-base">
+                        Enter Your Details to login to your Banking Dashboard again!
+                    </p>
+
+                </div>
+
+
+                <!-- Social Icons -->
+                <div class="mt-10 flex gap-5 sm:mt-20">
+
+                    <a
+                        href="#"
+                        class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl"
+                    >
+                        <i class="fa-brands fa-facebook"></i>
+                    </a>
+
+                    <a
+                        href="#"
+                        class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl"
+                    >
+                        <i class="fa-brands fa-square-instagram"></i>
+                    </a>
+
+                    <a
+                        href="#"
+                        class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl"
+                    >
+                        <i class="fa-brands fa-twitter"></i>
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- ========================= -->
+            <!-- RIGHT SIDE / LOGIN FORM -->
+            <!-- ========================= -->
+
+            <div class="w-full lg:w-1/2">
+
+                <div class="mx-auto w-full max-w-md rounded-2xl bg-white p-6 shadow-lg sm:p-8">
+
+                    <form action="" class="space-y-5">
+
+                        <!-- Heading -->
+                        <div class="mb-8">
+
+                            <h1 class="text-3xl font-semibold text-[#33B786]">
+                                Login
+                            </h1>
+
+                            <p class="mt-2 text-sm text-gray-500">
+                                Welcome back! Please login to your account.
+                            </p>
+
+                        </div>
+
+
+                        <!-- Email -->
+                        <div>
+
+                            <label
+                                for="email"
+                                class="mb-2 block font-medium text-gray-700"
+                            >
+                                Email
+                            </label>
+
+                            <div class="relative">
+
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    placeholder="Enter your Email"
+                                    required
+                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 text-gray-700 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
+                                >
+
+                                <i
+                                    class="fa-regular fa-envelope absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                                ></i>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Password -->
+                        <div>
+
+                            <label
+                                for="password"
+                                class="mb-2 block font-medium text-gray-700"
+                            >
+                                Password
+                            </label>
+
+                            <div class="relative">
+
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    placeholder="Enter your Password"
+                                    required
+                                    class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-32 text-gray-700 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
+                                >
+
+                                <!-- Forgot + Lock -->
+                                <div class="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-3">
+
+                                    <a
+                                        href="#"
+                                        class="text-xs font-medium text-[#33B786] hover:underline sm:text-sm"
+                                    >
+                                        Forgot?
+                                    </a>
+
+                                    <i class="fa-solid fa-lock text-gray-400"></i>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Login Button -->
+                        <button
+                            type="submit"
+                            class="w-full rounded-xl bg-[#33B786] py-3 text-lg font-semibold text-white transition hover:bg-[#2ca776]"
+                        >
+                            Login
+                        </button>
+
+
+                        <!-- Register -->
+                        <p class="text-sm text-gray-600 sm:text-base">
+
+                            Don’t Have an Account?
+
+                            <a
+                                href="./register.html"
+                                target="_blank"
+                                class="font-semibold text-[#33B786] hover:underline"
+                            >
+                                Register
+                            </a>
+
+                        </p>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
 </body>
 </html>
