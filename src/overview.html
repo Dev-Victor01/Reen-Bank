@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
+        integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    >
+
+    <link href="./output.css" rel="stylesheet">
+
+    <title>Reen Bank | Dashboard</title>
+</head>
+
+<body class="bg-[#f5fbf9] text-[#292929] min-h-screen">
+
+    <!-- =========================================================
+         DASHBOARD WRAPPER
+    ========================================================== -->
+
+    <div class="min-h-screen flex">
+
+        <!-- =====================================================
+             SIDEBAR
+        ====================================================== -->
+
+        <aside
+            id="sidebar"
+            class="fixed lg:static z-50 top-0 left-0 h-screen w-[250px] bg-[#f5fbf9] border-r border-[#e8f1ee] transform -translate-x-full lg:translate-x-0 transition-transform duration-300"
+        >
+
+            <!-- Logo -->
+
+            <div class="h-[120px] flex items-center px-8">
+                <a href="./index.html" class="flex items-center gap-3">
+                    <img
+                        src="./asset/images/logo.png"
+                        alt="Reen Bank"
+                        class="object-contain"
+                    >
+                </a>
+            </div>
+
+            <!-- Navigation -->
+
+            <nav class="px-6 mt-7">
+
+                <!-- Overview -->
+
+                <a
+                    href="./overview.html"
+                    class="dashboard-nav active flex items-center gap-5 px-4 py-3 rounded-lg text-[#20b985] font-medium transition"
+                >
+                    <i class="fa-solid fa-grip w-5 text-lg"></i>
+                    <span>Overview</span>
+                </a>
+
+                <!-- Accounts -->
+
+                <a
+                    href="#accounts"
+                    class="dashboard-nav flex items-center gap-5 px-4 py-3 rounded-lg text-gray-600 hover:text-[#20b985] transition"
+                >
+                    <i class="fa-regular fa-credit-card w-5 text-lg"></i>
+                    <span>Accounts</span>
+                </a>
+
+                <!-- Transactions -->
+
+                <a
+                    href="#transactions"
+                    class="dashboard-nav flex items-center gap-5 px-4 py-3 rounded-lg text-gray-600 hover:text-[#20b985] transition"
+                >
+                    <i class="fa-solid fa-arrow-right-arrow-left w-5 text-lg"></i>
+                    <span>Transactions</span>
+                </a>
+
+                <!-- Profile -->
+
+                <a
+                    href="#profile"
+                    class="dashboard-nav flex items-center gap-5 px-4 py-3 rounded-lg text-gray-600 hover:text-[#20b985] transition"
+                >
+                    <i class="fa-regular fa-user w-5 text-lg"></i>
+                    <span>Profile</span>
+                </a>
+
+            </nav>
+
+            <!-- Logout -->
+
+            <div class="absolute bottom-0 left-6 right-6">
+                <button
+                    id="logoutButton"
+                    type="button"
+                    class="w-full flex items-center gap-5 px-4 py-3 text-gray-600 hover:text-red-500 transition"
+                >
+                    <i class="fa-solid fa-arrow-left w-5"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+
+        </aside>
+
+        <!-- =====================================================
+             MOBILE SIDEBAR OVERLAY
+        ====================================================== -->
+
+        <div
+            id="sidebarOverlay"
+            class="fixed inset-0 z-40 bg-black/30 hidden lg:hidden"
+        ></div>
+
+        <!-- =====================================================
+             MAIN CONTENT
+        ====================================================== -->
+
+        <main class="flex-1 min-w-0">
+
+            <!-- =================================================
+                 TOP HEADER
+            ================================================== -->
+
+            <header
+                class="h-[120px] px-6 lg:px-12 flex items-center justify-between"
+            >
+
+                <!-- Left -->
+
+                <div class="flex items-center gap-5">
+
+                    <!-- Mobile menu -->
+
+                    <button
+                        id="menuButton"
+                        type="button"
+                        class="lg:hidden text-xl"
+                    >
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <h1 class="text-2xl md:text-3xl font-semibold">
+                        Overview
+                    </h1>
+
+                </div>
+
+                <!-- Desktop User Area -->
+
+                <div class="hidden md:flex items-center gap-8">
+
+                    <!-- User -->
+
+                    <div class="text-right">
+                        <p
+                            id="headerUserName"
+                            class="text-xs text-[#20b985] font-medium"
+                        >
+                            User
+                        </p>
+
+                        <p
+                            id="accountNumber"
+                            class="text-2xl font-bold"
+                        >
+                            1234567890
+                        </p>
+                    </div>
+
+                    <!-- Search -->
+
+                    <div class="flex items-center gap-3 text-gray-500">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input
+                            id="searchInput"
+                            type="search"
+                            placeholder="Search"
+                            class="w-20 bg-transparent outline-none text-sm"
+                        >
+                    </div>
+
+                    <!-- Notification -->
+
+                    <button type="button" class="relative text-lg">
+                        <i class="fa-regular fa-bell"></i>
+
+                        <span
+                            class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500"
+                        ></span>
+                    </button>
+
+                    <!-- Avatar -->
+
+                    <div
+                        id="profileAvatar"
+                        class="w-10 h-10 rounded-full bg-[#20b985] text-white flex items-center justify-center font-semibold"
+                    >
+                        <img src="./asset/images/Ellipse 33.png" alt="">
+                    </div>
+
+                </div>
+
+            </header>
+
+            <!-- =================================================
+                 DASHBOARD CONTENT
+            ================================================== -->
+
+            <div
+                id="overview"
+                class="px-6 lg:px-12 pb-12 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-8"
+            >
+
+                <!-- =============================================
+                     LEFT / MAIN DASHBOARD
+                ============================================== -->
+
+                <section>
+
+                    <!-- Balance Header -->
+
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+
+                        <h2 class="text-base font-semibold">
+                            Current Account Balance
+                        </h2>
+
+                        <div class="flex items-center gap-3">
+
+                            <!-- Hide balance -->
+
+                            <button
+                                id="balanceToggle"
+                                type="button"
+                                class="w-9 h-9 bg-gray-100 rounded-md text-gray-600 hover:bg-gray-200 transition"
+                            >
+                                <i class="fa-regular fa-eye-slash"></i>
+                            </button>
+
+                            <!-- Date -->
+
+                            <select
+                                id="dateFilter"
+                                class="h-9 px-3 bg-gray-100 rounded-md text-xs outline-none"
+                            >
+                                <option>Feb 22 - Mar 21, 2023</option>
+                                <option>Jan 22 - Feb 21, 2023</option>
+                                <option>Dec 22 - Jan 21, 2023</option>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Balance Card -->
+
+                    <div
+                        class="bg-[#cef2e5] rounded-lg p-6 md:p-7 grid grid-cols-2 md:grid-cols-4 gap-6 items-center"
+                    >
+
+                        <!-- Reen Logo -->
+
+                        <div
+                            class="w-11 h-11 border-2 border-[#20b985] rounded-lg flex items-center justify-center text-[#20b985] text-xl font-bold"
+                        >
+                            rb
+                        </div>
+
+                        <!-- Current Balance -->
+
+                        <div>
+                            <p class="text-xs text-gray-600">
+                                Current Balance
+                            </p>
+
+                            <p
+                                id="currentBalance"
+                                class="balance-value text-lg font-semibold"
+                            >
+                                ₦0.00
+                            </p>
+                        </div>
+
+                        <!-- Income -->
+
+                        <div>
+                            <p class="text-xs text-gray-600">
+                                Income
+                            </p>
+
+                            <p
+                                id="incomeValue"
+                                class="balance-value text-lg font-semibold"
+                            >
+                                ₦0.00
+                            </p>
+                        </div>
+
+                        <!-- Expense -->
+
+                        <div>
+                            <p class="text-xs text-gray-600">
+                                Expense
+                            </p>
+
+                            <p
+                                id="expenseValue"
+                                class="balance-value text-lg font-semibold"
+                            >
+                                ₦0.00
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Accounts -->
+
+                    <section id="accounts" class="mt-11">
+
+                        <div class="flex items-center justify-between mb-5">
+
+                            <h2 class="text-base font-semibold">
+                                Accounts
+                            </h2>
+
+                            <button
+                                id="addAccountButton"
+                                type="button"
+                                class="w-8 h-8 bg-gray-100 rounded-md text-gray-600 hover:bg-[#cef2e5] transition"
+                            >
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+                            <!-- Main Account -->
+
+                            <div class="bg-[#cef2e5] rounded-lg p-6">
+                                <p class="text-xs text-[#3d3180]">
+                                    Main Account
+                                </p>
+
+                                <p
+                                    id="mainAccountBalance"
+                                    class="account-balance text-lg font-semibold mt-1"
+                                >
+                                    ₦0.00
+                                </p>
+                            </div>
+
+                            <!-- School Savings -->
+
+                            <div class="bg-[#cef2e5] rounded-lg p-6">
+                                <p class="text-xs text-[#3d3180]">
+                                    School Savings
+                                </p>
+
+                                <p
+                                    id="schoolSavingsBalance"
+                                    class="account-balance text-lg font-semibold mt-1"
+                                >
+                                    ₦0.00
+                                </p>
+                            </div>
+
+                            <!-- Holiday Plan -->
+
+                            <div class="bg-[#cef2e5] rounded-lg p-6">
+                                <p class="text-xs text-[#3d3180]">
+                                    Holiday Plan
+                                </p>
+
+                                <p
+                                    id="holidayBalance"
+                                    class="account-balance text-lg font-semibold mt-1"
+                                >
+                                    ₦0.00
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </section>
+
+                    <!-- Statistics -->
+
+                    <section class="mt-11">
+
+                        <div class="flex items-center justify-between mb-5">
+
+                            <h2 class="text-base font-semibold">
+                                Statistics
+                            </h2>
+
+                            <select
+                                id="statisticsFilter"
+                                class="bg-gray-100 rounded-md px-4 py-2 text-xs outline-none"
+                            >
+                                <option>This Month</option>
+                                <option>Last Month</option>
+                                <option>This Year</option>
+                            </select>
+
+                        </div>
+
+                        <!-- Income -->
+
+                        <div class="flex items-center gap-5 mb-7">
+
+                            <div
+                                class="w-8 h-8 border-2 border-[#20b985] rounded-md flex items-center justify-center text-[#20b985] font-bold"
+                            >
+                                rb
+                            </div>
+
+                            <span class="w-16 text-sm font-medium">
+                                Income
+                            </span>
+
+                            <div class="flex-1 max-w-[300px] h-2 bg-gray-100 rounded-full">
+                                <div
+                                    id="incomeBar"
+                                    class="h-full w-0 bg-[#20b985] rounded-full transition-all duration-500"
+                                ></div>
+                            </div>
+
+                            <strong
+                                id="statisticsIncome"
+                                class="text-sm whitespace-nowrap"
+                            >
+                                ₦0.00
+                            </strong>
+
+                        </div>
+
+                        <!-- Expense -->
+
+                        <div class="flex items-center gap-5">
+
+                            <div
+                                class="w-8 h-8 border-2 border-red-400 rounded-md flex items-center justify-center text-red-400 font-bold"
+                            >
+                                rb
+                            </div>
+
+                            <span class="w-16 text-sm font-medium">
+                                Expense
+                            </span>
+
+                            <div class="flex-1 max-w-[300px] h-2 bg-gray-100 rounded-full">
+                                <div
+                                    id="expenseBar"
+                                    class="h-full w-0 bg-red-400 rounded-full transition-all duration-500"
+                                ></div>
+                            </div>
+
+                            <strong
+                                id="statisticsExpense"
+                                class="text-sm whitespace-nowrap"
+                            >
+                                ₦0.00
+                            </strong>
+
+                        </div>
+
+                    </section>
+
+                </section>
+
+                <!-- =============================================
+                     RIGHT SIDE
+                ============================================== -->
+
+                <aside>
+
+                    <!-- Transactions -->
+
+                    <section id="transactions">
+
+                        <div class="flex items-center justify-between mb-4">
+
+                            <h2 class="text-base font-semibold">
+                                Transactions
+                            </h2>
+
+                            <button
+                                id="viewTransactions"
+                                type="button"
+                                class="text-[#20b985] text-xl"
+                            >
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+
+                        </div>
+
+                        <!-- Transaction List -->
+
+                        <div id="transactionList">
+                            <!-- JavaScript fills this -->
+                        </div>
+
+                        <!-- Empty State -->
+
+                        <div
+                            id="emptyTransactions"
+                            class="py-10 text-center text-gray-400 text-sm"
+                        >
+                            <i class="fa-regular fa-file-lines text-2xl mb-3"></i>
+                            <p>No transactions yet</p>
+                        </div>
+
+                    </section>
+
+                    <!-- Upgrade Card -->
+
+                    <div
+                        class="mt-8 min-h-[138px] rounded-xl overflow-hidden bg-[url('./asset/images/pro.png')] relative p-5 text-white"
+                    >
+                        <div class="relative z-10">
+
+                            <i class="fa-solid fa-arrow-right mb-5"></i>
+
+                            <h3 class="text-lg font-semibold">
+                                Upgrade to PRO
+                            </h3>
+
+                            <p class="text-xs">
+                                Sign in on more than one device
+                            </p>
+
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </main>
+
+    </div>
+
+   <!-- LOGOUT MODAL -->
+    <div
+        id="logoutModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4"
+    >
+
+        <div
+            class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+        >
+
+            <!-- Icon -->
+            <div class="mb-4 flex justify-center">
+                <div
+                    class="flex h-14 w-14 items-center justify-center rounded-full bg-red-100"
+                >
+                    <i class="fa-solid fa-right-from-bracket text-xl text-red-500"></i>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <h2 class="text-center text-lg font-semibold text-gray-900">
+                Logout
+            </h2>
+
+            <!-- Message -->
+            <p class="mt-2 text-center text-sm text-gray-500">
+                Are you sure you want to logout?
+            </p>
+
+            <!-- Buttons -->
+            <div class="mt-6 flex gap-3">
+
+                <!-- CANCEL -->
+                <button
+                    type="button"
+                    id="cancelLogout"
+                    class="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                >
+                    Cancel
+                </button>
+
+                <!-- LOGOUT -->
+                <button
+                    type="button"
+                    id="confirmLogout"
+                    class="flex-1 rounded-xl bg-red-500 px-4 py-3 text-sm font-medium text-white transition hover:bg-red-600"
+                >
+                    Logout
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ADD ACCOUNT MODAL -->
+     <div>
+
+     </div>
+    <!-- =========================================================
+         DASHBOARD JAVASCRIPT
+    ========================================================== -->
+
+    <script src="./js/overview.js"></script>
+
+</body>
+</html>

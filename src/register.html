@@ -1,10 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
         integrity="sha512-QeR2VH+lsBE5LSAe1Q5EnTBbe7XTBubt8dG93Y7gidSgdMCr8nVqKcfKAMyN96SV8KDbZVTDXChatu5G2KQGzg=="
@@ -15,61 +21,92 @@
     <link href="/src/output.css" rel="stylesheet">
 
     <title>Reen Bank | Register</title>
+
 </head>
+
 
 <body class="min-h-screen bg-[url('./asset/images/register.png')] bg-cover bg-center">
 
     <section class="min-h-screen">
-        
+
         <div class="container mx-auto px-5 py-8 sm:px-8 sm:py-12 lg:px-12 xl:px-20 2xl:px-30">
 
             <div class="flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
 
+
+                <!-- ================================================= -->
                 <!-- LEFT SIDE -->
+                <!-- ================================================= -->
+
                 <div class="w-full lg:w-1/2">
 
+
                     <!-- Logo -->
+
                     <div>
-                        <img 
-                            src="./asset/images/logo.png" 
+
+                        <img
+                            src="./asset/images/logo.png"
                             alt="Reen Bank Logo"
                             class="w-32 sm:w-36"
                         >
+
                     </div>
 
+
                     <!-- Text -->
+
                     <div class="mt-12 sm:mt-16 lg:mt-20">
 
                         <span class="text-lg font-semibold text-[#2CC48A] sm:text-xl">
                             Reen Bank
                         </span>
 
-                        <h1 class="mt-2 text-4xl font-semibold leading-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-7xl">
+
+                        <h1 class="mt-2 text-4xl font-semibold leading-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-4xl">
+
                             Experience
                             <br>
                             hassle-free banking
+
                         </h1>
 
+
                         <p class="mt-6 max-w-xl text-base leading-7 text-gray-600 sm:mt-8 sm:text-lg sm:leading-8">
+
                             Experience simple, secure, and stress-free banking.
                             Say goodbye to long queues and complex procedures
                             and hello to hassle-free banking with Reen Bank.
+
                         </p>
 
                     </div>
 
+
                     <!-- Social Icons -->
+
                     <div class="mt-10 flex gap-5 sm:mt-16">
 
-                        <a href="#" class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl">
+                        <a
+                            href="#"
+                            class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl"
+                        >
                             <i class="fa-brands fa-facebook"></i>
                         </a>
 
-                        <a href="#" class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl">
+
+                        <a
+                            href="#"
+                            class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl"
+                        >
                             <i class="fa-brands fa-square-instagram"></i>
                         </a>
 
-                        <a href="#" class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl">
+
+                        <a
+                            href="#"
+                            class="text-xl text-[#33B786] transition hover:scale-110 sm:text-2xl"
+                        >
                             <i class="fa-brands fa-twitter"></i>
                         </a>
 
@@ -78,17 +115,34 @@
                 </div>
 
 
+
+                <!-- ================================================= -->
                 <!-- RIGHT SIDE / FORM -->
+                <!-- ================================================= -->
+
                 <div class="w-full lg:w-1/2">
 
                     <div class="mx-auto w-full max-w-md rounded-2xl bg-white p-5 shadow-lg sm:p-7 md:p-8">
 
-                        <form class="space-y-5">
 
-                            <h1 class="text-[#33B786] font-semibold text-3xl">Register</h1>
+                        <!-- FORM -->
 
-                            <!-- Name -->
+                        <form
+                            id="registerForm"
+                            class="space-y-5"
+                        >
+
+                            <h1 class="text-3xl font-semibold text-[#33B786]">
+                                Register
+                            </h1>
+
+
+                            <!-- ================================================= -->
+                            <!-- NAME -->
+                            <!-- ================================================= -->
+
                             <div>
+
                                 <label
                                     for="name"
                                     class="mb-2 block font-medium text-gray-700"
@@ -96,23 +150,32 @@
                                     Name
                                 </label>
 
+
                                 <div class="relative">
 
                                     <input
                                         id="name"
                                         type="text"
                                         placeholder="Enter name here"
+                                        required
+                                        autocomplete="name"
                                         class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
                                     >
 
                                     <i class="fa-regular fa-user absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
 
                                 </div>
+
                             </div>
 
 
-                            <!-- Email -->
+
+                            <!-- ================================================= -->
+                            <!-- EMAIL -->
+                            <!-- ================================================= -->
+
                             <div>
+
                                 <label
                                     for="email"
                                     class="mb-2 block font-medium text-gray-700"
@@ -120,23 +183,32 @@
                                     Email
                                 </label>
 
+
                                 <div class="relative">
 
                                     <input
                                         id="email"
                                         type="email"
                                         placeholder="Enter your Email"
+                                        required
+                                        autocomplete="email"
                                         class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
                                     >
 
                                     <i class="fa-regular fa-envelope absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
 
                                 </div>
+
                             </div>
 
 
-                            <!-- Password -->
+
+                            <!-- ================================================= -->
+                            <!-- PASSWORD -->
+                            <!-- ================================================= -->
+
                             <div>
+
                                 <label
                                     for="password"
                                     class="mb-2 block font-medium text-gray-700"
@@ -144,48 +216,67 @@
                                     Password
                                 </label>
 
+
                                 <div class="relative">
 
                                     <input
                                         id="password"
                                         type="password"
                                         placeholder="Enter your Password"
+                                        required
+                                        autocomplete="new-password"
                                         class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
                                     >
 
                                     <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
 
                                 </div>
+
                             </div>
 
 
-                            <!-- Terms -->
+
+                            <!-- ================================================= -->
+                            <!-- TERMS -->
+                            <!-- ================================================= -->
+
                             <div class="flex items-start gap-3">
 
                                 <input
                                     type="checkbox"
                                     id="terms"
+                                    required
                                     class="mt-1 h-4 w-4 shrink-0 accent-[#33B786]"
                                 >
+
 
                                 <label
                                     for="terms"
                                     class="text-sm leading-6 text-gray-600"
                                 >
+
                                     I agree to all the
+
                                     <span class="text-[#33B786]">
                                         Terms, Privacy Policy
                                     </span>
+
                                     and
+
                                     <span class="text-[#33B786]">
                                         Fees.
                                     </span>
+
                                 </label>
 
                             </div>
 
 
-                            <!-- Register Button -->
+
+                            <!-- ================================================= -->
+                            <!-- REGISTER BUTTON -->
+                            <!-- ================================================= -->
+
                             <button
                                 type="submit"
                                 class="w-full rounded-xl bg-[#33B786] py-3 text-base font-semibold text-white transition hover:bg-[#2ca776] sm:text-lg"
@@ -194,7 +285,9 @@
                             </button>
 
 
-                            <!-- Login -->
+
+                            <!-- LOGIN -->
+
                             <p class="text-sm text-gray-600 sm:text-base">
 
                                 Already have an Account?
@@ -219,6 +312,83 @@
         </div>
 
     </section>
-    <script></script>
+
+
+
+    <!-- ========================================================= -->
+    <!-- ALREADY REGISTERED MODAL -->
+    <!-- ========================================================= -->
+
+    <div
+        id="alreadyRegisteredModal"
+        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4"
+    >
+
+        <div class="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+
+
+            <!-- ICON -->
+
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+
+                <i class="fa-solid fa-user-check text-2xl text-red-500"></i>
+
+            </div>
+
+
+            <!-- TITLE -->
+
+            <h2 class="mt-5 text-2xl font-bold text-gray-900">
+
+                Account Already Registered
+
+            </h2>
+
+
+            <!-- MESSAGE -->
+
+            <p class="mt-3 text-gray-500">
+
+                This email address is already registered.
+                Please login to your account instead.
+
+            </p>
+
+
+            <!-- BUTTONS -->
+
+            <div class="mt-6 flex gap-3">
+
+                <button
+                    type="button"
+                    onclick="closeAlreadyRegisteredModal()"
+                    class="w-full rounded-xl border border-gray-300 py-3 font-semibold text-gray-700 transition hover:bg-gray-50"
+                >
+                    Close
+                </button>
+
+
+                <a
+                    href="./login.html"
+                    class="w-full rounded-xl bg-[#33B786] py-3 font-semibold text-white transition hover:bg-[#2ca776]"
+                >
+                    Login
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT -->
+    <!-- ========================================================= -->
+
+    <script src="./js/register.js"></script>
+
 </body>
+
 </html>
