@@ -17,7 +17,7 @@
     <title>Reen Bank | Dashboard</title>
 </head>
 
-<body class="bg-[#f5fbf9] text-[#292929] min-h-screen">
+<body class="bg-[url('./asset/images/accounts.png')] text-[#292929] min-h-screen bg-cover bg-center">
 
     <!-- =========================================================
          DASHBOARD WRAPPER
@@ -31,7 +31,7 @@
 
         <aside
             id="sidebar"
-            class="fixed lg:static z-50 top-0 left-0 h-screen w-[250px] bg-[#f5fbf9] border-r border-[#e8f1ee] transform -translate-x-full lg:translate-x-0 transition-transform duration-300"
+            class="fixed lg:static z-50 top-0 left-0 h-screen w-[250px]  border-r border-[#e8f1ee] transform -translate-x-full lg:translate-x-0 transition-transform duration-300"
         >
 
             <!-- Logo -->
@@ -63,7 +63,8 @@
                 <!-- Accounts -->
 
                 <a
-                    href="#accounts"
+                    href="./account.html"
+                    target="_blank"
                     class="dashboard-nav flex items-center gap-5 px-4 py-3 rounded-lg text-gray-600 hover:text-[#20b985] transition"
                 >
                     <i class="fa-regular fa-credit-card w-5 text-lg"></i>
@@ -83,7 +84,8 @@
                 <!-- Profile -->
 
                 <a
-                    href="#profile"
+                    href="./profile.html"
+                    target="_blank"
                     class="dashboard-nav flex items-center gap-5 px-4 py-3 rounded-lg text-gray-600 hover:text-[#20b985] transition"
                 >
                     <i class="fa-regular fa-user w-5 text-lg"></i>
@@ -168,7 +170,7 @@
                             id="accountNumber"
                             class="text-2xl font-bold"
                         >
-                            1234567890
+                            0000000000
                         </p>
                     </div>
 
@@ -197,11 +199,27 @@
 
                     <!-- Avatar -->
 
-                    <div
-                        id="profileAvatar"
-                        class="w-10 h-10 rounded-full bg-[#20b985] text-white flex items-center justify-center font-semibold"
-                    >
-                        <img src="./asset/images/Ellipse 33.png" alt="">
+                   <div class="relative">
+                        <a  href="./profile.html">
+                        <button
+                            id="profileAvatar"
+                            type="button"
+                            class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#d8f6ed] text-sm font-semibold text-[#33B786]"
+                            title="Change profile picture"
+                        >
+                        
+                            U
+                        
+                        </button>
+
+                        <input
+                            id="profileImageInput"
+                            type="file"
+                            accept="image/*"
+                            class="hidden"
+                        >
+                        </a>
+
                     </div>
 
                 </div>

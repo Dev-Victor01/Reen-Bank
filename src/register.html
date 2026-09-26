@@ -63,7 +63,7 @@
                         </span>
 
 
-                        <h1 class="mt-2 text-4xl font-semibold leading-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-4xl">
+                        <h1 class="mt-2 text-4xl font-semibold leading-tight text-gray-900 sm:text-5xl lg:text-6xl xl:text-6xl">
 
                             Experience
                             <br>
@@ -207,7 +207,7 @@
                             <!-- PASSWORD -->
                             <!-- ================================================= -->
 
-                            <div>
+                          <div>
 
                                 <label
                                     for="password"
@@ -216,24 +216,37 @@
                                     Password
                                 </label>
 
-
                                 <div class="relative">
 
                                     <input
                                         id="password"
+                                        name="password"
                                         type="password"
-                                        placeholder="Enter your Password"
+                                        minlength="6"
                                         required
                                         autocomplete="new-password"
-                                        class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
+                                        placeholder="Enter your Password"
+                                        class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-14 text-gray-700 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
                                     >
 
-                                    <i class="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <!-- Eye Button -->
+                                    <button
+                                        type="button"
+                                        id="togglePassword"
+                                        class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 transition hover:text-[#33B786]"
+                                        aria-label="Show password"
+                                        title="Show password"
+                                    >
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
 
                                 </div>
 
-                            </div>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Password must be at least 6 characters.
+                                </p>
 
+                            </div>
 
 
                             <!-- ================================================= -->

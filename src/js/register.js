@@ -1,122 +1,269 @@
-const registerForm = document.getElementById("registerForm");
+document.addEventListener("DOMContentLoaded", function () {
 
-if (registerForm) {
+    const registerForm = document.getElementById("registerForm");
 
-    registerForm.addEventListener("submit", function (event) {
+    // =====================================================
+    // PASSWORD SHOW / HIDE
+    // =====================================================
 
-        event.preventDefault();
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
 
-        // Get form values
-        const name = document.getElementById("name").value.trim();
+    if (passwordInput && togglePassword) {
 
-        const email = document
-            .getElementById("email")
-            .value
-            .trim()
-            .toLowerCase();
+        togglePassword.addEventListener("click", function () {
 
-        const password =
-            document.getElementById("password").value;
+            const isPassword =
+                passwordInput.type === "password";
 
+            passwordInput.type =
+                isPassword ? "text" : "password";
 
-        // Get existing users
-        let users = [];
+            togglePassword.innerHTML =
+                isPassword
+                    ? '<i class="fa-solid fa-eye-slash"></i>'
+                    : '<i class="fa-solid fa-eye"></i>';
 
-        try {
-            users =
-                JSON.parse(
-                    localStorage.getItem("reenUsers")
-                ) || [];
-        } catch (error) {
-            users = [];
-        }
+            togglePassword.setAttribute(
+                "aria-label",
+                isPassword
+                    ? "Hide password"
+                    : "Show password"
+            );
 
-
-        // Check if email already exists
-        const existingUser = users.find(function (user) {
-            return user.email === email;
         });
 
+    }
 
-        if (existingUser) {
 
-            const modal =
-                document.getElementById(
-                    "alreadyRegisteredModal"
+    // =====================================================
+    // REGISTRATION FORM
+    // =====================================================
+
+    if (registerForm) {
+
+        registerForm.addEventListener("submit", function (event) {
+
+            event.preventDefault();
+
+
+            // =====================================================
+            // GET FORM VALUES
+            // =====================================================
+
+            const nameInput =
+                document.getElementById("name");
+
+            const emailInput =
+                document.getElementById("email");
+
+            const passwordInput =
+                document.getElementById("password");
+
+
+            if (
+                !nameInput ||
+                !emailInput ||
+                !passwordInput
+            ) {
+
+                console.error(
+                    "Registration form fields were not found."
                 );
 
-            if (modal) {
-                modal.classList.remove("hidden");
-                modal.classList.add("flex");
+                return;
             }
 
-            return;
-        }
+
+            const name =
+                nameInput.value.trim();
+
+            const email =
+                emailInput.value
+                    .trim()
+                    .toLowerCase();
+
+            const password =
+                passwordInput.value;
 
 
-        // =====================================================
-        // GENERATE OTP
-        // =====================================================
+            // =====================================================
+            // VALIDATE FORM
+            // =====================================================
 
-        const otp =
-            Math.floor(
-                100000 + Math.random() * 900000
-            ).toString();
+            if (!name || !email || !password) {
 
+                alert(
+                    "Please fill in all fields."
+                );
 
-        // =====================================================
-        // CREATE PENDING USER
-        // =====================================================
-
-        const pendingUser = {
-            name: name,
-            email: email,
-            password: password,
-            otp: otp
-        };
+                return;
+            }
 
 
-        // =====================================================
-        // SAVE PENDING USER
-        // =====================================================
+            // =====================================================
+            // PASSWORD LENGTH
+            // =====================================================
 
-        sessionStorage.setItem(
-            "pendingUser",
-            JSON.stringify(pendingUser)
-        );
+            if (password.length < 8) {
 
+                alert(
+                    "Password must be at least 8 characters long."
+                );
 
-        // =====================================================
-        // SHOW OTP FOR TESTING
-        // =====================================================
+                passwordInput.focus();
 
-        console.log(
-            "================================"
-        );
-
-        console.log(
-            "YOUR OTP IS:",
-            otp
-        );
-
-        console.log(
-            "================================"
-        );
+                return;
+            }
 
 
-        // =====================================================
-        // GO TO OTP PAGE
-        // =====================================================
+            // =====================================================
+            // GET EXISTING USERS
+            // =====================================================
 
-        window.location.href = "./otp.html";
+            let users = [];
 
-    });
+            try {
 
-}
+                users =
+                    JSON.parse(
+                        localStorage.getItem("reenUsers")
+                    ) || [];
+
+            } catch (error) {
+
+                console.error(
+                    "Could not read registered users:",
+                    error
+                );
+
+                users = [];
+            }
+
+
+            // Make sure users is an array
+
+            if (!Array.isArray(users)) {
+
+                users = [];
+
+            }
+
+
+            // =====================================================
+            // CHECK IF EMAIL ALREADY EXISTS
+            // =====================================================
+
+            const existingUser =
+                users.find(function (user) {
+
+                    return (
+                        user &&
+                        typeof user.email === "string" &&
+                        user.email.toLowerCase() === email
+                    );
+
+                });
+
+
+            if (existingUser) {
+
+                const modal =
+                    document.getElementById(
+                        "alreadyRegisteredModal"
+                    );
+
+
+                if (modal) {
+
+                    modal.classList.remove("hidden");
+
+                    modal.classList.add("flex");
+
+                } else {
+
+                    alert(
+                        "An account with this email already exists."
+                    );
+
+                }
+
+                return;
+            }
+
+
+            // =====================================================
+            // GENERATE OTP
+            // =====================================================
+
+            const otp =
+                Math.floor(
+                    100000 +
+                    Math.random() * 900000
+                ).toString();
+
+
+            // =====================================================
+            // CREATE PENDING USER
+            // =====================================================
+
+            const pendingUser = {
+
+                name: name,
+
+                email: email,
+
+                password: password,
+
+                otp: otp
+
+            };
+
+
+            // =====================================================
+            // SAVE PENDING USER
+            // =====================================================
+
+            sessionStorage.setItem(
+                "pendingUser",
+                JSON.stringify(pendingUser)
+            );
+
+
+            // =====================================================
+            // SHOW OTP FOR TESTING
+            // =====================================================
+
+            console.log(
+                "================================"
+            );
+
+            console.log(
+                "YOUR OTP IS:",
+                otp
+            );
+
+            console.log(
+                "================================"
+            );
+
+
+            // =====================================================
+            // GO TO OTP PAGE
+            // =====================================================
+
+            window.location.href =
+                "./otp.html";
+
+        });
+
+    }
+
+});
 
 
 // =========================================================
-// CLOSE MODAL
+// CLOSE ALREADY REGISTERED MODAL
 // =========================================================
 
 function closeAlreadyRegisteredModal() {
@@ -126,10 +273,13 @@ function closeAlreadyRegisteredModal() {
             "alreadyRegisteredModal"
         );
 
+
     if (modal) {
+
         modal.classList.add("hidden");
+
         modal.classList.remove("flex");
+
     }
 
 }
-

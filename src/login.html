@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link 
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
@@ -10,33 +11,33 @@
         crossorigin="anonymous"
         referrerpolicy="no-referrer"
     >
+
     <link href="/src/output.css" rel="stylesheet">
+
     <title>Reen Bank | Login</title>
 </head>
+
 <body class="min-h-screen bg-[url('./asset/images/register.png')] bg-cover bg-center">
-   <section class="min-h-screen">
+
+<section class="min-h-screen">
 
     <div class="container mx-auto px-5 py-8 sm:px-8 sm:py-12 lg:px-12 xl:px-20">
 
         <div class="flex flex-col gap-12 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
 
-            <!-- ========================= -->
             <!-- LEFT SIDE -->
-            <!-- ========================= -->
-
             <div class="w-full lg:w-1/2">
 
                 <!-- Logo -->
                 <div>
                     <a href="./index.html">
-                    <img
-                        src="./asset/images/logo.png"
-                        alt="Reen Bank logo"
-                        class="w-32"
-                    >
+                        <img
+                            src="./asset/images/logo.png"
+                            alt="Reen Bank logo"
+                            class="w-32"
+                        >
                     </a>
                 </div>
-
 
                 <!-- Welcome Text -->
                 <div class="mt-12 sm:mt-16 lg:mt-[140px]">
@@ -54,7 +55,6 @@
                     </p>
 
                 </div>
-
 
                 <!-- Social Icons -->
                 <div class="mt-10 flex gap-5 sm:mt-20">
@@ -85,15 +85,12 @@
             </div>
 
 
-            <!-- ========================= -->
             <!-- RIGHT SIDE / LOGIN FORM -->
-            <!-- ========================= -->
-
             <div class="w-full lg:w-1/2">
 
                 <div class="mx-auto w-full max-w-md rounded-2xl bg-white p-6 shadow-lg sm:p-8">
 
-                    <form action="" class="space-y-5">
+                    <form id="loginForm" class="space-y-5">
 
                         <!-- Heading -->
                         <div class="mb-8">
@@ -107,6 +104,13 @@
                             </p>
 
                         </div>
+
+
+                        <!-- Error Message -->
+                        <div
+                            id="loginMessage"
+                            class="hidden rounded-lg px-4 py-3 text-sm"
+                        ></div>
 
 
                         <!-- Email -->
@@ -127,6 +131,7 @@
                                     type="email"
                                     placeholder="Enter your Email"
                                     required
+                                    autocomplete="email"
                                     class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-12 text-gray-700 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
                                 >
 
@@ -140,7 +145,7 @@
 
 
                         <!-- Password -->
-                        <div>
+                       <div>
 
                             <label
                                 for="password"
@@ -157,12 +162,15 @@
                                     type="password"
                                     placeholder="Enter your Password"
                                     required
+                                    autocomplete="current-password"
                                     class="w-full rounded-xl border border-gray-300 px-4 py-3 pr-32 text-gray-700 outline-none transition focus:border-[#33B786] focus:ring-1 focus:ring-[#33B786]"
                                 >
 
-                                <!-- Forgot + Lock -->
-                                <div class="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-3">
+                                <div
+                                    class="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-3"
+                                >
 
+                                    <!-- Forgot Password -->
                                     <a
                                         href="#"
                                         class="text-xs font-medium text-[#33B786] hover:underline sm:text-sm"
@@ -170,7 +178,15 @@
                                         Forgot?
                                     </a>
 
-                                    <i class="fa-solid fa-lock text-gray-400"></i>
+                                    <!-- Show / Hide Password -->
+                                    <button
+                                        type="button"
+                                        id="togglePassword"
+                                        class="text-gray-400 transition hover:text-[#33B786]"
+                                        aria-label="Show password"
+                                    >
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
 
                                 </div>
 
@@ -181,6 +197,7 @@
 
                         <!-- Login Button -->
                         <button
+                            id="loginButton"
                             type="submit"
                             class="w-full rounded-xl bg-[#33B786] py-3 text-lg font-semibold text-white transition hover:bg-[#2ca776]"
                         >
@@ -195,7 +212,6 @@
 
                             <a
                                 href="./register.html"
-                                target="_blank"
                                 class="font-semibold text-[#33B786] hover:underline"
                             >
                                 Register
@@ -214,5 +230,9 @@
     </div>
 
 </section>
+
+
+<script src="./js/login.js"></script>
+
 </body>
 </html>
