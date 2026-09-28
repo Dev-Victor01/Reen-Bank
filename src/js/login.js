@@ -1,32 +1,30 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    "use strict";
+
+    console.log("LOGIN.JS LOADED");
+
     const loginForm = document.getElementById("loginForm");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     const loginMessage = document.getElementById("loginMessage");
     const loginButton = document.getElementById("loginButton");
-
     const togglePassword = document.getElementById("togglePassword");
 
     const USERS_KEY = "reenUsers";
     const CURRENT_USER_KEY = "currentUser";
 
 
-    // =====================================================
+    // =========================================================
     // SHOW / HIDE PASSWORD
-    // =====================================================
+    // =========================================================
 
     if (togglePassword && passwordInput) {
 
         togglePassword.addEventListener("click", function () {
 
-            const isPassword =
-                passwordInput.type === "password";
+            if (passwordInput.type === "password") {
 
-
-            if (isPassword) {
-
-                // Show password
                 passwordInput.type = "text";
 
                 togglePassword.innerHTML =
@@ -37,14 +35,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Hide password"
                 );
 
-                togglePassword.setAttribute(
-                    "title",
-                    "Hide password"
-                );
-
             } else {
 
-                // Hide password
                 passwordInput.type = "password";
 
                 togglePassword.innerHTML =
@@ -55,11 +47,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Show password"
                 );
 
-                togglePassword.setAttribute(
-                    "title",
-                    "Show password"
-                );
-
             }
 
         });
@@ -67,9 +54,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // =====================================================
-    // SHOW MESSAGE
-    // =====================================================
+    // =========================================================
+    // MESSAGE
+    // =========================================================
 
     function showMessage(message, type = "error") {
 
@@ -84,7 +71,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "bg-green-100",
             "text-green-700"
         );
-
 
         if (type === "success") {
 
@@ -105,15 +91,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // =====================================================
+    // =========================================================
     // LOGIN
-    // =====================================================
+    // =========================================================
 
-    if (loginForm) {
+    if (!loginForm) {
 
-        loginForm.addEventListener("submit", function (event) {
+        console.error(
+            "LOGIN: #loginForm was not found."
+        );
+
+        return;
+    }
+
+
+    loginForm.addEventListener(
+        "submit",
+        function (event) {
 
             event.preventDefault();
+
+            console.log("LOGIN FORM SUBMITTED");
 
 
             const email =
@@ -126,7 +124,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             // =====================================================
-            // CHECK FIELDS
+            // VALIDATE
             // =====================================================
 
             if (!email || !password) {
@@ -140,37 +138,53 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             // =====================================================
-            // GET REGISTERED USERS
+            // READ USERS
             // =====================================================
 
             let users = [];
 
             try {
 
-                users =
-                    JSON.parse(
-                        localStorage.getItem(USERS_KEY)
-                    ) || [];
+                const storedUsers =
+                    localStorage.getItem(
+                        USERS_KEY
+                    );
+
+                if (storedUsers) {
+
+                    users =
+                        JSON.parse(
+                            storedUsers
+                        );
+
+                }
 
             } catch (error) {
 
                 console.error(
-                    "Could not read users:",
+                    "LOGIN: Could not read reenUsers:",
                     error
                 );
 
-                users = [];
+                showMessage(
+                    "There was a problem reading your account."
+                );
 
+                return;
             }
 
-
-            // Make sure users is an array
 
             if (!Array.isArray(users)) {
 
                 users = [];
 
             }
+
+
+            console.log(
+                "LOGIN: Registered users:",
+                users
+            );
 
 
             // =====================================================
@@ -183,15 +197,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     return (
                         user &&
                         typeof user.email === "string" &&
-                        user.email.toLowerCase() === email
+                        user.email
+                            .trim()
+                            .toLowerCase() === email
                     );
 
                 });
 
-
-            // =====================================================
-            // USER DOES NOT EXIST
-            // =====================================================
 
             if (userIndex === -1) {
 
@@ -226,49 +238,36 @@ document.addEventListener("DOMContentLoaded", function () {
             // =====================================================
 
             if (typeof user.balance !== "number") {
-
                 user.balance = 0;
-
             }
-
 
             if (typeof user.income !== "number") {
-
                 user.income = 0;
-
             }
-
 
             if (typeof user.expense !== "number") {
-
                 user.expense = 0;
-
             }
-
 
             if (!Array.isArray(user.transactions)) {
-
                 user.transactions = [];
-
             }
-
 
             if (typeof user.schoolSavings !== "number") {
-
                 user.schoolSavings = 0;
-
             }
 
-
             if (typeof user.holidayBalance !== "number") {
-
                 user.holidayBalance = 0;
+            }
 
+            if (!Array.isArray(user.accounts)) {
+                user.accounts = [];
             }
 
 
             // =====================================================
-            // GENERATE ACCOUNT NUMBER
+            // ACCOUNT NUMBER
             // =====================================================
 
             if (!user.accountNumber) {
@@ -283,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             // =====================================================
-            // SAVE UPDATED USER
+            // SAVE USER
             // =====================================================
 
             users[userIndex] = user;
@@ -295,14 +294,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             // =====================================================
-            // SAVE CURRENT USER
+            // CREATE LOGIN SESSION
             // =====================================================
 
-            const currentUser = {
+            const session = {
 
-                name: user.name || "User",
+                name:
+                    user.name || "User",
 
-                email: user.email,
+                email:
+                    user.email
+                        .trim()
+                        .toLowerCase(),
 
                 accountNumber:
                     user.accountNumber
@@ -312,12 +315,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
             sessionStorage.setItem(
                 CURRENT_USER_KEY,
-                JSON.stringify(currentUser)
+                JSON.stringify(session)
             );
 
 
             // =====================================================
-            // SUCCESS MESSAGE
+            // VERIFY SESSION WAS CREATED
+            // =====================================================
+
+            const savedSession =
+                sessionStorage.getItem(
+                    CURRENT_USER_KEY
+                );
+
+
+            console.log(
+                "LOGIN: currentUser created:",
+                savedSession
+            );
+
+
+            if (!savedSession) {
+
+                showMessage(
+                    "Login session could not be created. Please try again."
+                );
+
+                return;
+            }
+
+
+            // =====================================================
+            // SUCCESS
             // =====================================================
 
             showMessage(
@@ -337,53 +366,48 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             // =====================================================
-            // GO TO DASHBOARD
+            // GO TO OVERVIEW
             // =====================================================
 
             setTimeout(function () {
 
-                window.location.href =
-                    "./overview.html";
+                window.location.replace(
+                    "./overview.html"
+                );
 
             }, 500);
 
-        });
+        }
+    );
 
-    }
 
-
-    // =====================================================
+    // =========================================================
     // ACCOUNT NUMBER GENERATOR
-    // =====================================================
+    // =========================================================
 
-    function generateAccountNumber(email, users) {
+    function generateAccountNumber(
+        email,
+        allUsers
+    ) {
 
         let number = "";
 
-
-        // Create numbers from email characters
-
-        for (let i = 0; i < email.length; i++) {
+        for (
+            let i = 0;
+            i < email.length;
+            i++
+        ) {
 
             number +=
                 email.charCodeAt(i);
 
         }
 
-
-        // Keep only numbers
-
         number =
-            number.replace(/\D/g, "");
+            number
+                .replace(/\D/g, "")
+                .substring(0, 10);
 
-
-        // Take first 10 digits
-
-        number =
-            number.substring(0, 10);
-
-
-        // Make sure it has 10 digits
 
         while (number.length < 10) {
 
@@ -395,35 +419,28 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        let accountNumber =
-            number;
-
-
-        // =====================================================
-        // CHECK ACCOUNT NUMBER UNIQUENESS
-        // =====================================================
-
         let exists =
-            users.some(function (user) {
+            allUsers.some(function (user) {
 
                 return (
                     user &&
-                    user.accountNumber === accountNumber
+                    user.accountNumber === number
                 );
 
             });
 
 
-        // Generate another number if it already exists
-
         while (exists) {
 
-            accountNumber = "";
+            number = "";
 
+            for (
+                let i = 0;
+                i < 10;
+                i++
+            ) {
 
-            for (let i = 0; i < 10; i++) {
-
-                accountNumber +=
+                number +=
                     Math.floor(
                         Math.random() * 10
                     );
@@ -432,11 +449,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             exists =
-                users.some(function (user) {
+                allUsers.some(function (user) {
 
                     return (
                         user &&
-                        user.accountNumber === accountNumber
+                        user.accountNumber === number
                     );
 
                 });
@@ -444,7 +461,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        return accountNumber;
+        return number;
 
     }
 

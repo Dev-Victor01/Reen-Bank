@@ -1,350 +1,267 @@
-document.addEventListener("DOMContentLoaded", function () {
+/* =========================================================
+   REEN BANK — PROFILE PAGE JAVASCRIPT
+   ---------------------------------------------------------
+   Works with:
+   - reenUsers      -> localStorage
+   - currentUser    -> localStorage OR sessionStorage
 
-    // =====================================================
-    // STORAGE KEYS
-    // =====================================================
-
-    const USERS_KEY = "reenUsers";
-    const CURRENT_USER_KEY = "currentUser";
-
-
-    // =====================================================
-    // GET ELEMENTS
-    // =====================================================
-
-    const sidebar = document.getElementById("sidebar");
-    const sidebarOverlay =
-        document.getElementById("sidebarOverlay");
-
-    const menuButton =
-        document.getElementById("menuButton");
-
-    const headerUserName =
-        document.getElementById("headerUserName");
-
-    const accountNumber =
-        document.getElementById("accountNumber");
-
-    const profileName =
-        document.getElementById("profileName");
-
-    const profileEmail =
-        document.getElementById("profileEmail");
-
-    const profilePhone =
-        document.getElementById("profilePhone");
-
-    const profileGender =
-        document.getElementById("profileGender");
-
-    const profileAccountNumber =
-        document.getElementById("profileAccountNumber");
-
-    const profileCreatedAt =
-        document.getElementById("profileCreatedAt");
-
-    const profileAvatar =
-        document.getElementById("profileAvatar");
-
-    const profileImage =
-        document.getElementById("profileImage");
-
-    const profileImageInput =
-        document.getElementById("profileImageInput");
-
-    const editProfileImage =
-        document.getElementById("editProfileImage");
-
-    const mainAccountBalance =
-        document.getElementById("mainAccountBalance");
-
-    const balanceToggle =
-        document.getElementById("balanceToggle");
-
-    const balanceToggleIcon =
-        document.getElementById("balanceToggleIcon");
-
-    const profileTransactions =
-        document.getElementById("profileTransactions");
-
-    const emptyProfileTransactions =
-        document.getElementById(
-            "emptyProfileTransactions"
-        );
+   Features:
+   - Load current user
+   - Profile information
+   - Profile image upload
+   - Header avatar
+   - Balance display
+   - Balance visibility
+   - Recent transactions
+   - Search transactions
+   - Mobile sidebar
+   - Logout modal
+   - Reset password modal
+   - Password visibility
+   - Password validation
+   - Password update
+   - Storage persistence
+========================================================= */
 
 
-    // =====================================================
-    // LOGOUT ELEMENTS
-    // =====================================================
-
-    const logoutButton =
-        document.getElementById("logoutButton");
-
-    const logoutModal =
-        document.getElementById("logoutModal");
-
-    const cancelLogout =
-        document.getElementById("cancelLogout");
-
-    const confirmLogout =
-        document.getElementById("confirmLogout");
+document.addEventListener("DOMContentLoaded", () => {
 
 
-    // =====================================================
-    // RESET PASSWORD ELEMENTS
-    // =====================================================
+    /* =====================================================
+       1. STORAGE
+    ===================================================== */
 
-    const resetPasswordButton =
-        document.getElementById(
-            "resetPasswordButton"
-        );
-
-    const resetPasswordModal =
-        document.getElementById(
-            "resetPasswordModal"
-        );
-
-    const cancelResetPassword =
-        document.getElementById(
-            "cancelResetPassword"
-        );
-
-    const saveNewPassword =
-        document.getElementById(
-            "saveNewPassword"
-        );
-
-    const newPassword =
-        document.getElementById("newPassword");
-
-    const confirmPassword =
-        document.getElementById(
-            "confirmPassword"
-        );
-
-    const toggleNewPassword =
-        document.getElementById(
-            "toggleNewPassword"
-        );
-
-    const toggleConfirmPassword =
-        document.getElementById(
-            "toggleConfirmPassword"
-        );
-
-    const passwordMessage =
-        document.getElementById(
-            "passwordMessage"
-        );
+    let users =
+        JSON.parse(
+            localStorage.getItem("reenUsers")
+        ) || [];
 
 
-    // =====================================================
-    // GET CURRENT USER
-    // =====================================================
-
-    let currentSession = null;
-
-    try {
-
-        currentSession =
-            JSON.parse(
-                sessionStorage.getItem(
-                    CURRENT_USER_KEY
-                )
-            );
-
-    } catch (error) {
-
-        console.error(
-            "Could not read current user:",
-            error
-        );
-
-        currentSession = null;
-
-    }
+    let currentUser =
+        JSON.parse(
+            localStorage.getItem("currentUser")
+        ) ||
+        JSON.parse(
+            sessionStorage.getItem("currentUser")
+        ) ||
+        null;
 
 
-    // =====================================================
-    // CHECK LOGIN
-    // =====================================================
 
-    if (
-        !currentSession ||
-        !currentSession.email
-    ) {
+    /* =====================================================
+       2. CHECK LOGIN
+    ===================================================== */
+
+    if (!currentUser) {
 
         window.location.href =
-            "./login.html";
+            "./register.html";
 
         return;
-
     }
 
 
-    // =====================================================
-    // GET USERS
-    // =====================================================
 
-    let users = [];
+    /* =====================================================
+       3. FIND COMPLETE USER
+    ===================================================== */
 
-    try {
-
-        users =
-            JSON.parse(
-                localStorage.getItem(
-                    USERS_KEY
-                )
-            ) || [];
-
-    } catch (error) {
-
-        console.error(
-            "Could not read users:",
-            error
-        );
-
-        users = [];
-
-    }
+    let userIndex = -1;
 
 
-    if (!Array.isArray(users)) {
+    if (currentUser.email) {
 
-        users = [];
-
-    }
-
-
-    // =====================================================
-    // FIND LOGGED-IN USER
-    // =====================================================
-
-    const userIndex =
-        users.findIndex(function (user) {
-
-            return (
-                user &&
-                typeof user.email === "string" &&
-                user.email.toLowerCase() ===
-                    currentSession.email.toLowerCase()
+        userIndex =
+            users.findIndex(
+                user =>
+                    user.email &&
+                    user.email.toLowerCase() ===
+                    currentUser.email.toLowerCase()
             );
+    }
 
-        });
+
+    /*
+        Fallback using account number.
+    */
+
+    if (
+        userIndex === -1 &&
+        currentUser.accountNumber
+    ) {
+
+        userIndex =
+            users.findIndex(
+                user =>
+                    user.accountNumber ===
+                    currentUser.accountNumber
+            );
+    }
+
+
+    /*
+        Fallback using name.
+    */
+
+    if (
+        userIndex === -1 &&
+        currentUser.name
+    ) {
+
+        userIndex =
+            users.findIndex(
+                user =>
+                    user.name ===
+                    currentUser.name
+            );
+    }
 
 
     if (userIndex === -1) {
 
-        sessionStorage.removeItem(
-            CURRENT_USER_KEY
+        alert(
+            "Your account could not be found. Please log in again."
         );
 
+
+        localStorage.removeItem(
+            "currentUser"
+        );
+
+
+        sessionStorage.removeItem(
+            "currentUser"
+        );
+
+
         window.location.href =
-            "./login.html";
+            "./register.html";
+
 
         return;
-
     }
 
 
-    const user =
+
+    /* =====================================================
+       4. USE COMPLETE USER
+    ===================================================== */
+
+    currentUser =
         users[userIndex];
 
 
-    // =====================================================
-    // INITIALIZE USER DATA
-    // =====================================================
 
-    if (typeof user.balance !== "number") {
+    /* =====================================================
+       5. INITIALIZE USER DATA
+    ===================================================== */
 
-        user.balance = 0;
+    if (
+        typeof currentUser.balance !==
+        "number"
+    ) {
 
-    }
-
-    if (typeof user.income !== "number") {
-
-        user.income = 0;
-
-    }
-
-    if (typeof user.expense !== "number") {
-
-        user.expense = 0;
-
-    }
-
-    if (!Array.isArray(user.transactions)) {
-
-        user.transactions = [];
-
-    }
-
-    if (typeof user.schoolSavings !== "number") {
-
-        user.schoolSavings = 0;
-
-    }
-
-    if (typeof user.holidayBalance !== "number") {
-
-        user.holidayBalance = 0;
-
+        currentUser.balance = 0;
     }
 
 
-    // =====================================================
-    // SAVE INITIALIZED USER
-    // =====================================================
+    if (
+        typeof currentUser.income !==
+        "number"
+    ) {
 
-    users[userIndex] = user;
-
-    localStorage.setItem(
-        USERS_KEY,
-        JSON.stringify(users)
-    );
-
-
-    // =====================================================
-    // SECOND NAME / SURNAME
-    // =====================================================
-
-    function getSecondName(fullName) {
-
-        if (!fullName) {
-
-            return "User";
-
-        }
-
-        const names =
-            fullName
-                .trim()
-                .split(/\s+/);
-
-
-        if (names.length >= 2) {
-
-            return names[names.length - 1];
-
-        }
-
-        return names[0];
-
+        currentUser.income = 0;
     }
 
 
-    // =====================================================
-    // MONEY FORMAT
-    // =====================================================
+    if (
+        typeof currentUser.expense !==
+        "number"
+    ) {
+
+        currentUser.expense = 0;
+    }
+
+
+    if (
+        !Array.isArray(
+            currentUser.transactions
+        )
+    ) {
+
+        currentUser.transactions = [];
+    }
+
+
+    if (
+        !Array.isArray(
+            currentUser.accounts
+        )
+    ) {
+
+        currentUser.accounts = [];
+    }
+
+
+
+    /* =====================================================
+       6. SAVE USER
+    ===================================================== */
+
+    function saveUser() {
+
+        users[userIndex] =
+            currentUser;
+
+
+        localStorage.setItem(
+            "reenUsers",
+            JSON.stringify(users)
+        );
+
+
+        /*
+            Keep current session information.
+        */
+
+        const sessionUser = {
+
+            name:
+                currentUser.name,
+
+            email:
+                currentUser.email,
+
+            accountNumber:
+                currentUser.accountNumber
+        };
+
+
+        localStorage.setItem(
+            "currentUser",
+            JSON.stringify(sessionUser)
+        );
+
+
+        sessionStorage.setItem(
+            "currentUser",
+            JSON.stringify(sessionUser)
+        );
+    }
+
+
+
+    /* =====================================================
+       7. HELPER — FORMAT MONEY
+    ===================================================== */
 
     function formatMoney(amount) {
 
-        const value =
-            Number(amount) || 0;
-
         return (
             "₦" +
-            value.toLocaleString(
+            (
+                Number(amount) || 0
+            ).toLocaleString(
                 "en-NG",
                 {
                     minimumFractionDigits: 2,
@@ -352,596 +269,485 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             )
         );
-
     }
 
 
-    // =====================================================
-    // UPDATE USER INFORMATION
-    // =====================================================
 
-    function updateUserInformation() {
+    /* =====================================================
+       8. HELPER — FORMAT DATE
+    ===================================================== */
 
-        const displayName =
-            getSecondName(user.name);
+    function formatDate(date) {
 
-
-        if (headerUserName) {
-
-            headerUserName.textContent =
-                displayName;
-
-        }
-
-
-        if (profileName) {
-
-            profileName.textContent =
-                user.name || "User";
-
-        }
-
-
-        if (profileEmail) {
-
-            profileEmail.textContent =
-                user.email || "Not provided";
-
-        }
-
-
-        if (profilePhone) {
-
-            profilePhone.textContent =
-                user.phone || "Not provided";
-
-        }
-
-
-        if (profileGender) {
-
-            profileGender.textContent =
-                user.gender || "Not provided";
-
-        }
-
-
-        if (accountNumber) {
-
-            accountNumber.textContent =
-                user.accountNumber ||
-                "0000000000";
-
-        }
-
-
-        if (profileAccountNumber) {
-
-            profileAccountNumber.textContent =
-                user.accountNumber ||
-                "0000000000";
-
-        }
-
-
-        if (profileCreatedAt) {
-
-            profileCreatedAt.textContent =
-                formatDate(
-                    user.createdAt
-                );
-
-        }
-
-
-        updateAvatar();
-
-    }
-
-
-    // =====================================================
-    // DATE FORMAT
-    // =====================================================
-
-    function formatDate(dateValue) {
-
-        if (!dateValue) {
+        if (!date) {
 
             return "Not available";
-
         }
 
 
-        const date =
-            new Date(dateValue);
+        const parsedDate =
+            new Date(date);
 
 
-        if (Number.isNaN(date.getTime())) {
+        if (
+            Number.isNaN(
+                parsedDate.getTime()
+            )
+        ) {
 
             return "Not available";
-
         }
 
 
-        return date.toLocaleDateString(
+        return parsedDate.toLocaleDateString(
             "en-NG",
             {
                 day: "2-digit",
-                month: "short",
+                month: "long",
                 year: "numeric"
             }
         );
-
     }
 
 
-    // =====================================================
-    // AVATAR
-    // =====================================================
+
+    /* =====================================================
+       9. HELPER — INITIALS
+    ===================================================== */
 
     function getInitials(name) {
 
         if (!name) {
 
             return "U";
-
         }
 
 
-        const names =
-            name.trim().split(/\s+/);
+        const words =
+            name
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
 
 
-        if (names.length === 1) {
+        if (
+            words.length === 1
+        ) {
 
-            return names[0]
-                .substring(0, 2)
-                .toUpperCase();
-
+            return (
+                words[0]
+                    .substring(0, 2)
+                    .toUpperCase()
+            );
         }
 
 
         return (
-            names[0][0] +
-            names[names.length - 1][0]
+            words[0].charAt(0) +
+            words[
+                words.length - 1
+            ].charAt(0)
         ).toUpperCase();
-
     }
 
 
-    function updateAvatar() {
 
-        const initials =
-            getInitials(user.name);
+    /* =====================================================
+       10. HELPER — MODALS
+    ===================================================== */
+
+    function openModal(modal) {
+
+        if (!modal) {
+            return;
+        }
 
 
-        if (
-            user.profileImage &&
-            profileImage
-        ) {
+        modal.classList.remove(
+            "hidden"
+        );
+
+
+        modal.classList.add(
+            "flex"
+        );
+
+
+        document.body.classList.add(
+            "overflow-hidden"
+        );
+    }
+
+
+
+    function closeModal(modal) {
+
+        if (!modal) {
+            return;
+        }
+
+
+        modal.classList.add(
+            "hidden"
+        );
+
+
+        modal.classList.remove(
+            "flex"
+        );
+
+
+        const visibleModal =
+            document.querySelector(
+                '[id$="Modal"]:not(.hidden)'
+            );
+
+
+        if (!visibleModal) {
+
+            document.body.classList.remove(
+                "overflow-hidden"
+            );
+        }
+    }
+
+
+
+    /* =====================================================
+       11. LOAD PROFILE INFORMATION
+    ===================================================== */
+
+    const headerUserName =
+        document.getElementById(
+            "headerUserName"
+        );
+
+
+    const accountNumber =
+        document.getElementById(
+            "accountNumber"
+        );
+
+
+    const profileName =
+        document.getElementById(
+            "profileName"
+        );
+
+
+    const profileEmail =
+        document.getElementById(
+            "profileEmail"
+        );
+
+
+    const profilePhone =
+        document.getElementById(
+            "profilePhone"
+        );
+
+
+    const profileGender =
+        document.getElementById(
+            "profileGender"
+        );
+
+
+    const profileAccountNumber =
+        document.getElementById(
+            "profileAccountNumber"
+        );
+
+
+    const profileCreatedAt =
+        document.getElementById(
+            "profileCreatedAt"
+        );
+
+
+
+    /* =====================================================
+       12. NAME
+    ===================================================== */
+
+    const userName =
+        currentUser.name ||
+        "User";
+
+
+    if (headerUserName) {
+
+        headerUserName.textContent =
+            userName;
+    }
+
+
+    if (profileName) {
+
+        profileName.textContent =
+            userName;
+    }
+
+
+
+    /* =====================================================
+       13. EMAIL
+    ===================================================== */
+
+    if (profileEmail) {
+
+        profileEmail.textContent =
+            currentUser.email ||
+            "Not provided";
+    }
+
+
+
+    /* =====================================================
+       14. PHONE
+    ===================================================== */
+
+    if (profilePhone) {
+
+        profilePhone.textContent =
+            currentUser.phone ||
+            currentUser.phoneNumber ||
+            "Not provided";
+    }
+
+
+
+    /* =====================================================
+       15. GENDER
+    ===================================================== */
+
+    if (profileGender) {
+
+        profileGender.textContent =
+            currentUser.gender ||
+            "Not provided";
+    }
+
+
+
+    /* =====================================================
+       16. ACCOUNT NUMBER
+    ===================================================== */
+
+    if (accountNumber) {
+
+        accountNumber.textContent =
+            currentUser.accountNumber ||
+            "0000000000";
+    }
+
+
+    if (profileAccountNumber) {
+
+        profileAccountNumber.textContent =
+            currentUser.accountNumber ||
+            "0000000000";
+    }
+
+
+
+    /* =====================================================
+       17. MEMBER SINCE
+    ===================================================== */
+
+    if (profileCreatedAt) {
+
+        profileCreatedAt.textContent =
+            formatDate(
+                currentUser.createdAt
+            );
+    }
+
+
+
+    /* =====================================================
+       18. PROFILE IMAGE / AVATAR
+    ===================================================== */
+
+    const profileImage =
+        document.getElementById(
+            "profileImage"
+        );
+
+
+    const profileAvatar =
+        document.getElementById(
+            "profileAvatar"
+        );
+
+
+    const savedProfileImage =
+        currentUser.profileImage ||
+        currentUser.profilePicture ||
+        currentUser.avatar ||
+        null;
+
+
+    const initials =
+        getInitials(
+            currentUser.name
+        );
+
+
+
+    function displayProfileImage() {
+
+        const imageSource =
+            currentUser.profileImage ||
+            currentUser.profilePicture ||
+            currentUser.avatar ||
+            null;
+
+
+        /*
+            Large profile image.
+        */
+
+        if (profileImage) {
 
             profileImage.innerHTML = "";
 
-            const image =
-                document.createElement("img");
 
-            image.src =
-                user.profileImage;
+            if (imageSource) {
 
-            image.alt =
-                "Profile picture";
+                const image =
+                    document.createElement(
+                        "img"
+                    );
 
-            image.className =
-                "h-full w-full object-cover";
 
-            profileImage.appendChild(image);
+                image.src =
+                    imageSource;
 
-        } else if (profileImage) {
 
-            profileImage.textContent =
-                initials;
+                image.alt =
+                    currentUser.name ||
+                    "Profile picture";
 
+
+                image.className =
+                    "h-full w-full object-cover";
+
+
+                profileImage.appendChild(
+                    image
+                );
+
+            } else {
+
+                profileImage.textContent =
+                    initials;
+            }
         }
 
 
-        if (
-            user.profileImage &&
-            profileAvatar
-        ) {
+        /*
+            Header avatar.
+        */
+
+        if (profileAvatar) {
 
             profileAvatar.innerHTML = "";
 
-            const image =
-                document.createElement("img");
 
-            image.src =
-                user.profileImage;
+            if (imageSource) {
 
-            image.alt =
-                "Profile picture";
-
-            image.className =
-                "h-full w-full object-cover";
-
-            profileAvatar.appendChild(image);
-
-        } else if (profileAvatar) {
-
-            profileAvatar.textContent =
-                initials;
-
-        }
-
-    }
+                const image =
+                    document.createElement(
+                        "img"
+                    );
 
 
-    // =====================================================
-    // UPDATE BALANCE
-    // =====================================================
-
-    let balanceVisible = true;
+                image.src =
+                    imageSource;
 
 
-    function updateBalance() {
+                image.alt =
+                    currentUser.name ||
+                    "Profile picture";
 
-        if (!mainAccountBalance) return;
+
+                image.className =
+                    "h-full w-full object-cover";
 
 
-        if (balanceVisible) {
-
-            mainAccountBalance.textContent =
-                formatMoney(
-                    user.balance
+                profileAvatar.appendChild(
+                    image
                 );
 
-        } else {
+            } else {
 
-            mainAccountBalance.textContent =
-                "₦••••••";
-
-        }
-
-
-        if (balanceToggleIcon) {
-
-            balanceToggleIcon.className =
-                balanceVisible
-                    ? "fa-regular fa-eye-slash"
-                    : "fa-regular fa-eye";
-
-        }
-
-    }
-
-
-    if (balanceToggle) {
-
-        balanceToggle.addEventListener(
-            "click",
-            function () {
-
-                balanceVisible =
-                    !balanceVisible;
-
-                updateBalance();
-
+                profileAvatar.textContent =
+                    initials;
             }
+        }
+    }
+
+
+    displayProfileImage();
+
+
+
+    /* =====================================================
+       19. CHANGE PROFILE IMAGE
+    ===================================================== */
+
+    const editProfileImage =
+        document.getElementById(
+            "editProfileImage"
         );
 
-    }
 
-
-    // =====================================================
-    // TRANSACTIONS
-    // =====================================================
-
-    function updateTransactions() {
-
-        if (!profileTransactions) return;
-
-
-        profileTransactions.innerHTML = "";
-
-
-        const transactions =
-            Array.isArray(user.transactions)
-                ? [...user.transactions]
-                : [];
-
-
-        if (transactions.length === 0) {
-
-            if (emptyProfileTransactions) {
-
-                emptyProfileTransactions.classList.remove(
-                    "hidden"
-                );
-
-            }
-
-            return;
-
-        }
-
-
-        if (emptyProfileTransactions) {
-
-            emptyProfileTransactions.classList.add(
-                "hidden"
-            );
-
-        }
-
-
-        transactions
-            .sort(function (a, b) {
-
-                return (
-                    new Date(
-                        b.date || 0
-                    ) -
-                    new Date(
-                        a.date || 0
-                    )
-                );
-
-            })
-            .slice(0, 8)
-            .forEach(function (transaction) {
-
-                const isDeposit =
-                    transaction.type ===
-                    "deposit";
-
-
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
-                row.className =
-                    "flex items-center justify-between py-3";
-
-
-                const left =
-                    document.createElement(
-                        "div"
-                    );
-
-                left.className =
-                    "min-w-0";
-
-
-                const description =
-                    document.createElement(
-                        "p"
-                    );
-
-                description.className =
-                    "truncate text-xs font-medium text-gray-700";
-
-                description.textContent =
-                    transaction.description ||
-                    (
-                        isDeposit
-                            ? "Deposit"
-                            : "Withdrawal"
-                    );
-
-
-                const date =
-                    document.createElement(
-                        "p"
-                    );
-
-                date.className =
-                    "mt-1 text-[10px] text-gray-400";
-
-                date.textContent =
-                    formatTransactionDate(
-                        transaction.date
-                    );
-
-
-                left.appendChild(
-                    description
-                );
-
-                left.appendChild(
-                    date
-                );
-
-
-                const amount =
-                    document.createElement(
-                        "p"
-                    );
-
-                amount.className =
-                    "ml-3 whitespace-nowrap text-xs font-semibold " +
-                    (
-                        isDeposit
-                            ? "text-[#33B786]"
-                            : "text-red-500"
-                    );
-
-
-                amount.textContent =
-                    (
-                        isDeposit
-                            ? "+"
-                            : "-"
-                    ) +
-                    formatMoney(
-                        transaction.amount
-                    );
-
-
-                row.appendChild(left);
-
-                row.appendChild(amount);
-
-                profileTransactions.appendChild(
-                    row
-                );
-
-            });
-
-    }
-
-
-    // =====================================================
-    // TRANSACTION DATE
-    // =====================================================
-
-    function formatTransactionDate(
-        dateValue
-    ) {
-
-        if (!dateValue) {
-
-            return "Date unavailable";
-
-        }
-
-
-        const date =
-            new Date(dateValue);
-
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "Date unavailable";
-
-        }
-
-
-        return date.toLocaleDateString(
-            "en-NG",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
-            }
+    const profileImageInput =
+        document.getElementById(
+            "profileImageInput"
         );
 
-    }
-
-
-    // =====================================================
-    // MOBILE SIDEBAR
-    // =====================================================
-
-    function openSidebar() {
-
-        if (sidebar) {
-
-            sidebar.classList.remove(
-                "-translate-x-full"
-            );
-
-            sidebar.classList.add(
-                "translate-x-0"
-            );
-
-        }
-
-
-        if (sidebarOverlay) {
-
-            sidebarOverlay.classList.remove(
-                "hidden"
-            );
-
-        }
-
-    }
-
-
-    function closeSidebar() {
-
-        if (sidebar) {
-
-            sidebar.classList.add(
-                "-translate-x-full"
-            );
-
-            sidebar.classList.remove(
-                "translate-x-0"
-            );
-
-        }
-
-
-        if (sidebarOverlay) {
-
-            sidebarOverlay.classList.add(
-                "hidden"
-            );
-
-        }
-
-    }
-
-
-    if (menuButton) {
-
-        menuButton.addEventListener(
-            "click",
-            openSidebar
-        );
-
-    }
-
-
-    if (sidebarOverlay) {
-
-        sidebarOverlay.addEventListener(
-            "click",
-            closeSidebar
-        );
-
-    }
-
-
-    // =====================================================
-    // PROFILE IMAGE
-    // =====================================================
 
     if (editProfileImage) {
 
         editProfileImage.addEventListener(
             "click",
-            function () {
+            () => {
 
                 if (profileImageInput) {
 
                     profileImageInput.click();
-
                 }
-
             }
         );
-
     }
 
+
+
+    /* =====================================================
+       20. SAVE PROFILE IMAGE
+    ===================================================== */
 
     if (profileImageInput) {
 
         profileImageInput.addEventListener(
             "change",
-            function (event) {
+            event => {
 
                 const file =
                     event.target.files[0];
 
 
-                if (!file) return;
+                if (!file) {
 
+                    return;
+                }
+
+
+                /*
+                    Only allow image files.
+                */
 
                 if (
                     !file.type.startsWith(
@@ -950,11 +756,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 ) {
 
                     alert(
-                        "Please select an image."
+                        "Please select a valid image file."
                     );
 
-                    return;
 
+                    profileImageInput.value =
+                        "";
+
+
+                    return;
+                }
+
+
+                /*
+                    Limit file size to 5MB.
+                */
+
+                if (
+                    file.size >
+                    5 * 1024 * 1024
+                ) {
+
+                    alert(
+                        "Please choose an image smaller than 5MB."
+                    );
+
+
+                    profileImageInput.value =
+                        "";
+
+
+                    return;
                 }
 
 
@@ -963,170 +795,1050 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                 reader.onload =
-                    function (e) {
+                    function () {
 
-                        user.profileImage =
-                            e.target.result;
-
-
-                        users[userIndex] =
-                            user;
+                        currentUser.profileImage =
+                            reader.result;
 
 
-                        localStorage.setItem(
-                            USERS_KEY,
-                            JSON.stringify(
-                                users
-                            )
-                        );
+                        saveUser();
 
 
-                        updateAvatar();
+                        displayProfileImage();
 
+
+                        profileImageInput.value =
+                            "";
                     };
 
 
-                reader.readAsDataURL(file);
+                reader.onerror =
+                    function () {
 
+                        alert(
+                            "Unable to load the selected image."
+                        );
+                    };
+
+
+                reader.readAsDataURL(
+                    file
+                );
             }
         );
-
     }
 
 
-    // =====================================================
-    // RESET PASSWORD MODAL
-    // =====================================================
 
-    function openResetPasswordModal() {
+    /* =====================================================
+       21. BALANCE
+    ===================================================== */
 
-        if (!resetPasswordModal) return;
-
-
-        resetPasswordModal.classList.remove(
-            "hidden"
-        );
-
-        resetPasswordModal.classList.add(
-            "flex"
+    const mainAccountBalance =
+        document.getElementById(
+            "mainAccountBalance"
         );
 
 
-        if (newPassword) {
+    const balanceToggle =
+        document.getElementById(
+            "balanceToggle"
+        );
 
-            newPassword.value = "";
 
+    const balanceToggleIcon =
+        document.getElementById(
+            "balanceToggleIcon"
+        );
+
+
+    let balanceHidden = false;
+
+
+    function updateBalance() {
+
+        if (!mainAccountBalance) {
+            return;
         }
 
 
-        if (confirmPassword) {
+        if (balanceHidden) {
 
-            confirmPassword.value = "";
+            mainAccountBalance.textContent =
+                "₦••••••";
 
+        } else {
+
+            mainAccountBalance.textContent =
+                formatMoney(
+                    currentUser.balance
+                );
+        }
+    }
+
+
+    updateBalance();
+
+
+
+    /* =====================================================
+       22. BALANCE SHOW / HIDE
+    ===================================================== */
+
+    if (balanceToggle) {
+
+        balanceToggle.addEventListener(
+            "click",
+            () => {
+
+                balanceHidden =
+                    !balanceHidden;
+
+
+                updateBalance();
+
+
+                if (
+                    balanceToggleIcon
+                ) {
+
+                    if (balanceHidden) {
+
+                        balanceToggleIcon.className =
+                            "fa-regular fa-eye";
+
+                    } else {
+
+                        balanceToggleIcon.className =
+                            "fa-regular fa-eye-slash";
+                    }
+                }
+            }
+        );
+    }
+
+
+
+    /* =====================================================
+       23. PROFILE TRANSACTIONS
+    ===================================================== */
+
+    const profileTransactions =
+        document.getElementById(
+            "profileTransactions"
+        );
+
+
+    const emptyProfileTransactions =
+        document.getElementById(
+            "emptyProfileTransactions"
+        );
+
+
+
+    function renderTransactions() {
+
+        if (!profileTransactions) {
+
+            return;
         }
 
 
-        hidePasswordMessage();
+        profileTransactions.innerHTML =
+            "";
 
+
+        const transactions =
+            Array.isArray(
+                currentUser.transactions
+            )
+                ? currentUser.transactions
+                : [];
+
+
+        /*
+            Show only latest 5.
+        */
+
+        const recentTransactions =
+            transactions.slice(
+                0,
+                5
+            );
+
+
+        if (
+            recentTransactions.length === 0
+        ) {
+
+            if (
+                emptyProfileTransactions
+            ) {
+
+                emptyProfileTransactions.classList.remove(
+                    "hidden"
+                );
+            }
+
+
+            return;
+        }
+
+
+        if (
+            emptyProfileTransactions
+        ) {
+
+            emptyProfileTransactions.classList.add(
+                "hidden"
+            );
+        }
+
+
+        recentTransactions.forEach(
+            transaction => {
+
+                const isIncome =
+                    transaction.type ===
+                    "income";
+
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "flex items-center justify-between py-4";
+
+
+                /* -----------------------------------------
+                   LEFT
+                ----------------------------------------- */
+
+                const left =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                left.className =
+                    "flex min-w-0 items-center gap-3";
+
+
+                /* ICON */
+
+                const icon =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                icon.className =
+                    isIncome
+                        ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#d8f6ed] text-[#33B786]"
+                        : "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500";
+
+
+                icon.innerHTML =
+                    isIncome
+                        ? '<i class="fa-solid fa-arrow-down"></i>'
+                        : '<i class="fa-solid fa-arrow-up"></i>';
+
+
+                /* DETAILS */
+
+                const details =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                details.className =
+                    "min-w-0";
+
+
+                const description =
+                    document.createElement(
+                        "p"
+                    );
+
+
+                description.className =
+                    "truncate text-sm font-semibold text-gray-800";
+
+
+                description.textContent =
+                    transaction.description ||
+                    transaction.category ||
+                    "Transaction";
+
+
+                const date =
+                    document.createElement(
+                        "p"
+                    );
+
+
+                date.className =
+                    "mt-1 text-xs text-gray-400";
+
+
+                date.textContent =
+                    formatShortDate(
+                        transaction.date
+                    );
+
+
+                details.appendChild(
+                    description
+                );
+
+
+                details.appendChild(
+                    date
+                );
+
+
+                left.appendChild(
+                    icon
+                );
+
+
+                left.appendChild(
+                    details
+                );
+
+
+                /* -----------------------------------------
+                   AMOUNT
+                ----------------------------------------- */
+
+                const amount =
+                    document.createElement(
+                        "p"
+                    );
+
+
+                amount.className =
+                    isIncome
+                        ? "ml-3 shrink-0 text-sm font-semibold text-[#33B786]"
+                        : "ml-3 shrink-0 text-sm font-semibold text-red-500";
+
+
+                amount.textContent =
+                    isIncome
+                        ? "+" +
+                          formatMoney(
+                              transaction.amount
+                          )
+                        : "-" +
+                          formatMoney(
+                              transaction.amount
+                          );
+
+
+                row.appendChild(
+                    left
+                );
+
+
+                row.appendChild(
+                    amount
+                );
+
+
+                profileTransactions.appendChild(
+                    row
+                );
+            }
+        );
     }
 
 
-    function closeResetPasswordModal() {
 
-        if (!resetPasswordModal) return;
+    /* =====================================================
+       24. SHORT DATE
+    ===================================================== */
+
+    function formatShortDate(
+        date
+    ) {
+
+        if (!date) {
+
+            return "Recently";
+        }
 
 
-        resetPasswordModal.classList.add(
-            "hidden"
+        const parsedDate =
+            new Date(date);
+
+
+        if (
+            Number.isNaN(
+                parsedDate.getTime()
+            )
+        ) {
+
+            return "Recently";
+        }
+
+
+        return parsedDate.toLocaleDateString(
+            "en-NG",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
         );
-
-        resetPasswordModal.classList.remove(
-            "flex"
-        );
-
     }
 
+
+
+    renderTransactions();
+
+
+
+    /* =====================================================
+       25. SEARCH
+    ===================================================== */
+
+    const searchInput =
+        document.getElementById(
+            "searchInput"
+        );
+
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            () => {
+
+                const query =
+                    searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+
+                if (!query) {
+
+                    renderTransactions();
+
+                    return;
+                }
+
+
+                const transactions =
+                    Array.isArray(
+                        currentUser.transactions
+                    )
+                        ? currentUser.transactions
+                        : [];
+
+
+                const filtered =
+                    transactions.filter(
+                        transaction => {
+
+                            const searchableText =
+                                [
+
+                                    transaction.description,
+
+                                    transaction.category,
+
+                                    transaction.account,
+
+                                    transaction.bank,
+
+                                    transaction.paymentMethod,
+
+                                    transaction.type
+
+                                ]
+                                    .filter(Boolean)
+                                    .join(" ")
+                                    .toLowerCase();
+
+
+                            return searchableText.includes(
+                                query
+                            );
+                        }
+                    );
+
+
+                /*
+                    Temporarily render search results.
+                */
+
+                profileTransactions.innerHTML =
+                    "";
+
+
+                if (
+                    filtered.length === 0
+                ) {
+
+                    if (
+                        emptyProfileTransactions
+                    ) {
+
+                        emptyProfileTransactions.textContent =
+                            "No matching transactions found.";
+
+                        emptyProfileTransactions.classList.remove(
+                            "hidden"
+                        );
+                    }
+
+
+                    return;
+                }
+
+
+                if (
+                    emptyProfileTransactions
+                ) {
+
+                    emptyProfileTransactions.classList.add(
+                        "hidden"
+                    );
+                }
+
+
+                filtered
+                    .slice(0, 5)
+                    .forEach(
+                        transaction => {
+
+                            renderSingleSearchTransaction(
+                                transaction
+                            );
+                        }
+                    );
+            }
+        );
+    }
+
+
+
+    /* =====================================================
+       26. SEARCH TRANSACTION ROW
+    ===================================================== */
+
+    function renderSingleSearchTransaction(
+        transaction
+    ) {
+
+        const isIncome =
+            transaction.type ===
+            "income";
+
+
+        const row =
+            document.createElement(
+                "div"
+            );
+
+
+        row.className =
+            "flex items-center justify-between py-4";
+
+
+        const left =
+            document.createElement(
+                "div"
+            );
+
+
+        left.className =
+            "flex min-w-0 items-center gap-3";
+
+
+        const icon =
+            document.createElement(
+                "div"
+            );
+
+
+        icon.className =
+            isIncome
+                ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#d8f6ed] text-[#33B786]"
+                : "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500";
+
+
+        icon.innerHTML =
+            isIncome
+                ? '<i class="fa-solid fa-arrow-down"></i>'
+                : '<i class="fa-solid fa-arrow-up"></i>';
+
+
+        const details =
+            document.createElement(
+                "div"
+            );
+
+
+        details.className =
+            "min-w-0";
+
+
+        const description =
+            document.createElement(
+                "p"
+            );
+
+
+        description.className =
+            "truncate text-sm font-semibold text-gray-800";
+
+
+        description.textContent =
+            transaction.description ||
+            transaction.category ||
+            "Transaction";
+
+
+        const date =
+            document.createElement(
+                "p"
+            );
+
+
+        date.className =
+            "mt-1 text-xs text-gray-400";
+
+
+        date.textContent =
+            formatShortDate(
+                transaction.date
+            );
+
+
+        details.appendChild(
+            description
+        );
+
+
+        details.appendChild(
+            date
+        );
+
+
+        left.appendChild(
+            icon
+        );
+
+
+        left.appendChild(
+            details
+        );
+
+
+        const amount =
+            document.createElement(
+                "p"
+            );
+
+
+        amount.className =
+            isIncome
+                ? "ml-3 shrink-0 text-sm font-semibold text-[#33B786]"
+                : "ml-3 shrink-0 text-sm font-semibold text-red-500";
+
+
+        amount.textContent =
+            isIncome
+                ? "+" +
+                  formatMoney(
+                      transaction.amount
+                  )
+                : "-" +
+                  formatMoney(
+                      transaction.amount
+                  );
+
+
+        row.appendChild(
+            left
+        );
+
+
+        row.appendChild(
+            amount
+        );
+
+
+        profileTransactions.appendChild(
+            row
+        );
+    }
+
+
+
+    /* =====================================================
+       27. MOBILE SIDEBAR
+    ===================================================== */
+
+    const sidebar =
+        document.getElementById(
+            "sidebar"
+        );
+
+
+    const sidebarOverlay =
+        document.getElementById(
+            "sidebarOverlay"
+        );
+
+
+    const menuButton =
+        document.getElementById(
+            "menuButton"
+        );
+
+
+
+    function openSidebar() {
+
+        if (!sidebar) {
+            return;
+        }
+
+
+        sidebar.classList.remove(
+            "-translate-x-full"
+        );
+
+
+        sidebar.classList.add(
+            "translate-x-0"
+        );
+
+
+        if (sidebarOverlay) {
+
+            sidebarOverlay.classList.remove(
+                "hidden"
+            );
+        }
+
+
+        document.body.classList.add(
+            "overflow-hidden"
+        );
+    }
+
+
+
+    function closeSidebar() {
+
+        if (!sidebar) {
+            return;
+        }
+
+
+        sidebar.classList.remove(
+            "translate-x-0"
+        );
+
+
+        sidebar.classList.add(
+            "-translate-x-full"
+        );
+
+
+        if (sidebarOverlay) {
+
+            sidebarOverlay.classList.add(
+                "hidden"
+            );
+        }
+
+
+        document.body.classList.remove(
+            "overflow-hidden"
+        );
+    }
+
+
+
+    if (menuButton) {
+
+        menuButton.addEventListener(
+            "click",
+            openSidebar
+        );
+    }
+
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.addEventListener(
+            "click",
+            closeSidebar
+        );
+    }
+
+
+
+    /* =====================================================
+       28. CLOSE SIDEBAR WHEN NAV LINK CLICKED
+    ===================================================== */
+
+    document.querySelectorAll(
+        ".dashboard-nav"
+    ).forEach(
+        link => {
+
+            link.addEventListener(
+                "click",
+                () => {
+
+                    closeSidebar();
+                }
+            );
+        }
+    );
+
+
+
+    /* =====================================================
+       29. LOGOUT MODAL
+    ===================================================== */
+
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+
+
+    const logoutModal =
+        document.getElementById(
+            "logoutModal"
+        );
+
+
+    const cancelLogout =
+        document.getElementById(
+            "cancelLogout"
+        );
+
+
+    const confirmLogout =
+        document.getElementById(
+            "confirmLogout"
+        );
+
+
+
+    /* OPEN */
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
+            "click",
+            () => {
+
+                closeSidebar();
+
+                openModal(
+                    logoutModal
+                );
+            }
+        );
+    }
+
+
+
+    /* CANCEL */
+
+    if (cancelLogout) {
+
+        cancelLogout.addEventListener(
+            "click",
+            () => {
+
+                closeModal(
+                    logoutModal
+                );
+            }
+        );
+    }
+
+
+
+    /* CONFIRM */
+
+    if (confirmLogout) {
+
+        confirmLogout.addEventListener(
+            "click",
+            () => {
+
+                /*
+                    Do NOT remove reenUsers.
+
+                    That contains the registered
+                    user's account.
+
+                    Only remove login/session data.
+                */
+
+                localStorage.removeItem(
+                    "currentUser"
+                );
+
+
+                sessionStorage.removeItem(
+                    "currentUser"
+                );
+
+
+                window.location.href =
+                    "./register.html";
+            }
+        );
+    }
+
+
+
+    /* =====================================================
+       30. RESET PASSWORD MODAL
+    ===================================================== */
+
+    const resetPasswordButton =
+        document.getElementById(
+            "resetPasswordButton"
+        );
+
+
+    const resetPasswordModal =
+        document.getElementById(
+            "resetPasswordModal"
+        );
+
+
+    const cancelResetPassword =
+        document.getElementById(
+            "cancelResetPassword"
+        );
+
+
+    const saveNewPassword =
+        document.getElementById(
+            "saveNewPassword"
+        );
+
+
+    const newPassword =
+        document.getElementById(
+            "newPassword"
+        );
+
+
+    const confirmPassword =
+        document.getElementById(
+            "confirmPassword"
+        );
+
+
+    const passwordMessage =
+        document.getElementById(
+            "passwordMessage"
+        );
+
+
+
+    /* =====================================================
+       31. OPEN RESET PASSWORD
+    ===================================================== */
 
     if (resetPasswordButton) {
 
         resetPasswordButton.addEventListener(
             "click",
-            openResetPasswordModal
-        );
+            () => {
 
+                if (newPassword) {
+
+                    newPassword.value =
+                        "";
+                }
+
+
+                if (confirmPassword) {
+
+                    confirmPassword.value =
+                        "";
+                }
+
+
+                if (passwordMessage) {
+
+                    passwordMessage.textContent =
+                        "";
+
+                    passwordMessage.classList.add(
+                        "hidden"
+                    );
+
+                    passwordMessage.classList.remove(
+                        "bg-red-50",
+                        "text-red-600",
+                        "bg-green-50",
+                        "text-green-600"
+                    );
+                }
+
+
+                openModal(
+                    resetPasswordModal
+                );
+            }
+        );
     }
 
+
+
+    /* =====================================================
+       32. CANCEL RESET PASSWORD
+    ===================================================== */
 
     if (cancelResetPassword) {
 
         cancelResetPassword.addEventListener(
             "click",
-            closeResetPasswordModal
-        );
+            () => {
 
-    }
-
-
-    // =====================================================
-    // PASSWORD SHOW / HIDE
-    // =====================================================
-
-    function setupPasswordToggle(
-        input,
-        button
-    ) {
-
-        if (!input || !button) return;
-
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                const hidden =
-                    input.type ===
-                    "password";
-
-
-                input.type =
-                    hidden
-                        ? "text"
-                        : "password";
-
-
-                button.innerHTML =
-                    hidden
-                        ? '<i class="fa-solid fa-eye-slash"></i>'
-                        : '<i class="fa-solid fa-eye"></i>';
-
+                closeModal(
+                    resetPasswordModal
+                );
             }
         );
-
     }
 
 
-    setupPasswordToggle(
-        newPassword,
-        toggleNewPassword
-    );
 
-
-    setupPasswordToggle(
-        confirmPassword,
-        toggleConfirmPassword
-    );
-
-
-    // =====================================================
-    // PASSWORD MESSAGE
-    // =====================================================
+    /* =====================================================
+       33. PASSWORD MESSAGE
+    ===================================================== */
 
     function showPasswordMessage(
         message,
         type
     ) {
 
-        if (!passwordMessage) return;
+        if (!passwordMessage) {
+
+            return;
+        }
 
 
         passwordMessage.textContent =
@@ -1135,72 +1847,216 @@ document.addEventListener("DOMContentLoaded", function () {
 
         passwordMessage.classList.remove(
             "hidden",
-            "bg-red-100",
-            "text-red-700",
-            "bg-green-100",
-            "text-green-700"
+            "bg-red-50",
+            "text-red-600",
+            "bg-green-50",
+            "text-green-600"
         );
 
 
-        if (type === "success") {
+        if (type === "error") {
 
             passwordMessage.classList.add(
-                "bg-green-100",
-                "text-green-700"
+                "bg-red-50",
+                "text-red-600"
             );
 
         } else {
 
             passwordMessage.classList.add(
-                "bg-red-100",
-                "text-red-700"
+                "bg-green-50",
+                "text-green-600"
             );
-
         }
-
     }
 
 
-    function hidePasswordMessage() {
 
-        if (!passwordMessage) return;
+    /* =====================================================
+       34. TOGGLE NEW PASSWORD
+    ===================================================== */
 
-
-        passwordMessage.classList.add(
-            "hidden"
+    const toggleNewPassword =
+        document.getElementById(
+            "toggleNewPassword"
         );
 
+
+    if (toggleNewPassword) {
+
+        toggleNewPassword.addEventListener(
+            "click",
+            () => {
+
+                if (!newPassword) {
+                    return;
+                }
+
+
+                const icon =
+                    toggleNewPassword.querySelector(
+                        "i"
+                    );
+
+
+                if (
+                    newPassword.type ===
+                    "password"
+                ) {
+
+                    newPassword.type =
+                        "text";
+
+
+                    if (icon) {
+
+                        icon.className =
+                            "fa-solid fa-eye-slash";
+                    }
+
+                } else {
+
+                    newPassword.type =
+                        "password";
+
+
+                    if (icon) {
+
+                        icon.className =
+                            "fa-solid fa-eye";
+                    }
+                }
+            }
+        );
     }
 
 
-    // =====================================================
-    // SAVE NEW PASSWORD
-    // =====================================================
+
+    /* =====================================================
+       35. TOGGLE CONFIRM PASSWORD
+    ===================================================== */
+
+    const toggleConfirmPassword =
+        document.getElementById(
+            "toggleConfirmPassword"
+        );
+
+
+    if (toggleConfirmPassword) {
+
+        toggleConfirmPassword.addEventListener(
+            "click",
+            () => {
+
+                if (!confirmPassword) {
+                    return;
+                }
+
+
+                const icon =
+                    toggleConfirmPassword.querySelector(
+                        "i"
+                    );
+
+
+                if (
+                    confirmPassword.type ===
+                    "password"
+                ) {
+
+                    confirmPassword.type =
+                        "text";
+
+
+                    if (icon) {
+
+                        icon.className =
+                            "fa-solid fa-eye-slash";
+                    }
+
+                } else {
+
+                    confirmPassword.type =
+                        "password";
+
+
+                    if (icon) {
+
+                        icon.className =
+                            "fa-solid fa-eye";
+                    }
+                }
+            }
+        );
+    }
+
+
+
+    /* =====================================================
+       36. SAVE NEW PASSWORD
+    ===================================================== */
 
     if (saveNewPassword) {
 
         saveNewPassword.addEventListener(
             "click",
-            function () {
+            () => {
+
+                if (
+                    !newPassword ||
+                    !confirmPassword
+                ) {
+
+                    return;
+                }
+
 
                 const password =
                     newPassword.value;
+
 
                 const confirmation =
                     confirmPassword.value;
 
 
-                if (password.length < 8) {
+
+                /* -----------------------------------------
+                   EMPTY
+                ----------------------------------------- */
+
+                if (!password) {
 
                     showPasswordMessage(
-                        "Password must be at least 8 characters long.",
+                        "Please enter a new password.",
                         "error"
                     );
 
                     return;
-
                 }
 
+
+
+                /* -----------------------------------------
+                   MINIMUM LENGTH
+                ----------------------------------------- */
+
+                if (
+                    password.length < 8
+                ) {
+
+                    showPasswordMessage(
+                        "Password must be at least 8 characters.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+
+                /* -----------------------------------------
+                   MATCH
+                ----------------------------------------- */
 
                 if (
                     password !==
@@ -1213,24 +2069,39 @@ document.addEventListener("DOMContentLoaded", function () {
                     );
 
                     return;
-
                 }
 
 
-                user.password =
+
+                /* -----------------------------------------
+                   PREVENT SAME PASSWORD
+                ----------------------------------------- */
+
+                if (
+                    currentUser.password ===
+                    password
+                ) {
+
+                    showPasswordMessage(
+                        "Your new password must be different from your current password.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+
+
+                /* -----------------------------------------
+                   UPDATE
+                ----------------------------------------- */
+
+                currentUser.password =
                     password;
 
 
-                users[userIndex] =
-                    user;
+                saveUser();
 
-
-                localStorage.setItem(
-                    USERS_KEY,
-                    JSON.stringify(
-                        users
-                    )
-                );
 
 
                 showPasswordMessage(
@@ -1239,148 +2110,130 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
 
 
-                setTimeout(
-                    function () {
+                /*
+                    Close modal after a short delay.
+                */
 
-                        closeResetPasswordModal();
+                setTimeout(
+                    () => {
+
+                        closeModal(
+                            resetPasswordModal
+                        );
 
                     },
-                    1000
+                    1200
                 );
-
             }
         );
-
     }
 
 
-    // =====================================================
-    // LOGOUT
-    // =====================================================
 
-    function openLogoutModal() {
+    /* =====================================================
+       37. CLOSE MODALS BY CLICKING OUTSIDE
+    ===================================================== */
 
-        if (!logoutModal) return;
+    document.querySelectorAll(
+        '[id$="Modal"]'
+    ).forEach(
+        modal => {
 
+            modal.addEventListener(
+                "click",
+                event => {
 
-        logoutModal.classList.remove(
-            "hidden"
-        );
+                    /*
+                        Close only if the user clicks
+                        the overlay itself.
+                    */
 
-        logoutModal.classList.add(
-            "flex"
-        );
+                    if (
+                        event.target ===
+                        modal
+                    ) {
 
-    }
-
-
-    function closeLogoutModal() {
-
-        if (!logoutModal) return;
-
-
-        logoutModal.classList.add(
-            "hidden"
-        );
-
-        logoutModal.classList.remove(
-            "flex"
-        );
-
-    }
-
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
-            "click",
-            openLogoutModal
-        );
-
-    }
-
-
-    if (cancelLogout) {
-
-        cancelLogout.addEventListener(
-            "click",
-            closeLogoutModal
-        );
-
-    }
-
-
-    if (confirmLogout) {
-
-        confirmLogout.addEventListener(
-            "click",
-            function () {
-
-                sessionStorage.removeItem(
-                    CURRENT_USER_KEY
-                );
-
-                window.location.href =
-                    "./login.html";
-
-            }
-        );
-
-    }
-
-
-    if (logoutModal) {
-
-        logoutModal.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target ===
-                    logoutModal
-                ) {
-
-                    closeLogoutModal();
-
+                        closeModal(
+                            modal
+                        );
+                    }
                 }
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // ESCAPE KEY
-    // =====================================================
-
-    document.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (event.key !== "Escape") {
-                return;
-            }
-
-
-            closeLogoutModal();
-
-            closeResetPasswordModal();
-
-            closeSidebar();
-
+            );
         }
     );
 
 
-    // =====================================================
-    // INITIAL LOAD
-    // =====================================================
 
-    updateUserInformation();
+    /* =====================================================
+       38. ESC KEY
+    ===================================================== */
 
-    updateBalance();
+    document.addEventListener(
+        "keydown",
+        event => {
 
-    updateTransactions();
+            if (
+                event.key !==
+                "Escape"
+            ) {
+
+                return;
+            }
+
+
+            closeModal(
+                logoutModal
+            );
+
+
+            closeModal(
+                resetPasswordModal
+            );
+
+
+            closeSidebar();
+        }
+    );
+
+
+
+    /* =====================================================
+       39. INITIAL SAVE
+    ===================================================== */
+
+    saveUser();
+
+
+
+    /* =====================================================
+       40. DEBUG
+    ===================================================== */
+
+    console.log(
+        "===================================="
+    );
+
+    console.log(
+        "REEN BANK PROFILE PAGE"
+    );
+
+    console.log(
+        "Current User:",
+        currentUser
+    );
+
+    console.log(
+        "Balance:",
+        currentUser.balance
+    );
+
+    console.log(
+        "Transactions:",
+        currentUser.transactions
+    );
+
+    console.log(
+        "===================================="
+    );
 
 });

@@ -1,1945 +1,1915 @@
-// =========================================================
-// REEN BANK - ACCOUNTS PAGE
-// =========================================================
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    console.log("ACCOUNTS.JS IS LOADED!");
-
-    // =====================================================
-    // STORAGE
-    // =====================================================
-
-    const USERS_KEY = "reenUsers";
-    const CURRENT_USER_KEY = "currentUser";
-
-
-    // =====================================================
-    // GET USERS
-    // =====================================================
-
-    let users = [];
-
-    try {
-        users = JSON.parse(
-            localStorage.getItem(USERS_KEY)
-        ) || [];
-    } catch (error) {
-        console.error("Could not read users:", error);
-        users = [];
-    }
-
-    if (!Array.isArray(users)) {
-        users = [];
-    }
-
-
-    // =====================================================
-    // GET CURRENT SESSION
-    // =====================================================
-
-    let currentUserSession = null;
-
-    try {
-        currentUserSession = JSON.parse(
-            sessionStorage.getItem(CURRENT_USER_KEY)
-        );
-    } catch (error) {
-        console.error("Could not read current user:", error);
-    }
-
-
-    // =====================================================
-    // CHECK LOGIN
-    // =====================================================
-
-    if (!currentUserSession || !currentUserSession.email) {
-        window.location.href = "./login.html";
-        return;
-    }
-
-
-    // =====================================================
-    // FIND USER
-    // =====================================================
-
-    let userIndex = users.findIndex(function (user) {
-
-        return (
-            user &&
-            typeof user.email === "string" &&
-            user.email.toLowerCase() ===
-            currentUserSession.email.toLowerCase()
-        );
-
-    });
-
-
-    if (userIndex === -1) {
-
-        sessionStorage.removeItem(CURRENT_USER_KEY);
-
-        window.location.href = "./login.html";
-
-        return;
-    }
-
-
-    // =====================================================
-    // CURRENT USER
-    // =====================================================
-
-    let currentUser = users[userIndex];
-
-
-    // =====================================================
-    // INITIALIZE USER DATA
-    // =====================================================
-
-    if (typeof currentUser.balance !== "number") {
-        currentUser.balance = 0;
-    }
-
-    if (typeof currentUser.income !== "number") {
-        currentUser.income = 0;
-    }
-
-    if (typeof currentUser.expense !== "number") {
-        currentUser.expense = 0;
-    }
-
-    if (!Array.isArray(currentUser.transactions)) {
-        currentUser.transactions = [];
-    }
-
-    if (typeof currentUser.schoolSavings !== "number") {
-        currentUser.schoolSavings = 0;
-    }
-
-    if (typeof currentUser.holidayBalance !== "number") {
-        currentUser.holidayBalance = 0;
-    }
-
-    if (!Array.isArray(currentUser.accounts)) {
-        currentUser.accounts = [];
-    }
-
-
-    // =====================================================
-    // ACCOUNT NUMBER
-    // =====================================================
-
-    if (!currentUser.accountNumber) {
-
-        currentUser.accountNumber =
-            generateAccountNumber(
-                currentUser.email,
-                users
-            );
-
-    }
-
-
-    // =====================================================
-    // GENERATE ACCOUNT NUMBER
-    // =====================================================
-
-    function generateAccountNumber(email, allUsers) {
-
-        let digits = "";
-
-        for (let i = 0; i < email.length; i++) {
-            digits += email.charCodeAt(i);
-        }
-
-        digits = digits.replace(/\D/g, "");
-
-        let number =
-            digits.substring(0, 10);
-
-        while (number.length < 10) {
-            number += Math.floor(
-                Math.random() * 10
-            );
-        }
-
-        let exists = allUsers.some(function (user) {
-
-            return (
-                user &&
-                user.accountNumber === number
-            );
-
-        });
-
-        while (exists) {
-
-            number = "";
-
-            for (let i = 0; i < 10; i++) {
-
-                number += Math.floor(
-                    Math.random() * 10
-                );
-
-            }
-
-            exists = allUsers.some(function (user) {
-
-                return (
-                    user &&
-                    user.accountNumber === number
-                );
-
-            });
-
-        }
-
-        return number;
-    }
-
-
-    // =====================================================
-    // SAVE USERS
-    // =====================================================
-
-    function saveUsers() {
-
-        users[userIndex] = currentUser;
-
-        localStorage.setItem(
-            USERS_KEY,
-            JSON.stringify(users)
-        );
-
-    }
-
-
-    saveUsers();
-
-
-    // =====================================================
-    // UPDATE SESSION
-    // =====================================================
-
-    sessionStorage.setItem(
-        CURRENT_USER_KEY,
-        JSON.stringify({
-
-            name: currentUser.name || "User",
-
-            email: currentUser.email,
-
-            accountNumber: currentUser.accountNumber
-
-        })
+/* =========================================================
+   REEN BANK — ACCOUNTS PAGE JAVASCRIPT
+   ---------------------------------------------------------
+   Works with:
+   - reenUsers       -> localStorage
+   - currentUser     -> sessionStorage / localStorage
+   - accounts.html
+   - overview dashboard
+
+   Supports:
+   - Main account funding
+   - School savings funding
+   - Holiday savings funding
+   - Custom account funding
+   - Withdrawals
+   - Credit card / DirectPay selection
+   - Transaction history
+   - Balance persistence
+   - Custom accounts
+   - Logout
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* =====================================================
+       1. STORAGE
+    ===================================================== */
+
+    let users = JSON.parse(
+        localStorage.getItem("reenUsers") || "[]"
     );
 
+    let storedCurrentUser =
+        sessionStorage.getItem("currentUser") ||
+        localStorage.getItem("currentUser");
 
-    // =====================================================
-    // ELEMENTS
-    // =====================================================
+    if (!storedCurrentUser) {
+        window.location.href = "./login.html";
+        return;
+    }
 
-    const headerUserName =
-        document.getElementById("headerUserName");
+    let currentUserData;
 
-    const accountNumber =
-        document.getElementById("accountNumber");
+    try {
+        currentUserData = JSON.parse(storedCurrentUser);
+    } catch (error) {
+        console.error("Invalid currentUser:", error);
+        window.location.href = "./login.html";
+        return;
+    }
 
-    const profileAvatar =
-        document.getElementById("profileAvatar");
+    /* =====================================================
+       2. FIND FULL USER
+    ===================================================== */
 
-    const profileAvatarInitials =
-        document.getElementById("profileAvatarInitials");
+    let currentUser = users.find(
+        user =>
+            user.email &&
+            currentUserData.email &&
+            user.email.toLowerCase() ===
+            currentUserData.email.toLowerCase()
+    );
 
-    const mainAccountBalance =
-        document.getElementById("mainAccountBalance");
+    if (!currentUser) {
+        console.error("Current user was not found in reenUsers.");
+        window.location.href = "./login.html";
+        return;
+    }
 
-    const schoolSavingsBalance =
-        document.getElementById("schoolSavingsBalance");
+    /* =====================================================
+       3. DEFAULT USER DATA
+    ===================================================== */
 
-    const holidayBalance =
-        document.getElementById("holidayBalance");
+    currentUser.balance = Number(currentUser.balance) || 0;
+    currentUser.income = Number(currentUser.income) || 0;
+    currentUser.expense = Number(currentUser.expense) || 0;
 
-    const transactionList =
-        document.getElementById("transactionList");
+    currentUser.schoolSavings =
+        Number(currentUser.schoolSavings) || 0;
 
-    const emptyTransactions =
-        document.getElementById("emptyTransactions");
+    currentUser.holidayBalance =
+        Number(currentUser.holidayBalance) || 0;
 
-    const accountsGrid =
-        document.getElementById("accountsGrid");
+    currentUser.accounts =
+        Array.isArray(currentUser.accounts)
+            ? currentUser.accounts
+            : [];
 
+    currentUser.transactions =
+        Array.isArray(currentUser.transactions)
+            ? currentUser.transactions
+            : [];
 
-    // =====================================================
-    // FORMAT MONEY
-    // =====================================================
+    /* =====================================================
+       4. ELEMENT HELPER
+    ===================================================== */
+
+    const $ = id => document.getElementById(id);
+
+    /* =====================================================
+       5. ELEMENTS
+    ===================================================== */
+
+    const headerUserName = $("headerUserName");
+    const accountNumber = $("accountNumber");
+
+    const profileAvatar = $("profileAvatar");
+    const profileAvatarInitials = $("profileAvatarInitials");
+
+    /* Balances */
+    const mainAccountBalance = $("mainAccountBalance");
+    const schoolSavingsBalance = $("schoolSavingsBalance");
+    const holidayBalance = $("holidayBalance");
+
+    /* Fund buttons */
+    const mainFundButton = $("mainFundButton");
+    const schoolFundButton = $("schoolFundButton");
+    const holidayFundButton = $("holidayFundButton");
+
+    /* Withdraw buttons */
+    const mainWithdrawButton = $("mainWithdrawButton");
+    const schoolWithdrawButton = $("schoolWithdrawButton");
+    const holidayWithdrawButton = $("holidayWithdrawButton");
+
+    /* Accounts */
+    const accountsGrid = $("accountsGrid");
+    const addAccountButton = $("addAccountButton");
+
+    /* Transactions */
+    const transactionList = $("transactionList");
+    const emptyTransactions = $("emptyTransactions");
+    const viewAllTransactions = $("viewAllTransactions");
+
+    /* Add account modal */
+    const addAccountModal = $("addAccountModal");
+    const addAccountForm = $("addAccountForm");
+    const accountNameInput = $("accountName");
+    const accountDescriptionInput = $("accountDescription");
+    const cancelAddAccount = $("cancelAddAccount");
+
+    /* Account created modal */
+    const accountCreatedModal = $("accountCreatedModal");
+    const createdAccountName = $("createdAccountName");
+    const goBackCreated = $("goBackCreated");
+    const fundCreatedAccount = $("fundCreatedAccount");
+
+    /* Fund modal */
+    const fundModal = $("fundModal");
+    const fundForm = $("fundForm");
+    const fundAmount = $("fundAmount");
+
+    const directPayMethod = $("directPayMethod");
+    const creditCardMethod = $("creditCardMethod");
+    const creditCardFields = $("creditCardFields");
+
+    const cardNumber = $("cardNumber");
+    const cardHolder = $("cardHolder");
+    const expiryDate = $("expiryDate");
+    const cvc = $("cvc");
+
+    const cancelFund = $("cancelFund");
+
+    /* Fund success */
+    const fundSuccessModal = $("fundSuccessModal");
+    const fundSuccessAmount = $("fundSuccessAmount");
+    const fundSuccessBack = $("fundSuccessBack");
+
+    /* Withdraw */
+    const withdrawModal = $("withdrawModal");
+    const withdrawForm = $("withdrawForm");
+    const withdrawAmount = $("withdrawAmount");
+    const withdrawAccountNumber = $("withdrawAccountNumber");
+    const withdrawAccountName = $("withdrawAccountName");
+    const withdrawBank = $("withdrawBank");
+    const cancelWithdraw = $("cancelWithdraw");
+
+    /* Withdraw success */
+    const withdrawSuccessModal = $("withdrawSuccessModal");
+    const withdrawSuccessAmount = $("withdrawSuccessAmount");
+    const withdrawSuccessBack = $("withdrawSuccessBack");
+
+    /* Logout */
+    const logoutButton = $("logoutButton");
+    const logoutModal = $("logoutModal");
+    const cancelLogout = $("cancelLogout");
+    const confirmLogout = $("confirmLogout");
+
+    /* Sidebar */
+    const menuButton = $("menuButton");
+    const sidebar = $("sidebar");
+    const sidebarOverlay = $("sidebarOverlay");
+
+    /* =====================================================
+       6. GENERAL VARIABLES
+    ===================================================== */
+
+    let selectedFundAccount = "main";
+    let selectedWithdrawAccount = "main";
+    let selectedPaymentMethod = "directpay";
+
+    /* =====================================================
+       7. MONEY FORMAT
+    ===================================================== */
 
     function formatMoney(amount) {
 
-        const value = Number(amount) || 0;
+        amount = Number(amount) || 0;
 
-        return (
-            "₦" +
-            value.toLocaleString(
-                "en-NG",
-                {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }
-            )
+        return new Intl.NumberFormat("en-NG", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
+    }
+
+    /* =====================================================
+       8. SAVE USER
+    ===================================================== */
+
+    function saveUser() {
+
+        const index = users.findIndex(
+            user =>
+                user.email &&
+                currentUser.email &&
+                user.email.toLowerCase() ===
+                currentUser.email.toLowerCase()
         );
 
-    }
-
-
-    // =====================================================
-    // GET SECOND NAME
-    // =====================================================
-
-    function getSecondName(fullName) {
-
-        if (!fullName) {
-            return "User";
+        if (index === -1) {
+            console.error("Unable to save user.");
+            return;
         }
 
-        const parts =
-            fullName
-                .trim()
-                .split(/\s+/);
+        users[index] = currentUser;
 
-        if (parts.length >= 2) {
-            return parts[1];
-        }
+        localStorage.setItem(
+            "reenUsers",
+            JSON.stringify(users)
+        );
 
-        return parts[0];
+        /*
+           Keep login information in both storages.
+           Do NOT replace the full user object here.
+        */
+
+        localStorage.setItem(
+            "currentUser",
+            JSON.stringify(currentUser)
+        );
+
+        sessionStorage.setItem(
+            "currentUser",
+            JSON.stringify(currentUser)
+        );
     }
 
-
-    // =====================================================
-    // INITIALS
-    // =====================================================
+    /* =====================================================
+       9. USER PROFILE
+    ===================================================== */
 
     function getInitials(name) {
 
-        if (!name) {
-            return "U";
-        }
+        if (!name) return "U";
 
-        const parts =
-            name.trim().split(/\s+/);
+        const words = name.trim().split(/\s+/);
 
-        if (parts.length === 1) {
-            return parts[0]
-                .substring(0, 2)
-                .toUpperCase();
+        if (words.length === 1) {
+            return words[0].substring(0, 2).toUpperCase();
         }
 
         return (
-            parts[0].charAt(0) +
-            parts[parts.length - 1].charAt(0)
+            words[0][0] +
+            words[words.length - 1][0]
         ).toUpperCase();
-
     }
 
-
-    // =====================================================
-    // PROFILE AVATAR
-    // =====================================================
-
-    function updateProfileAvatar() {
-
-        if (!profileAvatar) {
-            return;
-        }
-
-        const initials =
-            getInitials(
-                currentUser.name
-            );
-
-        if (profileAvatarInitials) {
-            profileAvatarInitials.textContent =
-                initials;
-        }
-
-
-        /*
-         * Check several possible names in case
-         * the profile page stores the image differently.
-         */
-
-        const savedImage =
-            currentUser.profileImage ||
-            currentUser.profilePhoto ||
-            currentUser.avatar ||
-            localStorage.getItem("profileImage");
-
-
-        if (!savedImage) {
-
-            profileAvatar.style.backgroundImage =
-                "";
-
-            profileAvatarInitials.classList.remove(
-                "hidden"
-            );
-
-            return;
-        }
-
-
-        const testImage =
-            new Image();
-
-
-        testImage.onload = function () {
-
-            profileAvatar.style.backgroundImage =
-                `url("${savedImage}")`;
-
-            profileAvatar.style.backgroundSize =
-                "cover";
-
-            profileAvatar.style.backgroundPosition =
-                "center";
-
-            profileAvatarInitials.classList.add(
-                "hidden"
-            );
-
-        };
-
-
-        testImage.onerror = function () {
-
-            profileAvatar.style.backgroundImage =
-                "";
-
-            profileAvatarInitials.classList.remove(
-                "hidden"
-            );
-
-        };
-
-
-        testImage.src = savedImage;
-
-    }
-
-
-    // =====================================================
-    // USER INFORMATION
-    // =====================================================
-
-    function updateUserInformation() {
+    function renderUser() {
 
         if (headerUserName) {
-
             headerUserName.textContent =
-                getSecondName(
-                    currentUser.name
-                );
-
+                currentUser.name || "User";
         }
-
 
         if (accountNumber) {
-
             accountNumber.textContent =
-                currentUser.accountNumber ||
-                "0000000000";
-
+                currentUser.accountNumber || "0000000000";
         }
 
+        const initials = getInitials(currentUser.name);
 
-        updateProfileAvatar();
+        if (profileAvatarInitials) {
+            profileAvatarInitials.textContent = initials;
+        }
 
+        /*
+           If there is no profile image,
+           show initials.
+        */
+
+        if (profileAvatar) {
+            profileAvatar.style.display = "flex";
+        }
     }
 
+    /* =====================================================
+       10. RENDER BALANCES
+    ===================================================== */
 
-    // =====================================================
-    // UPDATE BALANCES
-    // =====================================================
-
-    function updateBalances() {
+    function renderBalances() {
 
         if (mainAccountBalance) {
-
             mainAccountBalance.textContent =
-                formatMoney(
-                    currentUser.balance
-                );
-
+                `₦${formatMoney(currentUser.balance)}`;
         }
-
 
         if (schoolSavingsBalance) {
-
             schoolSavingsBalance.textContent =
-                formatMoney(
-                    currentUser.schoolSavings
-                );
-
+                `₦${formatMoney(currentUser.schoolSavings)}`;
         }
-
 
         if (holidayBalance) {
-
             holidayBalance.textContent =
-                formatMoney(
-                    currentUser.holidayBalance
-                );
-
+                `₦${formatMoney(currentUser.holidayBalance)}`;
         }
-
-
-        updateCustomAccountCards();
-
     }
 
-
-    // =====================================================
-    // MODAL HELPERS
-    // =====================================================
+    /* =====================================================
+       11. MODAL HELPERS
+    ===================================================== */
 
     function openModal(modal) {
 
-        if (!modal) {
-            return;
-        }
+        if (!modal) return;
 
         modal.classList.remove("hidden");
-
         modal.classList.add("flex");
-
     }
-
 
     function closeModal(modal) {
 
-        if (!modal) {
-            return;
-        }
+        if (!modal) return;
 
         modal.classList.add("hidden");
-
         modal.classList.remove("flex");
-
     }
 
+    /* =====================================================
+       12. TRANSACTION CREATOR
+       -----------------------------------------------------
+       We save multiple compatible fields so the Overview
+       page can correctly identify deposits and withdrawals.
+    ===================================================== */
 
-    // =====================================================
-    // ADD ACCOUNT ELEMENTS
-    // =====================================================
+    function createTransaction({
+        type,
+        account,
+        amount,
+        description,
+        bank = "",
+        bankAccountNumber = "",
+        accountId = ""
+    }) {
 
-    const addAccountButton =
-        document.getElementById(
-            "addAccountButton"
-        );
+        const isDeposit = type === "income";
 
-    const addAccountModal =
-        document.getElementById(
-            "addAccountModal"
-        );
+        return {
+            id:
+                Date.now().toString() +
+                Math.random().toString(36).substring(2, 8),
 
-    const addAccountForm =
-        document.getElementById(
-            "addAccountForm"
-        );
+            /*
+               Primary type used by existing overview code.
+            */
+            type: isDeposit ? "income" : "expense",
 
-    const cancelAddAccount =
-        document.getElementById(
-            "cancelAddAccount"
-        );
+            /*
+               Explicit transaction type.
+            */
+            transactionType:
+                isDeposit ? "deposit" : "withdrawal",
 
+            /*
+               Very clear direction.
+            */
+            direction:
+                isDeposit ? "credit" : "debit",
 
-    // =====================================================
-    // OPEN ADD ACCOUNT
-    // =====================================================
+            /*
+               Category.
+            */
+            category:
+                isDeposit ? "Deposit" : "Withdrawal",
 
-    if (addAccountButton) {
+            title:
+                isDeposit ? "Deposit" : "Withdrawal",
 
-        addAccountButton.addEventListener(
-            "click",
-            function () {
+            description,
 
-                openModal(
-                    addAccountModal
-                );
+            account,
 
-            }
-        );
+            accountId,
 
+            amount: Number(amount),
+
+            bank,
+
+            accountNumber: bankAccountNumber,
+
+            status: "completed",
+
+            date: new Date().toISOString(),
+
+            /*
+               Balance after the transaction.
+            */
+            balanceAfter:
+                getAccountBalance(account, accountId)
+        };
     }
 
+    /* =====================================================
+       13. GET ACCOUNT BALANCE
+    ===================================================== */
 
-    // =====================================================
-    // CANCEL ADD ACCOUNT
-    // =====================================================
+    function getAccountBalance(accountName, accountId = "") {
 
-    if (cancelAddAccount) {
-
-        cancelAddAccount.addEventListener(
-            "click",
-            function () {
-
-                closeModal(
-                    addAccountModal
-                );
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // ADD ACCOUNT FORM
-    // =====================================================
-
-    if (addAccountForm) {
-
-        addAccountForm.addEventListener(
-            "submit",
-            function (event) {
-
-                event.preventDefault();
-
-
-                const accountName =
-                    document.getElementById(
-                        "accountName"
-                    ).value.trim();
-
-
-                const description =
-                    document.getElementById(
-                        "accountDescription"
-                    ).value.trim();
-
-
-                if (!accountName) {
-
-                    alert(
-                        "Please enter an account name."
-                    );
-
-                    return;
-
-                }
-
-
-                const newAccount = {
-
-                    id:
-                        Date.now().toString(),
-
-                    name:
-                        accountName,
-
-                    description:
-                        description,
-
-                    balance:
-                        0,
-
-                    transactions:
-                        [],
-
-                    createdAt:
-                        new Date().toISOString()
-
-                };
-
-
-                currentUser.accounts.push(
-                    newAccount
-                );
-
-
-                saveUsers();
-
-
-                document.getElementById(
-                    "createdAccountName"
-                ).textContent =
-                    accountName;
-
-
-                addAccountForm.reset();
-
-
-                closeModal(
-                    addAccountModal
-                );
-
-
-                renderCustomAccounts();
-
-
-                openModal(
-                    document.getElementById(
-                        "accountCreatedModal"
-                    )
-                );
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // ACCOUNT CREATED
-    // =====================================================
-
-    const accountCreatedModal =
-        document.getElementById(
-            "accountCreatedModal"
-        );
-
-    const goBackCreated =
-        document.getElementById(
-            "goBackCreated"
-        );
-
-    const fundCreatedAccount =
-        document.getElementById(
-            "fundCreatedAccount"
-        );
-
-
-    let newlyCreatedAccountId = null;
-
-
-    if (currentUser.accounts.length > 0) {
-
-        newlyCreatedAccountId =
-            currentUser.accounts[
-                currentUser.accounts.length - 1
-            ].id;
-
-    }
-
-
-    if (goBackCreated) {
-
-        goBackCreated.addEventListener(
-            "click",
-            function () {
-
-                closeModal(
-                    accountCreatedModal
-                );
-
-            }
-        );
-
-    }
-
-
-    if (fundCreatedAccount) {
-
-        fundCreatedAccount.addEventListener(
-            "click",
-            function () {
-
-                closeModal(
-                    accountCreatedModal
-                );
-
-
-                if (newlyCreatedAccountId) {
-
-                    openFundModal(
-                        "custom",
-                        newlyCreatedAccountId
-                    );
-
-                } else {
-
-                    openFundModal(
-                        "main"
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // FUND MODAL
-    // =====================================================
-
-    const fundModal =
-        document.getElementById(
-            "fundModal"
-        );
-
-    const fundForm =
-        document.getElementById(
-            "fundForm"
-        );
-
-    const cancelFund =
-        document.getElementById(
-            "cancelFund"
-        );
-
-
-    let selectedFundAccount = "main";
-
-    let selectedCustomAccountId = null;
-
-
-    function openFundModal(
-        accountType,
-        customAccountId = null
-    ) {
-
-        selectedFundAccount =
-            accountType || "main";
-
-        selectedCustomAccountId =
-            customAccountId;
-
-
-        if (fundForm) {
-            fundForm.reset();
+        if (accountName === "Main Account") {
+            return Number(currentUser.balance) || 0;
         }
 
-
-        setPaymentMethod("direct");
-
-
-        openModal(
-            fundModal
-        );
-
-    }
-
-
-    // =====================================================
-    // FUND BUTTONS
-    // =====================================================
-
-    const mainFundButton =
-        document.getElementById(
-            "mainFundButton"
-        );
-
-    const schoolFundButton =
-        document.getElementById(
-            "schoolFundButton"
-        );
-
-    const holidayFundButton =
-        document.getElementById(
-            "holidayFundButton"
-        );
-
-
-    if (mainFundButton) {
-
-        mainFundButton.addEventListener(
-            "click",
-            function () {
-
-                openFundModal(
-                    "main"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (schoolFundButton) {
-
-        schoolFundButton.addEventListener(
-            "click",
-            function () {
-
-                openFundModal(
-                    "school"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (holidayFundButton) {
-
-        holidayFundButton.addEventListener(
-            "click",
-            function () {
-
-                openFundModal(
-                    "holiday"
-                );
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // PAYMENT METHOD
-    // =====================================================
-
-    const directPayMethod =
-        document.getElementById(
-            "directPayMethod"
-        );
-
-    const creditCardMethod =
-        document.getElementById(
-            "creditCardMethod"
-        );
-
-    const creditCardFields =
-        document.getElementById(
-            "creditCardFields"
-        );
-
-
-    function setPaymentMethod(method) {
-
-        if (method === "credit") {
-
-            if (creditCardFields) {
-
-                creditCardFields.classList.remove(
-                    "hidden"
-                );
-
-            }
-
-
-            if (directPayMethod) {
-
-                directPayMethod.innerHTML =
-                    '<i class="fa-regular fa-circle"></i> Direct Pay';
-
-            }
-
-
-            if (creditCardMethod) {
-
-                creditCardMethod.innerHTML =
-                    '<i class="fa-solid fa-circle text-red-400"></i> Credit Card';
-
-            }
-
-        } else {
-
-            if (creditCardFields) {
-
-                creditCardFields.classList.add(
-                    "hidden"
-                );
-
-            }
-
-
-            if (directPayMethod) {
-
-                directPayMethod.innerHTML =
-                    '<i class="fa-solid fa-circle text-red-400"></i> Direct Pay';
-
-            }
-
-
-            if (creditCardMethod) {
-
-                creditCardMethod.innerHTML =
-                    '<i class="fa-regular fa-circle"></i> Credit Card';
-
-            }
-
+        if (accountName === "School Savings") {
+            return Number(currentUser.schoolSavings) || 0;
         }
 
+        if (
+            accountName === "Holiday Savings" ||
+            accountName === "Holiday Plan"
+        ) {
+            return Number(currentUser.holidayBalance) || 0;
+        }
+
+        const customAccount =
+            currentUser.accounts.find(
+                account =>
+                    account.id === accountId ||
+                    account.name === accountName
+            );
+
+        return customAccount
+            ? Number(customAccount.balance) || 0
+            : 0;
     }
 
+    /* =====================================================
+       14. FUND ACCOUNT
+    ===================================================== */
+
+    function fundAccount(accountType, amount) {
+
+        amount = Number(amount);
+
+        if (!amount || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return false;
+        }
+
+        let accountName = "";
+
+        /* ---------------- MAIN ACCOUNT ---------------- */
+
+        if (accountType === "main") {
+
+            currentUser.balance += amount;
+
+            accountName = "Main Account";
+        }
+
+        /* ---------------- SCHOOL ---------------- */
+
+        else if (accountType === "school") {
+
+            currentUser.schoolSavings += amount;
+
+            accountName = "School Savings";
+        }
+
+        /* ---------------- HOLIDAY ---------------- */
+
+        else if (accountType === "holiday") {
+
+            currentUser.holidayBalance += amount;
+
+            accountName = "Holiday Savings";
+        }
+
+        /* ---------------- CUSTOM ACCOUNT ---------------- */
+
+        else if (accountType.startsWith("custom:")) {
+
+            const accountId =
+                accountType.replace("custom:", "");
+
+            const account =
+                currentUser.accounts.find(
+                    item => item.id === accountId
+                );
+
+            if (!account) {
+                alert("Account could not be found.");
+                return false;
+            }
+
+            account.balance =
+                Number(account.balance) || 0;
+
+            account.balance += amount;
+
+            accountName = account.name;
+        }
+
+        else {
+            alert("Invalid account.");
+            return false;
+        }
+
+        /*
+           Income represents money coming into the user's
+           banking system.
+        */
+
+        currentUser.income += amount;
+
+        /* =================================================
+           IMPORTANT:
+           Deposit = income + credit + deposit
+        ================================================= */
+
+        const transaction = createTransaction({
+            type: "income",
+            account: accountName,
+            amount: amount,
+            description:
+                `Funded ${accountName}`
+        });
+
+        currentUser.transactions.unshift(transaction);
+
+        saveUser();
+
+        renderBalances();
+        renderTransactions();
+        renderCustomAccounts();
+
+        return true;
+    }
+
+    /* =====================================================
+       15. OPEN FUND MODAL
+    ===================================================== */
+
+    function openFundModal(accountType) {
+
+        selectedFundAccount = accountType;
+
+        if (fundAmount) {
+            fundAmount.value = "";
+        }
+
+        selectedPaymentMethod = "directpay";
+
+        updatePaymentMethodUI();
+
+        openModal(fundModal);
+    }
+
+    /* =====================================================
+       16. PAYMENT METHOD UI
+    ===================================================== */
+
+    function updatePaymentMethodUI() {
+
+        if (creditCardFields) {
+
+            if (
+                selectedPaymentMethod ===
+                "creditcard"
+            ) {
+                creditCardFields.classList.remove("hidden");
+            } else {
+                creditCardFields.classList.add("hidden");
+            }
+        }
+
+        if (directPayMethod) {
+
+            if (
+                selectedPaymentMethod ===
+                "directpay"
+            ) {
+                directPayMethod.classList.add(
+                    "border-blue-600",
+                    "bg-blue-50"
+                );
+            } else {
+                directPayMethod.classList.remove(
+                    "border-blue-600",
+                    "bg-blue-50"
+                );
+            }
+        }
+
+        if (creditCardMethod) {
+
+            if (
+                selectedPaymentMethod ===
+                "creditcard"
+            ) {
+                creditCardMethod.classList.add(
+                    "border-blue-600",
+                    "bg-blue-50"
+                );
+            } else {
+                creditCardMethod.classList.remove(
+                    "border-blue-600",
+                    "bg-blue-50"
+                );
+            }
+        }
+    }
+
+    /* =====================================================
+       17. PAYMENT METHOD BUTTONS
+    ===================================================== */
 
     if (directPayMethod) {
 
         directPayMethod.addEventListener(
             "click",
-            function () {
+            () => {
 
-                setPaymentMethod(
-                    "direct"
-                );
+                selectedPaymentMethod =
+                    "directpay";
 
+                updatePaymentMethodUI();
             }
         );
-
     }
-
 
     if (creditCardMethod) {
 
         creditCardMethod.addEventListener(
             "click",
-            function () {
+            () => {
 
-                setPaymentMethod(
-                    "credit"
-                );
+                selectedPaymentMethod =
+                    "creditcard";
 
+                updatePaymentMethodUI();
             }
         );
-
     }
 
-
-    if (cancelFund) {
-
-        cancelFund.addEventListener(
-            "click",
-            function () {
-
-                closeModal(
-                    fundModal
-                );
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // FUND FORM
-    // =====================================================
+    /* =====================================================
+       18. FUND FORM
+    ===================================================== */
 
     if (fundForm) {
 
         fundForm.addEventListener(
             "submit",
-            function (event) {
+            event => {
 
                 event.preventDefault();
 
-
                 const amount =
                     Number(
-                        document.getElementById(
-                            "fundAmount"
-                        ).value
+                        fundAmount?.value
                     );
-
 
                 if (!amount || amount <= 0) {
 
                     alert(
-                        "Please enter a valid amount."
+                        "Please enter a valid funding amount."
                     );
 
                     return;
-
                 }
 
+                /* Credit card validation */
 
-                const creditVisible =
-                    creditCardFields &&
-                    !creditCardFields.classList.contains(
-                        "hidden"
-                    );
+                if (
+                    selectedPaymentMethod ===
+                    "creditcard"
+                ) {
 
+                    const card =
+                        cardNumber?.value
+                            .replace(/\s/g, "");
 
-                if (creditVisible) {
+                    const holder =
+                        cardHolder?.value.trim();
 
-                    const cardNumber =
-                        document.getElementById(
-                            "cardNumber"
-                        ).value.trim();
+                    const expiry =
+                        expiryDate?.value.trim();
 
-                    const cardHolder =
-                        document.getElementById(
-                            "cardHolder"
-                        ).value.trim();
-
-                    const expiryDate =
-                        document.getElementById(
-                            "expiryDate"
-                        ).value.trim();
-
-                    const cvc =
-                        document.getElementById(
-                            "cvc"
-                        ).value.trim();
-
+                    const securityCode =
+                        cvc?.value.trim();
 
                     if (
-                        !cardNumber ||
-                        !cardHolder ||
-                        !expiryDate ||
-                        !cvc
+                        !card ||
+                        !/^\d{16}$/.test(card)
                     ) {
 
                         alert(
-                            "Please complete all card details."
+                            "Please enter a valid 16-digit card number."
                         );
 
                         return;
-
                     }
 
-                }
-
-
-                let accountName =
-                    "Main Account";
-
-
-                // MAIN
-
-                if (
-                    selectedFundAccount ===
-                    "main"
-                ) {
-
-                    currentUser.balance +=
-                        amount;
-
-                }
-
-
-                // SCHOOL
-
-                else if (
-                    selectedFundAccount ===
-                    "school"
-                ) {
-
-                    currentUser.schoolSavings +=
-                        amount;
-
-                    accountName =
-                        "School Savings";
-
-                }
-
-
-                // HOLIDAY
-
-                else if (
-                    selectedFundAccount ===
-                    "holiday"
-                ) {
-
-                    currentUser.holidayBalance +=
-                        amount;
-
-                    accountName =
-                        "Holiday Plan";
-
-                }
-
-
-                // CUSTOM ACCOUNT
-
-                else if (
-                    selectedFundAccount ===
-                    "custom"
-                ) {
-
-                    const customAccount =
-                        currentUser.accounts.find(
-                            function (account) {
-
-                                return (
-                                    account.id ===
-                                    selectedCustomAccountId
-                                );
-
-                            }
-                        );
-
-
-                    if (!customAccount) {
+                    if (!holder) {
 
                         alert(
-                            "Account could not be found."
+                            "Please enter the card holder name."
                         );
 
                         return;
-
                     }
 
+                    if (
+                        !expiry ||
+                        !/^\d{2}\/\d{2}$/.test(expiry)
+                    ) {
 
-                    customAccount.balance +=
-                        amount;
+                        alert(
+                            "Enter the expiry date as MM/YY."
+                        );
 
+                        return;
+                    }
 
-                    accountName =
-                        customAccount.name;
+                    if (
+                        !securityCode ||
+                        !/^\d{3,4}$/.test(securityCode)
+                    ) {
 
+                        alert(
+                            "Please enter a valid CVC."
+                        );
+
+                        return;
+                    }
                 }
 
-
-                // INCOME
-
-                currentUser.income +=
-                    amount;
-
-
-                // TRANSACTION
-
-                currentUser.transactions.push({
-
-                    type:
-                        "deposit",
-
-                    amount:
-                        amount,
-
-                    description:
-                        "Fund " + accountName,
-
-                    date:
-                        new Date().toISOString(),
-
-                    status:
-                        "completed"
-
-                });
-
-
-                // SAVE
-
-                saveUsers();
-
-
-                updateBalances();
-
-                updateTransactions();
-
-
-                // SUCCESS
-
-                document.getElementById(
-                    "fundSuccessAmount"
-                ).textContent =
-                    formatMoney(
+                const success =
+                    fundAccount(
+                        selectedFundAccount,
                         amount
                     );
 
+                if (!success) return;
 
-                fundForm.reset();
+                closeModal(fundModal);
 
+                if (fundSuccessAmount) {
 
-                closeModal(
-                    fundModal
-                );
+                    fundSuccessAmount.textContent =
+                        `₦${formatMoney(amount)}`;
+                }
 
+                openModal(fundSuccessModal);
 
-                openModal(
-                    document.getElementById(
-                        "fundSuccessModal"
-                    )
-                );
+                /*
+                   Clear card information.
+                */
 
+                if (fundForm) {
+                    fundForm.reset();
+                }
+
+                selectedPaymentMethod =
+                    "directpay";
+
+                updatePaymentMethodUI();
             }
         );
-
     }
 
+    /* =====================================================
+       19. FUND BUTTONS
+    ===================================================== */
 
-    // =====================================================
-    // FUND SUCCESS
-    // =====================================================
+    if (mainFundButton) {
 
-    const fundSuccessModal =
-        document.getElementById(
-            "fundSuccessModal"
+        mainFundButton.addEventListener(
+            "click",
+            () => openFundModal("main")
         );
+    }
 
-    const fundSuccessBack =
-        document.getElementById(
-            "fundSuccessBack"
+    if (schoolFundButton) {
+
+        schoolFundButton.addEventListener(
+            "click",
+            () => openFundModal("school")
         );
+    }
 
+    if (holidayFundButton) {
+
+        holidayFundButton.addEventListener(
+            "click",
+            () => openFundModal("holiday")
+        );
+    }
+
+    /* =====================================================
+       20. CLOSE FUND MODAL
+    ===================================================== */
+
+    if (cancelFund) {
+
+        cancelFund.addEventListener(
+            "click",
+            () => closeModal(fundModal)
+        );
+    }
 
     if (fundSuccessBack) {
 
         fundSuccessBack.addEventListener(
             "click",
-            function () {
-
-                closeModal(
-                    fundSuccessModal
-                );
-
-            }
+            () => closeModal(fundSuccessModal)
         );
-
     }
 
+    /* =====================================================
+   21. WITHDRAWAL MODAL
+===================================================== */
 
-    // =====================================================
-    // WITHDRAW
-    // =====================================================
+function openWithdrawModal(accountType) {
 
-    const withdrawModal =
-        document.getElementById(
-            "withdrawModal"
-        );
+    selectedWithdrawAccount = accountType;
 
-    const withdrawForm =
-        document.getElementById(
-            "withdrawForm"
-        );
-
-    const cancelWithdraw =
-        document.getElementById(
-            "cancelWithdraw"
-        );
-
-
-    let selectedWithdrawAccount =
-        "main";
-
-    let selectedWithdrawCustomId =
-        null;
-
-
-    function openWithdrawModal(
-        accountType,
-        customAccountId = null
-    ) {
-
-        selectedWithdrawAccount =
-            accountType || "main";
-
-        selectedWithdrawCustomId =
-            customAccountId;
-
-
-        if (withdrawForm) {
-            withdrawForm.reset();
-        }
-
-
-        openModal(
-            withdrawModal
-        );
-
-    }
-
-
-    // =====================================================
-    // WITHDRAW BUTTONS
-    // =====================================================
-
-    const mainWithdrawButton =
-        document.getElementById(
-            "mainWithdrawButton"
-        );
-
-    const schoolWithdrawButton =
-        document.getElementById(
-            "schoolWithdrawButton"
-        );
-
-    const holidayWithdrawButton =
-        document.getElementById(
-            "holidayWithdrawButton"
-        );
-
-
-    if (mainWithdrawButton) {
-
-        mainWithdrawButton.addEventListener(
-            "click",
-            function () {
-
-                openWithdrawModal(
-                    "main"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (schoolWithdrawButton) {
-
-        schoolWithdrawButton.addEventListener(
-            "click",
-            function () {
-
-                openWithdrawModal(
-                    "school"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (holidayWithdrawButton) {
-
-        holidayWithdrawButton.addEventListener(
-            "click",
-            function () {
-
-                openWithdrawModal(
-                    "holiday"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (cancelWithdraw) {
-
-        cancelWithdraw.addEventListener(
-            "click",
-            function () {
-
-                closeModal(
-                    withdrawModal
-                );
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // WITHDRAW FORM
-    // =====================================================
+    /* Reset form */
 
     if (withdrawForm) {
+        withdrawForm.reset();
+    }
 
-        withdrawForm.addEventListener(
-            "submit",
-            function (event) {
+    /* Get account name */
 
-                event.preventDefault();
+    const accountName =
+        getWithdrawAccountName(accountType);
 
+    /* Get available balance */
 
-                const amount =
-                    Number(
-                        document.getElementById(
-                            "withdrawAmount"
-                        ).value
-                    );
+    const availableBalance =
+        getWithdrawBalance(accountType);
 
+    /*
+       Optional elements.
+       These will work if they exist
+       in your HTML.
+    */
 
-                const bank =
-                    document.getElementById(
-                        "withdrawBank"
-                    ).value;
+    const withdrawAccountTitle =
+        $("withdrawAccountTitle");
 
+    const withdrawAvailableBalance =
+        $("withdrawAvailableBalance");
 
-                const accountNumberInput =
-                    document.getElementById(
-                        "withdrawAccountNumber"
-                    ).value.trim();
+    const withdrawAccountType =
+        $("withdrawAccountType");
 
+    if (withdrawAccountTitle) {
 
-                const accountNameInput =
-                    document.getElementById(
-                        "withdrawAccountName"
-                    ).value.trim();
+        withdrawAccountTitle.textContent =
+            `Withdraw from ${accountName}`;
+    }
 
+    if (withdrawAvailableBalance) {
 
-                if (!amount || amount <= 0) {
+        withdrawAvailableBalance.textContent =
+            `Available balance: ₦${formatMoney(
+                availableBalance
+            )}`;
+    }
 
-                    alert(
-                        "Please enter a valid amount."
-                    );
+    if (withdrawAccountType) {
 
-                    return;
+        withdrawAccountType.value =
+            accountType;
+    }
 
-                }
+    /* Show modal */
 
+    openModal(withdrawModal);
+}
 
-                if (!accountNumberInput) {
 
-                    alert(
-                        "Please enter the account number."
-                    );
+/* =====================================================
+   22. GET WITHDRAWAL BALANCE
+===================================================== */
 
-                    return;
+function getWithdrawBalance(accountType) {
 
-                }
+    /* Main account */
 
+    if (accountType === "main") {
 
-                if (!accountNameInput) {
-
-                    alert(
-                        "Please enter the account name."
-                    );
-
-                    return;
-
-                }
-
-
-                if (!bank) {
-
-                    alert(
-                        "Please select a bank."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // GET BALANCE
-                // =========================================
-
-                let availableBalance =
-                    currentUser.balance;
-
-
-                let accountName =
-                    "Main Account";
-
-
-                if (
-                    selectedWithdrawAccount ===
-                    "school"
-                ) {
-
-                    availableBalance =
-                        currentUser.schoolSavings;
-
-                    accountName =
-                        "School Savings";
-
-                }
-
-
-                else if (
-                    selectedWithdrawAccount ===
-                    "holiday"
-                ) {
-
-                    availableBalance =
-                        currentUser.holidayBalance;
-
-                    accountName =
-                        "Holiday Plan";
-
-                }
-
-
-                else if (
-                    selectedWithdrawAccount ===
-                    "custom"
-                ) {
-
-                    const customAccount =
-                        currentUser.accounts.find(
-                            function (account) {
-
-                                return (
-                                    account.id ===
-                                    selectedWithdrawCustomId
-                                );
-
-                            }
-                        );
-
-
-                    if (!customAccount) {
-
-                        alert(
-                            "Account could not be found."
-                        );
-
-                        return;
-
-                    }
-
-
-                    availableBalance =
-                        customAccount.balance;
-
-                    accountName =
-                        customAccount.name;
-
-                }
-
-
-                // =========================================
-                // CHECK BALANCE
-                // =========================================
-
-                if (amount > availableBalance) {
-
-                    alert(
-                        "Insufficient balance."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // DEDUCT
-                // =========================================
-
-                if (
-                    selectedWithdrawAccount ===
-                    "main"
-                ) {
-
-                    currentUser.balance -=
-                        amount;
-
-                }
-
-
-                else if (
-                    selectedWithdrawAccount ===
-                    "school"
-                ) {
-
-                    currentUser.schoolSavings -=
-                        amount;
-
-                }
-
-
-                else if (
-                    selectedWithdrawAccount ===
-                    "holiday"
-                ) {
-
-                    currentUser.holidayBalance -=
-                        amount;
-
-                }
-
-
-                else if (
-                    selectedWithdrawAccount ===
-                    "custom"
-                ) {
-
-                    const customAccount =
-                        currentUser.accounts.find(
-                            function (account) {
-
-                                return (
-                                    account.id ===
-                                    selectedWithdrawCustomId
-                                );
-
-                            }
-                        );
-
-
-                    customAccount.balance -=
-                        amount;
-
-                }
-
-
-                // =========================================
-                // EXPENSE
-                // =========================================
-
-                currentUser.expense +=
-                    amount;
-
-
-                // =========================================
-                // TRANSACTION
-                // =========================================
-
-                currentUser.transactions.push({
-
-                    type:
-                        "withdrawal",
-
-                    amount:
-                        amount,
-
-                    description:
-                        "Withdrawal from " +
-                        accountName,
-
-                    date:
-                        new Date().toISOString(),
-
-                    status:
-                        "completed"
-
-                });
-
-
-                // SAVE
-
-                saveUsers();
-
-
-                updateBalances();
-
-                updateTransactions();
-
-
-                // SUCCESS
-
-                document.getElementById(
-                    "withdrawSuccessAmount"
-                ).textContent =
-                    formatMoney(
-                        amount
-                    );
-
-
-                withdrawForm.reset();
-
-
-                closeModal(
-                    withdrawModal
-                );
-
-
-                openModal(
-                    document.getElementById(
-                        "withdrawSuccessModal"
-                    )
-                );
-
-            }
-        );
-
+        return Number(
+            currentUser.balance
+        ) || 0;
     }
 
 
-    // =====================================================
-    // WITHDRAW SUCCESS
-    // =====================================================
+    /* School savings */
 
-    const withdrawSuccessModal =
-        document.getElementById(
-            "withdrawSuccessModal"
-        );
+    if (accountType === "school") {
 
-    const withdrawSuccessBack =
-        document.getElementById(
-            "withdrawSuccessBack"
-        );
-
-
-    if (withdrawSuccessBack) {
-
-        withdrawSuccessBack.addEventListener(
-            "click",
-            function () {
-
-                closeModal(
-                    withdrawSuccessModal
-                );
-
-            }
-        );
-
+        return Number(
+            currentUser.schoolSavings
+        ) || 0;
     }
 
 
-    // =====================================================
-    // CUSTOM ACCOUNT CARDS
-    // =====================================================
+    /* Holiday savings */
 
-    function renderCustomAccounts() {
+    if (accountType === "holiday") {
 
-        if (!accountsGrid) {
-            return;
+        return Number(
+            currentUser.holidayBalance
+        ) || 0;
+    }
+
+
+    /* Custom account */
+
+    if (
+        accountType.startsWith("custom:")
+    ) {
+
+        const accountId =
+            accountType.replace(
+                "custom:",
+                ""
+            );
+
+        const account =
+            currentUser.accounts.find(
+                item =>
+                    item.id === accountId
+            );
+
+        if (!account) {
+            return 0;
         }
 
+        return Number(
+            account.balance
+        ) || 0;
+    }
 
-        // Remove previously rendered custom cards
 
-        accountsGrid
-            .querySelectorAll(
-                ".custom-account-card"
+    return 0;
+}
+
+
+/* =====================================================
+   23. GET WITHDRAWAL ACCOUNT NAME
+===================================================== */
+
+function getWithdrawAccountName(accountType) {
+
+    if (accountType === "main") {
+
+        return "Main Account";
+    }
+
+
+    if (accountType === "school") {
+
+        return "School Savings";
+    }
+
+
+    if (accountType === "holiday") {
+
+        return "Holiday Savings";
+    }
+
+
+    if (
+        accountType.startsWith("custom:")
+    ) {
+
+        const accountId =
+            accountType.replace(
+                "custom:",
+                ""
+            );
+
+        const account =
+            currentUser.accounts.find(
+                item =>
+                    item.id === accountId
+            );
+
+        return account
+            ? account.name
+            : "Account";
+    }
+
+
+    return "Account";
+}
+
+
+/* =====================================================
+   24. PROCESS WITHDRAWAL
+===================================================== */
+
+function withdrawMoney(
+    accountType,
+    amount,
+    bankName,
+    bankAccountNumber,
+    bankAccountName
+) {
+
+    amount = Number(amount);
+
+    /* Validate amount */
+
+    if (
+        !Number.isFinite(amount) ||
+        amount <= 0
+    ) {
+
+        alert(
+            "Please enter a valid withdrawal amount."
+        );
+
+        return false;
+    }
+
+
+    /* Get available balance */
+
+    const availableBalance =
+        getWithdrawBalance(
+            accountType
+        );
+
+
+    /* Check balance */
+
+    if (
+        amount >
+        availableBalance
+    ) {
+
+        alert(
+            `Insufficient balance.\n\nAvailable balance: ₦${formatMoney(
+                availableBalance
+            )}`
+        );
+
+        return false;
+    }
+
+
+    /* Account name */
+
+    const accountName =
+        getWithdrawAccountName(
+            accountType
+        );
+
+
+    let accountId = "";
+
+
+    /* =================================================
+       MAIN ACCOUNT
+    ================================================= */
+
+    if (
+        accountType === "main"
+    ) {
+
+        currentUser.balance =
+            Number(
+                currentUser.balance
+            ) || 0;
+
+        currentUser.balance -=
+            amount;
+    }
+
+
+    /* =================================================
+       SCHOOL SAVINGS
+    ================================================= */
+
+    else if (
+        accountType === "school"
+    ) {
+
+        currentUser.schoolSavings =
+            Number(
+                currentUser.schoolSavings
+            ) || 0;
+
+        currentUser.schoolSavings -=
+            amount;
+    }
+
+
+    /* =================================================
+       HOLIDAY SAVINGS
+    ================================================= */
+
+    else if (
+        accountType === "holiday"
+    ) {
+
+        currentUser.holidayBalance =
+            Number(
+                currentUser.holidayBalance
+            ) || 0;
+
+        currentUser.holidayBalance -=
+            amount;
+    }
+
+
+    /* =================================================
+       CUSTOM ACCOUNT
+    ================================================= */
+
+    else if (
+        accountType.startsWith("custom:")
+    ) {
+
+        accountId =
+            accountType.replace(
+                "custom:",
+                ""
+            );
+
+        const account =
+            currentUser.accounts.find(
+                item =>
+                    item.id === accountId
+            );
+
+        if (!account) {
+
+            alert(
+                "Account could not be found."
+            );
+
+            return false;
+        }
+
+        account.balance =
+            Number(
+                account.balance
+            ) || 0;
+
+        account.balance -=
+            amount;
+    }
+
+
+    else {
+
+        alert(
+            "Invalid account."
+        );
+
+        return false;
+    }
+
+
+    /* =================================================
+       UPDATE EXPENSE
+    ================================================= */
+
+    currentUser.expense =
+        Number(
+            currentUser.expense
+        ) || 0;
+
+    currentUser.expense +=
+        amount;
+
+
+    /* =================================================
+       CREATE WITHDRAWAL TRANSACTION
+    ================================================= */
+
+    const transaction = {
+
+        id:
+            Date.now().toString() +
+            Math.random()
+                .toString(36)
+                .substring(2, 8),
+
+        type:
+            "expense",
+
+        transactionType:
+            "withdrawal",
+
+        direction:
+            "debit",
+
+        category:
+            "Withdrawal",
+
+        title:
+            "Withdrawal",
+
+        description:
+            `Withdrawal from ${accountName} to ${bankName}`,
+
+        account:
+            accountName,
+
+        accountId:
+            accountId,
+
+        amount:
+            amount,
+
+        bank:
+            bankName,
+
+        accountNumber:
+            bankAccountNumber,
+
+        accountName:
+            bankAccountName,
+
+        status:
+            "completed",
+
+        date:
+            new Date().toISOString(),
+
+        balanceAfter:
+            getWithdrawBalance(
+                accountType
             )
-            .forEach(
-                function (card) {
-                    card.remove();
-                }
+    };
+
+
+    /* Add newest transaction first */
+
+    currentUser.transactions.unshift(
+        transaction
+    );
+
+
+    /* Save everything */
+
+    saveUser();
+
+
+    /* Update page */
+
+    renderBalances();
+
+    renderTransactions();
+
+    renderCustomAccounts();
+
+
+    return true;
+}
+
+
+/* =====================================================
+   25. WITHDRAW FORM SUBMIT
+===================================================== */
+
+if (withdrawForm) {
+
+    withdrawForm.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+
+            /* Amount */
+
+            const amount =
+                Number(
+                    withdrawAmount?.value
+                );
+
+
+            /* Bank account number */
+
+            const bankAccountNumber =
+                withdrawAccountNumber
+                    ?.value
+                    .trim();
+
+
+            /* Account holder */
+
+            const bankAccountName =
+                withdrawAccountName
+                    ?.value
+                    .trim();
+
+
+            /* Bank */
+
+            const bankName =
+                withdrawBank
+                    ?.value
+                    .trim();
+
+
+            /* =================================================
+               VALIDATE AMOUNT
+            ================================================= */
+
+            if (
+                !Number.isFinite(amount) ||
+                amount <= 0
+            ) {
+
+                alert(
+                    "Please enter a valid withdrawal amount."
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               VALIDATE ACCOUNT NUMBER
+            ================================================= */
+
+            if (!bankAccountNumber) {
+
+                alert(
+                    "Please enter the bank account number."
+                );
+
+                return;
+            }
+
+
+            /* Optional 10-digit Nigerian account validation */
+
+            if (
+                !/^\d{10}$/.test(
+                    bankAccountNumber
+                )
+            ) {
+
+                alert(
+                    "Please enter a valid 10-digit bank account number."
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               VALIDATE ACCOUNT NAME
+            ================================================= */
+
+            if (!bankAccountName) {
+
+                alert(
+                    "Please enter the account name."
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               VALIDATE BANK
+            ================================================= */
+
+            if (!bankName) {
+
+                alert(
+                    "Please enter the bank name."
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               CHECK AVAILABLE BALANCE
+            ================================================= */
+
+            const availableBalance =
+                getWithdrawBalance(
+                    selectedWithdrawAccount
+                );
+
+
+            if (
+                amount >
+                availableBalance
+            ) {
+
+                alert(
+                    `Insufficient balance.\n\nAvailable balance: ₦${formatMoney(
+                        availableBalance
+                    )}`
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               PROCESS
+            ================================================= */
+
+            const success =
+                withdrawMoney(
+                    selectedWithdrawAccount,
+                    amount,
+                    bankName,
+                    bankAccountNumber,
+                    bankAccountName
+                );
+
+
+            if (!success) {
+                return;
+            }
+
+
+            /* =================================================
+               CLOSE WITHDRAWAL MODAL
+            ================================================= */
+
+            closeModal(
+                withdrawModal
             );
 
 
+            /* =================================================
+               SUCCESS AMOUNT
+            ================================================= */
+
+            if (
+                withdrawSuccessAmount
+            ) {
+
+                withdrawSuccessAmount.textContent =
+                    `₦${formatMoney(
+                        amount
+                    )}`;
+            }
+
+
+            /* =================================================
+               SHOW SUCCESS MODAL
+            ================================================= */
+
+            openModal(
+                withdrawSuccessModal
+            );
+
+
+            /* Reset form */
+
+            withdrawForm.reset();
+        }
+    );
+}
+
+
+/* =====================================================
+   26. WITHDRAW BUTTONS
+===================================================== */
+
+if (mainWithdrawButton) {
+
+    mainWithdrawButton.addEventListener(
+        "click",
+        () => {
+
+            openWithdrawModal(
+                "main"
+            );
+
+        }
+    );
+}
+
+
+if (schoolWithdrawButton) {
+
+    schoolWithdrawButton.addEventListener(
+        "click",
+        () => {
+
+            openWithdrawModal(
+                "school"
+            );
+
+        }
+    );
+}
+
+
+if (holidayWithdrawButton) {
+
+    holidayWithdrawButton.addEventListener(
+        "click",
+        () => {
+
+            openWithdrawModal(
+                "holiday"
+            );
+
+        }
+    );
+}
+
+
+/* =====================================================
+   27. CLOSE WITHDRAWAL MODAL
+===================================================== */
+
+if (cancelWithdraw) {
+
+    cancelWithdraw.addEventListener(
+        "click",
+        () => {
+
+            closeModal(
+                withdrawModal
+            );
+
+        }
+    );
+}
+
+
+/* =====================================================
+   28. WITHDRAWAL SUCCESS MODAL
+===================================================== */
+
+if (withdrawSuccessBack) {
+
+    withdrawSuccessBack.addEventListener(
+        "click",
+        () => {
+
+            closeModal(
+                withdrawSuccessModal
+            );
+
+        }
+    );
+}
+    /* =====================================================
+       28. RENDER TRANSACTIONS
+    ===================================================== */
+
+    function renderTransactions() {
+
+        if (!transactionList) return;
+
+        transactionList.innerHTML = "";
+
+        const transactions =
+            currentUser.transactions || [];
+
+        if (transactions.length === 0) {
+
+            if (emptyTransactions) {
+                emptyTransactions.classList.remove(
+                    "hidden"
+                );
+            }
+
+            return;
+        }
+
+        if (emptyTransactions) {
+            emptyTransactions.classList.add(
+                "hidden"
+            );
+        }
+
+        transactions
+            .slice(0, 10)
+            .forEach(transaction => {
+
+                const isDeposit =
+                    transaction.type === "income" ||
+                    transaction.transactionType ===
+                        "deposit" ||
+                    transaction.direction ===
+                        "credit";
+
+                const amount =
+                    Number(transaction.amount) || 0;
+
+                const date =
+                    new Date(
+                        transaction.date
+                    );
+
+                const formattedDate =
+                    date.toLocaleDateString(
+                        "en-NG",
+                        {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric"
+                        }
+                    );
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+                row.className =
+                    "flex items-center justify-between gap-4 py-4 border-b border-gray-100";
+
+                row.innerHTML = `
+
+                    <div class="flex items-center gap-3 min-w-0">
+
+                        <div
+                            class="
+                                w-10 h-10
+                                rounded-full
+                                flex items-center justify-center
+                                shrink-0
+                                ${
+                                    isDeposit
+                                        ? "bg-green-100 text-green-600"
+                                        : "bg-red-100 text-red-600"
+                                }
+                            "
+                        >
+
+                            <i class="
+                                fa-solid
+                                ${
+                                    isDeposit
+                                        ? "fa-arrow-down"
+                                        : "fa-arrow-up"
+                                }
+                            "></i>
+
+                        </div>
+
+                        <div class="min-w-0">
+
+                            <p class="font-semibold text-gray-800 truncate">
+                                ${
+                                    transaction.title ||
+                                    (
+                                        isDeposit
+                                            ? "Deposit"
+                                            : "Withdrawal"
+                                    )
+                                }
+                            </p>
+
+                            <p class="text-sm text-gray-500 truncate">
+                                ${
+                                    transaction.description ||
+                                    transaction.account ||
+                                    ""
+                                }
+                            </p>
+
+                            <p class="text-xs text-gray-400">
+                                ${formattedDate}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-right shrink-0">
+
+                        <p class="
+                            font-semibold
+                            ${
+                                isDeposit
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                            }
+                        ">
+
+                            ${
+                                isDeposit
+                                    ? "+"
+                                    : "-"
+                            }₦${formatMoney(amount)}
+
+                        </p>
+
+                        <p class="text-xs text-gray-400">
+                            ${
+                                transaction.status ||
+                                "completed"
+                            }
+                        </p>
+
+                    </div>
+                `;
+
+                transactionList.appendChild(row);
+            });
+    }
+
+    /* =====================================================
+       29. RENDER CUSTOM ACCOUNTS
+    ===================================================== */
+
+    function renderCustomAccounts() {
+
+        if (!accountsGrid) return;
+
+        /*
+           Remove previously generated custom cards.
+        */
+
+        accountsGrid
+            .querySelectorAll(
+                ".dynamic-custom-account"
+            )
+            .forEach(card => card.remove());
+
         currentUser.accounts.forEach(
-            function (account) {
+            account => {
 
                 const card =
                     document.createElement(
                         "div"
                     );
 
-
                 card.className =
-                    "custom-account-card rounded-xl bg-[#d4f3e8] p-5";
+                    "dynamic-custom-account bg-white rounded-2xl border border-gray-100 shadow-sm p-5";
 
+                account.balance =
+                    Number(account.balance) || 0;
 
                 card.innerHTML = `
 
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-start justify-between gap-3">
 
-                        <p class="text-xs font-medium text-[#482080]">
-                            ${escapeHTML(account.name)}
-                        </p>
+                        <div>
 
-                        <i class="fa-solid fa-wallet text-gray-500"></i>
+                            <div
+                                class="
+                                    w-11 h-11
+                                    rounded-xl
+                                    bg-blue-100
+                                    text-blue-600
+                                    flex items-center justify-center
+                                    mb-4
+                                "
+                            >
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+
+                            <h3 class="font-semibold text-gray-800">
+                                ${escapeHTML(account.name)}
+                            </h3>
+
+                            <p class="text-sm text-gray-500 mt-1">
+                                ${
+                                    escapeHTML(
+                                        account.description ||
+                                        "Personal account"
+                                    )
+                                }
+                            </p>
+
+                        </div>
 
                     </div>
 
+                    <div class="mt-5">
 
-                    <p
-                        class="custom-account-balance mt-2 text-xl font-bold"
-                        data-account-id="${account.id}"
-                    >
-                        ${formatMoney(account.balance)}
-                    </p>
+                        <p class="text-xs text-gray-500">
+                            Balance
+                        </p>
 
+                        <p class="text-xl font-bold text-gray-900 mt-1">
+                            ₦${formatMoney(account.balance)}
+                        </p>
 
-                    <p class="mt-1 truncate text-xs text-gray-500">
-                        ${escapeHTML(account.description || "Custom account")}
-                    </p>
+                    </div>
 
-
-                    <div class="mt-5 flex gap-3">
+                    <div class="flex gap-2 mt-5">
 
                         <button
                             type="button"
-                            class="custom-fund-button rounded-md bg-[#20b985] px-5 py-2 text-xs font-semibold text-white"
+                            class="
+                                flex-1
+                                rounded-xl
+                                bg-blue-600
+                                hover:bg-blue-700
+                                text-white
+                                py-2.5
+                                text-sm
+                                font-medium
+                                fund-custom-account
+                            "
                             data-account-id="${account.id}"
                         >
                             Fund
                         </button>
 
-
                         <button
                             type="button"
-                            class="custom-withdraw-button rounded-md bg-gray-300 px-5 py-2 text-xs font-semibold text-gray-700"
+                            class="
+                                flex-1
+                                rounded-xl
+                                border
+                                border-gray-200
+                                hover:bg-gray-50
+                                text-gray-700
+                                py-2.5
+                                text-sm
+                                font-medium
+                                withdraw-custom-account
+                            "
                             data-account-id="${account.id}"
                         >
                             Withdraw
                         </button>
 
                     </div>
-
                 `;
 
-
-                accountsGrid.insertBefore(
-                    card,
-                    addAccountButton
-                );
-
-
-                const fundButton =
-                    card.querySelector(
-                        ".custom-fund-button"
-                    );
-
-
-                const withdrawButton =
-                    card.querySelector(
-                        ".custom-withdraw-button"
-                    );
-
-
-                if (fundButton) {
-
-                    fundButton.addEventListener(
-                        "click",
-                        function () {
-
-                            openFundModal(
-                                "custom",
-                                account.id
-                            );
-
-                        }
-                    );
-
-                }
-
-
-                if (withdrawButton) {
-
-                    withdrawButton.addEventListener(
-                        "click",
-                        function () {
-
-                            openWithdrawModal(
-                                "custom",
-                                account.id
-                            );
-
-                        }
-                    );
-
-                }
-
+                accountsGrid.appendChild(card);
             }
         );
 
-    }
+        /*
+           Custom FUND buttons
+        */
 
+        accountsGrid
+            .querySelectorAll(
+                ".fund-custom-account"
+            )
+            .forEach(button => {
 
-    // =====================================================
-    // UPDATE CUSTOM ACCOUNT BALANCES
-    // =====================================================
+                button.addEventListener(
+                    "click",
+                    () => {
 
-    function updateCustomAccountCards() {
+                        const id =
+                            button.dataset.accountId;
 
-        currentUser.accounts.forEach(
-            function (account) {
-
-                const balanceElement =
-                    document.querySelector(
-                        `.custom-account-balance[data-account-id="${account.id}"]`
-                    );
-
-
-                if (balanceElement) {
-
-                    balanceElement.textContent =
-                        formatMoney(
-                            account.balance
+                        openFundModal(
+                            `custom:${id}`
                         );
+                    }
+                );
+            });
 
-                }
+        /*
+           Custom WITHDRAW buttons
+        */
 
-            }
-        );
+        accountsGrid
+            .querySelectorAll(
+                ".withdraw-custom-account"
+            )
+            .forEach(button => {
 
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const id =
+                            button.dataset.accountId;
+
+                        openWithdrawModal(
+                            `custom:${id}`
+                        );
+                    }
+                );
+            });
     }
 
-
-    // =====================================================
-    // ESCAPE HTML
-    // =====================================================
+    /* =====================================================
+       30. ESCAPE HTML
+    ===================================================== */
 
     function escapeHTML(value) {
 
@@ -1949,609 +1919,211 @@ document.addEventListener("DOMContentLoaded", function () {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
-
     }
 
+    /* =====================================================
+       31. ADD ACCOUNT MODAL
+    ===================================================== */
 
-    // =====================================================
-    // ACCOUNT VISIBILITY
-    // =====================================================
+    if (addAccountButton) {
 
-    const visibilityButtons =
-        document.querySelectorAll(
-            ".account-visibility"
-        );
+        addAccountButton.addEventListener(
+            "click",
+            () => {
 
-
-    visibilityButtons.forEach(
-        function (button) {
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    const targetId =
-                        button.dataset.target;
-
-
-                    const target =
-                        document.getElementById(
-                            targetId
-                        );
-
-
-                    const icon =
-                        button.querySelector(
-                            "i"
-                        );
-
-
-                    if (!target) {
-                        return;
-                    }
-
-
-                    target.classList.toggle(
-                        "blur-sm"
-                    );
-
-
-                    if (
-                        target.classList.contains(
-                            "blur-sm"
-                        )
-                    ) {
-
-                        icon.className =
-                            "fa-regular fa-eye";
-
-                    } else {
-
-                        icon.className =
-                            "fa-regular fa-eye-slash";
-
-                    }
-
+                if (addAccountForm) {
+                    addAccountForm.reset();
                 }
-            );
 
-        }
-    );
-
-
-    // =====================================================
-    // TRANSACTIONS
-    // =====================================================
-
-    function updateTransactions() {
-
-        if (!transactionList) {
-            return;
-        }
-
-
-        transactionList.innerHTML = "";
-
-
-        const transactions =
-            Array.isArray(
-                currentUser.transactions
-            )
-                ? [...currentUser.transactions]
-                : [];
-
-
-        if (transactions.length === 0) {
-
-            if (emptyTransactions) {
-
-                emptyTransactions.classList.remove(
-                    "hidden"
-                );
-
+                openModal(addAccountModal);
             }
+        );
+    }
 
-            return;
+    if (cancelAddAccount) {
 
-        }
+        cancelAddAccount.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    addAccountModal
+                )
+        );
+    }
 
+    /* =====================================================
+       32. CREATE ACCOUNT
+    ===================================================== */
 
-        if (emptyTransactions) {
+    if (addAccountForm) {
 
-            emptyTransactions.classList.add(
-                "hidden"
-            );
+        addAccountForm.addEventListener(
+            "submit",
+            event => {
 
-        }
-
-
-        transactions.reverse();
-
-
-        const transactionWrapper =
-            document.createElement(
-                "div"
-            );
-
-
-        transactionWrapper.className =
-            "min-w-[850px]";
-
-
-        transactions.forEach(
-            function (transaction) {
-
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
+                event.preventDefault();
 
                 /*
-                 * IMPORTANT:
-                 *
-                 * There are now exactly 6 columns:
-                 *
-                 * 1. icon
-                 * 2. name
-                 * 3. description
-                 * 4. date
-                 * 5. amount
-                 * 6. status
-                 */
-
-                row.className =
-                    "grid grid-cols-[48px_1.3fr_1.2fr_1fr_1fr_120px] items-center gap-4 border-b border-gray-200 py-4 text-xs";
-
-
-                // ICON
-
-                const icon =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                icon.className =
-                    "flex h-8 w-8 items-center justify-center rounded-full text-white";
-
-
-                const type =
-                    transaction.type ||
-                    "deposit";
-
-
-                if (
-                    type ===
-                    "withdrawal"
-                ) {
-
-                    icon.classList.add(
-                        "bg-red-500"
-                    );
-
-
-                    icon.innerHTML =
-                        '<i class="fa-solid fa-minus"></i>';
-
-                } else {
-
-                    icon.classList.add(
-                        "bg-[#20b985]"
-                    );
-
-
-                    icon.innerHTML =
-                        '<i class="fa-solid fa-plus"></i>';
-
-                }
-
-
-                // NAME
+                   IMPORTANT:
+                   Your HTML uses IDs rather than
+                   name="" attributes, so we read
+                   directly from the inputs.
+                */
 
                 const name =
-                    document.createElement(
-                        "p"
-                    );
-
-
-                name.className =
-                    "truncate text-gray-500";
-
-
-                name.textContent =
-                    currentUser.name ||
-                    "User";
-
-
-                // DESCRIPTION
+                    accountNameInput?.value.trim();
 
                 const description =
-                    document.createElement(
-                        "p"
+                    accountDescriptionInput?.value.trim();
+
+                if (!name) {
+
+                    alert(
+                        "Please enter an account name."
                     );
 
-
-                description.className =
-                    "truncate text-gray-500";
-
-
-                description.textContent =
-                    transaction.description ||
-                    (
-                        type === "withdrawal"
-                            ? "Withdrawal"
-                            : "Deposit"
-                    );
-
-
-                // DATE
-
-                const date =
-                    document.createElement(
-                        "p"
-                    );
-
-
-                date.className =
-                    "text-gray-400";
-
-
-                date.textContent =
-                    formatTransactionDate(
-                        transaction.date
-                    );
-
-
-                // AMOUNT
-
-                const amount =
-                    document.createElement(
-                        "p"
-                    );
-
-
-                amount.className =
-                    "font-semibold";
-
-
-                if (
-                    type ===
-                    "withdrawal"
-                ) {
-
-                    amount.classList.add(
-                        "text-red-500"
-                    );
-
-
-                    amount.textContent =
-                        "- " +
-                        formatMoney(
-                            transaction.amount
-                        );
-
-                } else {
-
-                    amount.classList.add(
-                        "text-[#20b985]"
-                    );
-
-
-                    amount.textContent =
-                        "+ " +
-                        formatMoney(
-                            transaction.amount
-                        );
-
+                    return;
                 }
 
+                const account = {
 
-                // STATUS
+                    id:
+                        "account_" +
+                        Date.now(),
 
-                const status =
-                    document.createElement(
-                        "span"
-                    );
+                    name,
 
+                    description:
+                        description ||
+                        "Personal savings account",
 
-                status.className =
-                    "rounded-md px-3 py-2 text-center font-medium";
+                    balance: 0,
 
+                    createdAt:
+                        new Date().toISOString()
+                };
 
-                const transactionStatus =
-                    transaction.status ||
-                    "completed";
-
-
-                if (
-                    transactionStatus ===
-                    "completed"
-                ) {
-
-                    status.classList.add(
-                        "bg-[#20b985]",
-                        "text-white"
-                    );
-
-
-                    status.textContent =
-                        "Completed";
-
-                }
-
-                else if (
-                    transactionStatus ===
-                    "pending"
-                ) {
-
-                    status.classList.add(
-                        "bg-gray-300",
-                        "text-gray-700"
-                    );
-
-
-                    status.textContent =
-                        "Pending";
-
-                }
-
-                else {
-
-                    status.classList.add(
-                        "bg-red-500",
-                        "text-white"
-                    );
-
-
-                    status.textContent =
-                        "Canceled";
-
-                }
-
-
-                row.appendChild(icon);
-
-                row.appendChild(name);
-
-                row.appendChild(description);
-
-                row.appendChild(date);
-
-                row.appendChild(amount);
-
-                row.appendChild(status);
-
-
-                transactionWrapper.appendChild(
-                    row
+                currentUser.accounts.push(
+                    account
                 );
 
+                saveUser();
+
+                renderCustomAccounts();
+
+                closeModal(addAccountModal);
+
+                if (createdAccountName) {
+
+                    createdAccountName.textContent =
+                        account.name;
+                }
+
+                openModal(
+                    accountCreatedModal
+                );
+
+                addAccountForm.reset();
             }
         );
-
-
-        transactionList.appendChild(
-            transactionWrapper
-        );
-
     }
 
+    /* =====================================================
+       33. ACCOUNT CREATED MODAL
+    ===================================================== */
 
-    // =====================================================
-    // TRANSACTION DATE
-    // =====================================================
+    if (goBackCreated) {
 
-    function formatTransactionDate(date) {
+        goBackCreated.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    accountCreatedModal
+                )
+        );
+    }
 
-        if (!date) {
-            return "Recent";
-        }
+    if (fundCreatedAccount) {
 
+        fundCreatedAccount.addEventListener(
+            "click",
+            () => {
 
-        const transactionDate =
-            new Date(date);
+                closeModal(
+                    accountCreatedModal
+                );
 
+                const lastAccount =
+                    currentUser.accounts[
+                        currentUser.accounts.length - 1
+                    ];
 
-        if (
-            Number.isNaN(
-                transactionDate.getTime()
-            )
-        ) {
+                if (lastAccount) {
 
-            return String(date);
-
-        }
-
-
-        return transactionDate.toLocaleDateString(
-            "en-NG",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
+                    openFundModal(
+                        `custom:${lastAccount.id}`
+                    );
+                }
             }
         );
-
     }
 
-
-    // =====================================================
-    // VIEW ALL TRANSACTIONS
-    // =====================================================
-
-    const viewAllTransactions =
-        document.getElementById(
-            "viewAllTransactions"
-        );
-
+    /* =====================================================
+       34. VIEW ALL TRANSACTIONS
+    ===================================================== */
 
     if (viewAllTransactions) {
 
         viewAllTransactions.addEventListener(
             "click",
-            function () {
+            event => {
+
+                /*
+                   If your overview/transactions page
+                   exists, change this path if necessary.
+                */
+
+                event.preventDefault();
 
                 window.location.href =
                     "./transactions.html";
-
             }
         );
-
     }
 
-
-    // =====================================================
-    // SEARCH
-    // =====================================================
-
-    const searchInput =
-        document.getElementById(
-            "searchInput"
-        );
-
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            "input",
-            function () {
-
-                const searchTerm =
-                    searchInput.value
-                        .trim()
-                        .toLowerCase();
-
-
-                const rows =
-                    transactionList.querySelectorAll(
-                        "min-w-\\[850px\\] > div"
-                    );
-
-
-                if (!searchTerm) {
-
-                    updateTransactions();
-
-                    return;
-
-                }
-
-
-                transactionList
-                    .querySelectorAll(
-                        ".grid"
-                    )
-                    .forEach(
-                        function (row) {
-
-                            const text =
-                                row.textContent
-                                    .toLowerCase();
-
-
-                            if (
-                                text.includes(
-                                    searchTerm
-                                )
-                            ) {
-
-                                row.classList.remove(
-                                    "hidden"
-                                );
-
-                            } else {
-
-                                row.classList.add(
-                                    "hidden"
-                                );
-
-                            }
-
-                        }
-                    );
-
-            }
-        );
-
-    }
-
-
-    // =====================================================
-    // MOBILE SIDEBAR
-    // =====================================================
-
-    const sidebar =
-        document.getElementById(
-            "sidebar"
-        );
-
-    const menuButton =
-        document.getElementById(
-            "menuButton"
-        );
-
-    const sidebarOverlay =
-        document.getElementById(
-            "sidebarOverlay"
-        );
-
+    /* =====================================================
+       35. SIDEBAR
+    ===================================================== */
 
     function openSidebar() {
 
-        if (!sidebar) {
-            return;
+        if (sidebar) {
+            sidebar.classList.remove(
+                "-translate-x-full"
+            );
         }
 
-
-        sidebar.classList.remove(
-            "-translate-x-full"
-        );
-
-
-        sidebar.classList.add(
-            "translate-x-0"
-        );
-
-
         if (sidebarOverlay) {
-
             sidebarOverlay.classList.remove(
                 "hidden"
             );
-
         }
-
     }
-
 
     function closeSidebar() {
 
-        if (!sidebar) {
-            return;
+        if (sidebar) {
+            sidebar.classList.add(
+                "-translate-x-full"
+            );
         }
 
-
-        sidebar.classList.add(
-            "-translate-x-full"
-        );
-
-
-        sidebar.classList.remove(
-            "translate-x-0"
-        );
-
-
         if (sidebarOverlay) {
-
             sidebarOverlay.classList.add(
                 "hidden"
             );
-
         }
-
     }
-
 
     if (menuButton) {
 
@@ -2559,9 +2131,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "click",
             openSidebar
         );
-
     }
-
 
     if (sidebarOverlay) {
 
@@ -2569,166 +2139,101 @@ document.addEventListener("DOMContentLoaded", function () {
             "click",
             closeSidebar
         );
-
     }
 
-
-    // =====================================================
-    // LOGOUT
-    // =====================================================
-
-    const logoutButton =
-        document.getElementById(
-            "logoutButton"
-        );
-
-    const logoutModal =
-        document.getElementById(
-            "logoutModal"
-        );
-
-    const cancelLogout =
-        document.getElementById(
-            "cancelLogout"
-        );
-
-    const confirmLogout =
-        document.getElementById(
-            "confirmLogout"
-        );
-
+    /* =====================================================
+       36. LOGOUT
+    ===================================================== */
 
     if (logoutButton) {
 
         logoutButton.addEventListener(
             "click",
-            function () {
-
-                openModal(
-                    logoutModal
-                );
-
-            }
+            () => openModal(logoutModal)
         );
-
     }
-
 
     if (cancelLogout) {
 
         cancelLogout.addEventListener(
             "click",
-            function () {
-
-                closeModal(
-                    logoutModal
-                );
-
-            }
+            () => closeModal(logoutModal)
         );
-
     }
-
 
     if (confirmLogout) {
 
         confirmLogout.addEventListener(
             "click",
-            function () {
+            () => {
 
                 sessionStorage.removeItem(
-                    CURRENT_USER_KEY
+                    "currentUser"
                 );
 
+                localStorage.removeItem(
+                    "currentUser"
+                );
 
                 window.location.href =
                     "./login.html";
-
             }
         );
-
     }
 
+    /* =====================================================
+       37. CLOSE MODALS WHEN CLICKING OUTSIDE
+    ===================================================== */
 
-    // =====================================================
-    // CLOSE MODALS OUTSIDE
-    // =====================================================
+    [
+        fundModal,
+        withdrawModal,
+        addAccountModal,
+        accountCreatedModal,
+        fundSuccessModal,
+        withdrawSuccessModal,
+        logoutModal
+    ].forEach(modal => {
 
-    const allModals =
-        document.querySelectorAll(
-            ".fixed.inset-0"
-        );
+        if (!modal) return;
 
+        modal.addEventListener(
+            "click",
+            event => {
 
-    allModals.forEach(
-        function (modal) {
-
-            modal.addEventListener(
-                "click",
-                function (event) {
-
-                    if (
-                        event.target ===
-                        modal
-                    ) {
-
-                        closeModal(
-                            modal
-                        );
-
-                    }
-
+                if (
+                    event.target === modal
+                ) {
+                    closeModal(modal);
                 }
-            );
-
-        }
-    );
-
-
-    // =====================================================
-    // ESCAPE
-    // =====================================================
-
-    document.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (
-                event.key ===
-                "Escape"
-            ) {
-
-                allModals.forEach(
-                    function (modal) {
-
-                        closeModal(
-                            modal
-                        );
-
-                    }
-                );
-
             }
+        );
+    });
 
-        }
-    );
+    /* =====================================================
+       38. INITIAL RENDER
+    ===================================================== */
 
-
-    // =====================================================
-    // INITIAL LOAD
-    // =====================================================
-
-    updateUserInformation();
-
+    renderUser();
+    renderBalances();
+    renderTransactions();
     renderCustomAccounts();
 
-    updateBalances();
-
-    updateTransactions();
-
+    updatePaymentMethodUI();
 
     console.log(
-        "Accounts page initialized."
+        "Reen Bank Accounts loaded successfully."
+    );
+
+    console.log(
+        "Current user:",
+        currentUser
+    );
+
+    console.log(
+        "Current balance:",
+        currentUser.balance
     );
 
 });
+
