@@ -1,567 +1,1408 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Reen Bank | Accounts</title>
-
-    <link rel="stylesheet" href="./output.css">
-
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+    <link
+        href="./output.css"
+        rel="stylesheet"
+    >
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
     >
+    <link rel="shortcut icon" href="./asset/images/image 32.png" type="image/x-icon">
+    <title>Reen Bank | Accounts</title>
+    <!-- <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .reen-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .reen-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .reen-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 999px;
+        }
+
+        .modal-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 999px;
+        }
+
+        .account-card {
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .account-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(35, 190, 140, 0.08);
+        }
+
+        .sidebar-link {
+            transition:
+                background-color 0.2s ease,
+                color 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            background: rgba(47, 188, 140, 0.08);
+            color: #24b986;
+        }
+
+        .sidebar-link.active {
+            color: #24b986;
+        }
+
+        .modal-backdrop {
+            backdrop-filter: blur(5px);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style> -->
 </head>
 
 
-<body class="min-h-screen bg-[#f5fbf9] text-gray-800">
+<body class="min-h-screen overflow-x-hidden bg-[#f5fffc] text-[#292929] bg-[url('./asset/images/accounts.png')] bg-cover bg-center">
 
-
-    <!-- =====================================================
-         MOBILE OVERLAY
-    ====================================================== -->
+    <!-- =========================================================
+         MOBILE SIDEBAR OVERLAY
+    ========================================================== -->
 
     <div
-        id="sidebarOverlay"
-        class="fixed inset-0 z-40 hidden bg-black/30 lg:hidden"
+        id="mobileSidebarOverlay"
+        class="fixed inset-0 z-[80] hidden bg-black/30 lg:hidden"
     ></div>
 
 
-
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
+    <!-- =========================================================
+         MOBILE SIDEBAR
+    ========================================================== -->
 
     <aside
-        id="sidebar"
-        class="fixed left-0 top-0 z-50 flex h-screen w-[250px] -translate-x-full flex-col border-r border-gray-100 bg-[#f5fbf9] px-8 py-8 transition-transform duration-300 lg:translate-x-0"
+        id="mobileSidebar"
+        class="fixed left-0 top-0 z-[90] flex h-screen w-[270px] -translate-x-full flex-col bg-white px-6 py-8 shadow-xl transition-transform duration-300 lg:hidden"
     >
 
-        <!-- LOGO -->
+        <!-- Mobile Logo -->
 
-        <div class="mb-16 flex items-center gap-3">
+        <div class="mb-12 flex items-center gap-3">
 
             <div
-                class="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-gray-700 bg-[#d5f5e9] text-xl font-bold"
-            >
-                <span class="text-[#ed5360]">r</span>
-                <span class="text-[#20b985]">b</span>
+>
+                <img src="./asset/images/logo.png" alt="">
             </div>
-
-            <span class="text-xl font-bold">
-                Reen Bank
-            </span>
-
         </div>
 
 
+        <!-- Mobile Navigation -->
 
-        <!-- NAVIGATION -->
-
-        <nav class="flex flex-1 flex-col gap-4">
+        <nav class="flex flex-col gap-2">
 
             <a
                 href="./overview.html"
-                class="dashboard-nav flex items-center gap-5 rounded-lg px-3 py-3 text-sm text-gray-600 transition hover:bg-white hover:text-[#20b985]"
+                id="mobileOverviewLink"
+                class="sidebar-link flex h-12 items-center gap-5 rounded-xl px-3 text-[15px] text-[#555] hover:text-[#33B786]"
             >
-                <i class="fa-solid fa-grip text-lg"></i>
+                <i class="fa-solid fa-border-all w-5 text-center text-[19px]"></i>
                 <span>Overview</span>
             </a>
 
 
             <a
                 href="./accounts.html"
-                class="dashboard-nav flex items-center gap-5 rounded-lg bg-white px-3 py-3 text-sm font-semibold text-[#20b985] shadow-sm"
+                id="mobileAccountsLink"
+                class="sidebar-link active flex h-12 items-center gap-5 rounded-xl px-3 text-[15px] text-[#33B786]"
             >
-                <i class="fa-regular fa-credit-card text-lg"></i>
+                <i class="fa-solid fa-credit-card w-5 text-center text-[18px]"></i>
                 <span>Accounts</span>
             </a>
 
 
             <a
                 href="./transactions.html"
-                class="dashboard-nav flex items-center gap-5 rounded-lg px-3 py-3 text-sm text-gray-600 transition hover:bg-white hover:text-[#20b985]"
+                id="mobileTransactionsLink"
+                class="sidebar-link flex h-12 items-center gap-5 rounded-xl px-3 text-[15px] text-[#555]  hover:text-[#33B786]"
             >
-                <i class="fa-solid fa-arrow-right-arrow-left text-lg"></i>
+                <i class="fa-solid fa-arrow-right-arrow-left w-5 text-center text-[17px]"></i>
                 <span>Transactions</span>
             </a>
 
 
             <a
                 href="./profile.html"
-                class="dashboard-nav flex items-center gap-5 rounded-lg px-3 py-3 text-sm text-gray-600 transition hover:bg-white hover:text-[#20b985]"
+                id="mobileProfileLink"
+                class="sidebar-link flex h-12 items-center gap-5 rounded-xl px-3 text-[15px] text-[#555]  hover:text-[#33B786]"
             >
-                <i class="fa-regular fa-user text-lg"></i>
+                <i class="fa-regular fa-user w-5 text-center text-[19px]"></i>
                 <span>Profile</span>
             </a>
 
         </nav>
 
 
-
-        <!-- LOGOUT -->
+        <!-- Mobile Logout -->
 
         <button
-            id="logoutButton"
+            id="mobileLogoutButton"
             type="button"
-            class="flex items-center gap-5 px-3 py-3 text-sm text-gray-600 transition hover:text-[#20b985]"
+            class="mt-auto flex h-12 items-center gap-5 rounded-xl px-3 text-[15px] text-[#555] transition hover:bg-red-50 hover:text-[#ef5260]"
         >
-            <i class="fa-solid fa-arrow-left text-lg"></i>
+            <i class="fa-solid fa-arrow-left w-5 text-center text-[18px]"></i>
             <span>Logout</span>
         </button>
 
     </aside>
 
 
+    <!-- =========================================================
+         MAIN PAGE WRAPPER
+    ========================================================== -->
 
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
-    <main class="min-h-screen lg:ml-[250px]">
+    <div class="min-h-screen">
 
 
-        <!-- =================================================
-             HEADER
-        ================================================== -->
+        <!-- =====================================================
+             DESKTOP SIDEBAR
+        ====================================================== -->
 
-        <header
-            class="flex items-center justify-between px-6 py-7 sm:px-10 lg:px-14"
+        <aside
+            id="desktopSidebar"
+            class="fixed left-0 top-0 z-40 hidden h-screen w-[305px] flex-col px-[60px] pt-[42px] lg:flex"
         >
 
-            <div class="flex items-center gap-5">
+            <!-- Logo -->
+
+            <a
+                href="./overview.html"
+                id="sidebarLogo"
+                class="flex items-center gap-3"
+            >     
+                <img src="./asset/images/logo.png" alt="">
+            </a>
+
+
+            <!-- Navigation -->
+
+            <nav
+                id="desktopNavigation"
+                class="mt-[75px] flex flex-col gap-[10px]"
+            >
+
+                <!-- Overview -->
+
+                <a
+                    id="overviewNavLink"
+                    href="./overview.html"
+                    class="sidebar-link flex h-[42px] items-center gap-7 rounded-xl px-0 text-[15px] text-[#555] hover:text-[#33B786]"
+                >
+
+                    <i class="fa-solid fa-border-all w-6 text-center text-[20px]"></i>
+
+                    <span>
+                        Overview
+                    </span>
+
+                </a>
+
+
+                <!-- Accounts -->
+
+                <a
+                    id="accountsNavLink"
+                    href="./accounts.html"
+                    class="sidebar-link active flex h-[42px] items-center gap-7 rounded-xl px-0 text-[15px] text-[#33B786]"
+                >
+
+                    <i
+                        class="fa-solid fa-credit-card w-6 text-center text-[19px]"
+                    ></i>
+
+                    <span>
+                        Accounts
+                    </span>
+
+                </a>
+
+
+                <!-- Transactions -->
+
+                <a
+                    id="transactionsNavLink"
+                    href="./transactions.html"
+                    class="sidebar-link flex h-[42px] items-center gap-7 rounded-xl px-0 text-[15px] text-[#555]  hover:text-[#33B786]"
+                >
+
+                    <i
+                        class="fa-solid fa-arrow-right-arrow-left w-6 text-center text-[18px]"
+                    ></i>
+
+                    <span>
+                        Transactions
+                    </span>
+
+                </a>
+
+
+                <!-- Profile -->
+
+                <a
+                    id="profileNavLink"
+                    href="./profile.html"
+                    class="sidebar-link flex h-[42px] items-center gap-7 rounded-xl px-0 text-[15px] text-[#555]  hover:text-[#33B786]"
+                >
+
+                    <i
+                        class="fa-regular fa-user w-6 text-center text-[20px]"
+                    ></i>
+
+                    <span>
+                        Profile
+                    </span>
+
+                </a>
+
+            </nav>
+
+
+            <!-- Logout -->
+
+            <button
+                id="logoutButton"
+                type="button"
+                class="mt-auto mb-[43px] flex h-[42px] items-center gap-7 rounded-xl px-0 text-left text-[15px] text-[#555] transition hover:text-[#ef5260]"
+            >
+
+                <i
+                    class="fa-solid fa-arrow-left w-6 text-center text-[19px]"
+                ></i>
+
+                <span>
+                    Logout
+                </span>
+
+            </button>
+
+        </aside>
+
+
+        <!-- =====================================================
+             CONTENT AREA
+        ====================================================== -->
+
+        <main
+            id="accountsPage"
+            class="min-h-screen lg:ml-[305px]"
+        >
+
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <header
+                id="dashboardHeader"
+                class="flex h-[125px] items-center justify-between px-6 sm:px-8 lg:px-[47px] xl:px-[48px]"
+            >
+
+                <!-- Mobile menu -->
 
                 <button
-                    id="menuButton"
+                    id="mobileMenuButton"
                     type="button"
-                    class="text-xl lg:hidden"
+                    class="flex h-10 w-10 items-center justify-center rounded-lg text-[#333] lg:hidden"
                 >
-                    <i class="fa-solid fa-bars"></i>
+                    <i class="fa-solid fa-bars text-xl"></i>
                 </button>
 
 
-                <h1 class="text-2xl font-bold sm:text-3xl">
+                <!-- Page title -->
+
+                <h1
+                    id="pageTitle"
+                    class="text-[30px] font-bold tracking-[-1.2px] sm:text-[32px]"
+                >
                     Accounts
                 </h1>
 
-            </div>
 
+                <!-- Header Right -->
 
+                <div class="ml-auto flex items-center gap-5 sm:gap-8">
 
-            <div class="flex items-center gap-5">
+                    <!-- User information -->
 
-
-                <!-- USER -->
-
-                <div class="hidden text-right sm:block">
-
-                    <p
-                        id="headerUserName"
-                        class="text-xs font-medium text-[#20b985]"
-                    >
-                        User
-                    </p>
-
-                    <p
-                        id="accountNumber"
-                        class="text-xl font-bold"
-                    >
-                        0000000000
-                    </p>
-
-                </div>
-
-
-
-                <!-- SEARCH -->
-
-                <div class="hidden items-center gap-2 md:flex">
-
-                    <i class="fa-solid fa-magnifying-glass text-gray-600"></i>
-
-                    <input
-                        id="searchInput"
-                        type="text"
-                        placeholder="Search"
-                        class="w-20 bg-transparent text-xs outline-none placeholder:text-gray-400"
+                    <div
+                        id="headerUserInfo"
+                        class="hidden text-right sm:block"
                     >
 
-                </div>
-
-
-
-                <!-- NOTIFICATION -->
-
-                <button
-                    type="button"
-                    class="relative text-gray-700"
-                >
-
-                    <i class="fa-regular fa-bell text-lg"></i>
-
-                    <span
-                        class="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500"
-                    ></span>
-
-                </button>
-
-
-
-                <!-- PROFILE AVATAR -->
-
-                <!--
-                    JavaScript will automatically use the user's
-                    saved profile image if available.
-
-                    If no image exists, initials will be displayed.
-                -->
-
-                <div
-                    id="profileAvatar"
-                    class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#d5f5e9] text-sm font-bold text-[#20b985]"
-                >
-
-                    <span id="profileAvatarInitials">
-                        U
-                    </span>
-
-                </div>
-
-            </div>
-
-        </header>
-
-
-
-        <!-- =================================================
-             CONTENT
-        ================================================== -->
-
-        <section class="px-6 pb-12 sm:px-10 lg:px-14">
-
-
-            <!-- =================================================
-                 ACCOUNT CARDS
-            ================================================== -->
-
-            <div
-                id="accountsGrid"
-                class="grid gap-6 md:grid-cols-2 xl:grid-cols-4"
-            >
-
-
-                <!-- MAIN ACCOUNT -->
-
-                <div
-                    class="relative rounded-xl border-l-4 border-[#482080] bg-[#d4f3e8] p-5"
-                >
-
-                    <div class="flex items-center justify-between">
-
-                        <p class="text-xs text-[#482080]">
-                            Main Account
+                        <p
+                            id="headerUserName"
+                            class="text-[12px] font-medium text-[#26b987]"
+                        >
+                            Maureen Oguche
                         </p>
 
-                        <button
-                            type="button"
-                            class="account-visibility text-gray-600"
-                            data-target="mainAccountBalance"
+                        <p
+                            id="headerAccountNumber"
+                            class="mt-[2px] text-[25px] font-bold leading-none tracking-[-1px]"
                         >
-                            <i class="fa-regular fa-eye-slash"></i>
-                        </button>
-
-                    </div>
-
-
-                    <p
-                        id="mainAccountBalance"
-                        class="account-balance mt-2 text-xl font-bold"
-                    >
-                        ₦0.00
-                    </p>
-
-
-                    <div class="mt-5 flex gap-3">
-
-                        <button
-                            type="button"
-                            id="mainFundButton"
-                            class="rounded-md bg-[#20b985] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#189f72]"
-                        >
-                            Fund
-                        </button>
-
-
-                        <button
-                            type="button"
-                            id="mainWithdrawButton"
-                            class="rounded-md bg-gray-300 px-5 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-400"
-                        >
-                            Withdraw
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- SCHOOL SAVINGS -->
-
-                <div
-                    class="rounded-xl bg-[#d4f3e8] p-5"
-                >
-
-                    <div class="flex items-center justify-between">
-
-                        <p class="text-xs text-[#482080]">
-                            School Savings
+                            1234567890
                         </p>
 
-                        <button
-                            type="button"
-                            class="account-visibility text-gray-600"
-                            data-target="schoolSavingsBalance"
-                        >
-                            <i class="fa-regular fa-eye-slash"></i>
-                        </button>
-
                     </div>
 
 
-                    <p
-                        id="schoolSavingsBalance"
-                        class="account-balance mt-2 text-xl font-bold"
+                    <!-- Search -->
+
+                    <div
+                        id="headerSearchWrapper"
+                        class="relative hidden md:block"
                     >
-                        ₦0.00
-                    </p>
+
+                        <div class="flex items-center gap-3">
+
+                            <i
+                                class="fa-solid fa-magnifying-glass text-[18px] text-[#3d4443]"
+                            ></i>
+
+                            <input
+                                id="globalSearchInput"
+                                type="search"
+                                autocomplete="off"
+                                placeholder="Search"
+                                class="w-[100px] border-0 bg-transparent p-0 text-[13px] text-[#333] outline-none placeholder:text-[#777] focus:w-[180px] transition-all duration-200"
+                            >
+
+                        </div>
 
 
-                    <div class="mt-5 flex gap-3">
+                        <!-- Search Results -->
 
-                        <button
-                            type="button"
-                            id="schoolFundButton"
-                            class="rounded-md bg-[#20b985] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#189f72]"
+                        <div
+                            id="globalSearchResults"
+                            class="absolute right-0 top-[38px] z-[70] hidden w-[330px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_15px_45px_rgba(0,0,0,0.10)]"
                         >
-                            Fund
-                        </button>
+
+                            <div
+                                class="border-b border-gray-100 px-5 py-4"
+                            >
+
+                                <p class="text-[12px] font-semibold text-[#777]">
+                                    SEARCH RESULTS
+                                </p>
+
+                            </div>
 
 
-                        <button
-                            type="button"
-                            id="schoolWithdrawButton"
-                            class="rounded-md bg-gray-300 px-5 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-400"
-                        >
-                            Withdraw
-                        </button>
+                            <div
+                                id="searchResultsList"
+                                class="max-h-[300px] overflow-y-auto"
+                            >
+                                <!-- JavaScript inserts results -->
+                            </div>
 
-                    </div>
-
-                </div>
-
-
-
-                <!-- HOLIDAY PLAN -->
-
-                <div
-                    class="rounded-xl bg-[#d4f3e8] p-5"
-                >
-
-                    <div class="flex items-center justify-between">
-
-                        <p class="text-xs text-[#482080]">
-                            Holiday Plan
-                        </p>
-
-                        <button
-                            type="button"
-                            class="account-visibility text-gray-600"
-                            data-target="holidayBalance"
-                        >
-                            <i class="fa-regular fa-eye-slash"></i>
-                        </button>
+                        </div>
 
                     </div>
 
 
-                    <p
-                        id="holidayBalance"
-                        class="account-balance mt-2 text-xl font-bold"
+                    <!-- Notification -->
+
+                    <div
+                        id="notificationWrapper"
+                        class="relative"
                     >
-                        ₦0.00
-                    </p>
-
-
-                    <div class="mt-5 flex gap-3">
 
                         <button
+                            id="notificationButton"
                             type="button"
-                            id="holidayFundButton"
-                            class="rounded-md bg-[#20b985] px-5 py-2 text-xs font-semibold text-white transition hover:bg-[#189f72]"
+                            aria-label="Notifications"
+                            class="relative flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-black/5"
                         >
-                            Fund
+
+                            <i
+                                class="fa-regular fa-bell text-[19px] text-[#292929]"
+                            ></i>
+
+
+                            <!-- Notification count -->
+
+                            <span
+                                id="notificationCount"
+                                class="absolute right-[7px] top-[7px] hidden h-[7px] min-w-[7px] rounded-full bg-[#ef5260]"
+                            ></span>
+
                         </button>
 
 
-                        <button
-                            type="button"
-                            id="holidayWithdrawButton"
-                            class="rounded-md bg-gray-300 px-5 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-400"
+                        <!-- Notification Dropdown -->
+
+                        <div
+                            id="notificationDropdown"
+                            class="absolute right-0 top-[50px] z-[75] hidden w-[350px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-[0_18px_50px_rgba(0,0,0,0.12)]"
                         >
-                            Withdraw
-                        </button>
+
+                            <div
+                                class="flex items-center justify-between border-b border-gray-100 px-5 py-4"
+                            >
+
+                                <div>
+
+                                    <h3 class="text-[15px] font-bold">
+                                        Notifications
+                                    </h3>
+
+                                    <p
+                                        id="notificationSubtitle"
+                                        class="mt-1 text-[11px] text-[#888]"
+                                    >
+                                        You have new notifications
+                                    </p>
+
+                                </div>
+
+
+                                <button
+                                    id="markAllNotificationsButton"
+                                    type="button"
+                                    class="text-[11px] font-semibold text-[#25b989]"
+                                >
+                                    Mark all as read
+                                </button>
+
+                            </div>
+
+
+                            <div
+                                id="notificationList"
+                                class="max-h-[330px] overflow-y-auto"
+                            >
+                                <!-- Notifications inserted by JS -->
+                            </div>
+
+
+                            <div
+                                id="emptyNotifications"
+                                class="hidden px-5 py-10 text-center"
+                            >
+
+                                <i
+                                    class="fa-regular fa-bell-slash text-[25px] text-[#bbb]"
+                                ></i>
+
+                                <p class="mt-3 text-[13px] text-[#888]">
+                                    No new notifications
+                                </p>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
-                </div>
 
-
-
-                <!-- ADD ACCOUNT -->
-
-                <button
-                    type="button"
-                    id="addAccountButton"
-                    class="flex min-h-[175px] flex-col justify-between rounded-xl bg-gray-100 p-5 text-left transition hover:bg-gray-200"
-                >
-
-                    <div class="flex items-center gap-8">
-
-                        <i class="fa-solid fa-plus text-lg"></i>
-
-                        <span class="text-xs font-medium">
-                            Add Account
-                        </span>
-
-                    </div>
-
-
-                    <p class="text-xl font-bold text-gray-600">
-                        ₦00,000.00
-                    </p>
-
-                </button>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 TRANSACTIONS
-            ================================================== -->
-
-            <section class="mt-12">
-
-                <div class="mb-5 flex items-center justify-between">
-
-                    <h2 class="text-lg font-semibold">
-                        Transactions
-                    </h2>
-
+                    <!-- Avatar -->
 
                     <button
-                        id="viewAllTransactions"
+                        id="profileButton"
                         type="button"
-                        class="flex items-center gap-3 text-sm font-medium text-[#20b985]"
+                        class="h-[40px] w-[40px] overflow-hidden rounded-full bg-[#ddd]"
                     >
-                        View All
-                        <i class="fa-solid fa-arrow-right"></i>
+
+                        <img
+                            id="headerProfileImage"
+                            src="./asset/images/profile.jpg"
+                            alt="Profile"
+                            class="h-full w-full object-cover"
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                        >
+
+                        <span
+                            class="hidden h-full w-full items-center justify-center bg-[#25b989] text-[14px] font-bold text-white"
+                        >
+                            U
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- =================================================
+                 PAGE CONTENT
+            ================================================== -->
+
+            <section
+                class="px-5 pb-12 sm:px-8 lg:px-[47px] xl:px-[48px]"
+            >
+
+                <!-- =================================================
+                     ACCOUNT CARDS
+                ================================================== -->
+
+                <div
+                    id="accountsGrid"
+                    class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4"
+                >
+
+
+                    <!-- MAIN ACCOUNT -->
+
+                    <article
+                        id="mainAccountCard"
+                        data-account-id="main"
+                        data-account-type="main"
+                        class="account-card relative min-h-[131px] overflow-hidden rounded-[9px] bg-[#d3f5e8] px-[22px] py-[22px]"
+                    >
+
+                        <!-- Active purple line -->
+
+                        <div
+                            class="absolute left-0 top-0 h-full w-[6px] bg-[#5926a6]"
+                        ></div>
+
+
+                        <div class="flex items-start justify-between">
+
+                            <div>
+
+                                <p
+                                    id="mainAccountName"
+                                    class="text-[12px] font-medium text-[#49317c]"
+                                >
+                                    Main Account
+                                </p>
+
+                                <p
+                                    id="mainAccountBalance"
+                                    data-balance="main"
+                                    class="mt-[4px] text-[20px] font-semibold tracking-[-0.5px]"
+                                >
+                                    ₦ 44,500.00
+                                </p>
+
+                            </div>
+
+
+                            <!-- Visibility -->
+
+                            <button
+                                type="button"
+                                data-balance-toggle="main"
+                                class="accountBalanceToggle mt-1 text-[#4b5653]"
+                                aria-label="Hide balance"
+                            >
+
+                                <i
+                                    id="mainAccountEye"
+                                    class="fa-regular fa-eye-slash text-[12px]"
+                                ></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <div class="mt-[16px] flex gap-3">
+
+                            <button
+                                id="mainAccountFundButton"
+                                type="button"
+                                data-account-id="main"
+                                class="fundAccountButton h-[23px] min-w-[57px] rounded-[4px] bg-[#2ebd8d] px-4 text-[10px] font-semibold text-white transition hover:bg-[#24ab7d]"
+                            >
+                                Fund
+                            </button>
+
+
+                            <button
+                                id="mainAccountWithdrawButton"
+                                type="button"
+                                data-account-id="main"
+                                class="withdrawAccountButton h-[23px] min-w-[82px] rounded-[4px] bg-[#d1d1d1] px-4 text-[10px] font-semibold text-[#333] transition hover:bg-[#c5c5c5]"
+                            >
+                                Withdraw
+                            </button>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- SCHOOL SAVINGS -->
+
+                    <article
+                        id="schoolSavingsCard"
+                        data-account-id="schoolSavings"
+                        data-account-type="savings"
+                        class="account-card min-h-[131px] rounded-[9px] bg-[#d3f5e8] px-[22px] py-[22px]"
+                    >
+
+                        <div class="flex items-start justify-between">
+
+                            <div>
+
+                                <p
+                                    id="schoolSavingsName"
+                                    class="text-[12px] font-medium text-[#49317c]"
+                                >
+                                    School Savings
+                                </p>
+
+                                <p
+                                    id="schoolSavingsBalance"
+                                    data-balance="schoolSavings"
+                                    class="mt-[4px] text-[20px] font-semibold tracking-[-0.5px]"
+                                >
+                                    ₦ 44,500.00
+                                </p>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                data-balance-toggle="schoolSavings"
+                                class="accountBalanceToggle mt-1 text-[#4b5653]"
+                                aria-label="Hide balance"
+                            >
+
+                                <i
+                                    id="schoolSavingsEye"
+                                    class="fa-regular fa-eye-slash text-[12px]"
+                                ></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <div class="mt-[16px] flex gap-3">
+
+                            <button
+                                id="schoolSavingsFundButton"
+                                type="button"
+                                data-account-id="schoolSavings"
+                                class="fundAccountButton h-[23px] min-w-[57px] rounded-[4px] bg-[#2ebd8d] px-4 text-[10px] font-semibold text-white transition hover:bg-[#24ab7d]"
+                            >
+                                Fund
+                            </button>
+
+
+                            <button
+                                id="schoolSavingsWithdrawButton"
+                                type="button"
+                                data-account-id="schoolSavings"
+                                class="withdrawAccountButton h-[23px] min-w-[82px] rounded-[4px] bg-[#d1d1d1] px-4 text-[10px] font-semibold text-[#333] transition hover:bg-[#c5c5c5]"
+                            >
+                                Withdraw
+                            </button>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- HOLIDAY PLAN -->
+
+                    <article
+                        id="holidayPlanCard"
+                        data-account-id="holidaySavings"
+                        data-account-type="savings"
+                        class="account-card min-h-[131px] rounded-[9px] bg-[#d3f5e8] px-[22px] py-[22px]"
+                    >
+
+                        <div class="flex items-start justify-between">
+
+                            <div>
+
+                                <p
+                                    id="holidayPlanName"
+                                    class="text-[12px] font-medium text-[#49317c]"
+                                >
+                                    Holiday Plan
+                                </p>
+
+                                <p
+                                    id="holidayPlanBalance"
+                                    data-balance="holidaySavings"
+                                    class="mt-[4px] text-[20px] font-semibold tracking-[-0.5px]"
+                                >
+                                    ₦ 44,500.00
+                                </p>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                data-balance-toggle="holidaySavings"
+                                class="accountBalanceToggle mt-1 text-[#4b5653]"
+                                aria-label="Hide balance"
+                            >
+
+                                <i
+                                    id="holidayPlanEye"
+                                    class="fa-regular fa-eye-slash text-[12px]"
+                                ></i>
+
+                            </button>
+
+                        </div>
+
+
+                        <div class="mt-[16px] flex gap-3">
+
+                            <button
+                                id="holidayPlanFundButton"
+                                type="button"
+                                data-account-id="holidaySavings"
+                                class="fundAccountButton h-[23px] min-w-[57px] rounded-[4px] bg-[#2ebd8d] px-4 text-[10px] font-semibold text-white transition hover:bg-[#24ab7d]"
+                            >
+                                Fund
+                            </button>
+
+
+                            <button
+                                id="holidayPlanWithdrawButton"
+                                type="button"
+                                data-account-id="holidaySavings"
+                                class="withdrawAccountButton h-[23px] min-w-[82px] rounded-[4px] bg-[#d1d1d1] px-4 text-[10px] font-semibold text-[#333] transition hover:bg-[#c5c5c5]"
+                            >
+                                Withdraw
+                            </button>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- ADD ACCOUNT -->
+
+                    <button
+                        id="addAccountButton"
+                        type="button"
+                        class="group min-h-[131px] rounded-[9px] bg-[#f0f1f1] px-[22px] py-[22px] text-left transition hover:bg-[#e8eeee]"
+                    >
+
+                        <div class="flex items-center gap-6">
+
+                            <i
+                                class="fa-solid fa-plus text-[17px] text-[#555]"
+                            ></i>
+
+                            <span
+                                class="text-[12px] font-medium text-[#555]"
+                            >
+                                Add Account
+                            </span>
+
+                        </div>
+
+
+                        <p
+                            id="newAccountPreviewBalance"
+                            class="mt-[38px] text-[20px] font-semibold tracking-[-0.5px] text-[#555]"
+                        >
+                            ₦ 00,000.00
+                        </p>
+
                     </button>
 
                 </div>
 
 
-                <div
-                    id="transactionList"
-                    class="overflow-x-auto"
-                ></div>
+                <!-- =================================================
+                     TRANSACTIONS
+                ================================================== -->
 
-
-                <div
-                    id="emptyTransactions"
-                    class="hidden rounded-xl bg-white py-12 text-center text-gray-400"
+                <section
+                    id="accountTransactionsSection"
+                    class="mt-[48px]"
                 >
-                    No transactions yet.
-                </div>
+
+                    <!-- Transaction heading -->
+
+                    <div class="mb-[22px] flex items-center justify-between">
+
+                        <h2
+                            class="text-[17px] font-bold tracking-[-0.3px]"
+                        >
+                            Transactions
+                        </h2>
+
+
+                        <button
+                            id="viewAllTransactionsButton"
+                            type="button"
+                            class="group flex items-center gap-5 text-[11px] font-medium text-[#25b989]"
+                        >
+
+                            <span>
+                                View All
+                            </span>
+
+                            <i
+                                class="fa-solid fa-arrow-right text-[15px] transition group-hover:translate-x-1"
+                            ></i>
+
+                        </button>
+
+                    </div>
+
+
+                    <!-- Transaction Table -->
+
+                    <div
+                        id="transactionsList"
+                        class="w-full"
+                    >
+
+
+                        <!-- TRANSACTION 1 -->
+
+                        <div
+                            class="transaction-row grid min-w-[760px] grid-cols-[70px_1.3fr_1fr_1.2fr_1fr_145px] items-center border-b border-[#dce4e1] py-[9px]"
+                            data-transaction-id="transaction-1"
+                            data-searchable="Oluwaben Jamin Bank Transfer 06.Mar.2023 09:39"
+                        >
+
+                            <div>
+
+                                <span
+                                    class="flex h-[29px] w-[29px] items-center justify-center rounded-full bg-[#ef5260] text-white"
+                                >
+                                    <i class="fa-solid fa-minus text-[12px]"></i>
+                                </span>
+
+                            </div>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Oluwaben Jamin
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Bank Transfer
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                06.Mar.2023 - 09:39
+                            </p>
+
+
+                            <p class="text-[13px] font-semibold text-[#ef5260]">
+                                - 10,000.00
+                            </p>
+
+
+                            <span
+                                class="flex h-[29px] items-center justify-center rounded-[6px] bg-[#d1d1d1] text-[11px] font-semibold text-[#666]"
+                            >
+                                Pending
+                            </span>
+
+                        </div>
+
+
+                        <!-- TRANSACTION 2 -->
+
+                        <div
+                            class="transaction-row grid min-w-[760px] grid-cols-[70px_1.3fr_1fr_1.2fr_1fr_145px] items-center border-b border-[#dce4e1] py-[9px]"
+                            data-transaction-id="transaction-2"
+                            data-searchable="Oluwaben Jamin Direct Pay 06.Mar.2023 09:39"
+                        >
+
+                            <div>
+
+                                <span
+                                    class="flex h-[29px] w-[29px] items-center justify-center rounded-full bg-[#2dbd8d] text-white"
+                                >
+                                    <i class="fa-solid fa-plus text-[12px]"></i>
+                                </span>
+
+                            </div>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Oluwaben Jamin
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Direct Pay
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                06.Mar.2023 - 09:39
+                            </p>
+
+
+                            <p class="text-[13px] font-semibold text-[#2dbd8d]">
+                                + 10,000.00
+                            </p>
+
+
+                            <span
+                                class="flex h-[29px] items-center justify-center rounded-[6px] bg-[#2dbd8d] text-[11px] font-semibold text-white"
+                            >
+                                Completed
+                            </span>
+
+                        </div>
+
+
+                        <!-- TRANSACTION 3 -->
+
+                        <div
+                            class="transaction-row grid min-w-[760px] grid-cols-[70px_1.3fr_1fr_1.2fr_1fr_145px] items-center border-b border-[#dce4e1] py-[9px]"
+                            data-transaction-id="transaction-3"
+                            data-searchable="Oluwaben Jamin Bank Transfer 06.Mar.2023 09:39"
+                        >
+
+                            <div>
+
+                                <span
+                                    class="flex h-[29px] w-[29px] items-center justify-center rounded-full bg-[#ef5260] text-white"
+                                >
+                                    <i class="fa-solid fa-minus text-[12px]"></i>
+                                </span>
+
+                            </div>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Oluwaben Jamin
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Bank Transfer
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                06.Mar.2023 - 09:39
+                            </p>
+
+
+                            <p class="text-[13px] font-semibold text-[#ef5260]">
+                                - 10,000.00
+                            </p>
+
+
+                            <span
+                                class="flex h-[29px] items-center justify-center rounded-[6px] bg-[#ef5260] text-[11px] font-semibold text-white"
+                            >
+                                Canceled
+                            </span>
+
+                        </div>
+
+
+                        <!-- TRANSACTION 4 -->
+
+                        <div
+                            class="transaction-row grid min-w-[760px] grid-cols-[70px_1.3fr_1fr_1.2fr_1fr_145px] items-center border-b border-[#dce4e1] py-[9px]"
+                            data-transaction-id="transaction-4"
+                            data-searchable="Oluwaben Jamin Credit Card 06.Mar.2023 09:39"
+                        >
+
+                            <div>
+
+                                <span
+                                    class="flex h-[29px] w-[29px] items-center justify-center rounded-full bg-[#2dbd8d] text-white"
+                                >
+                                    <i class="fa-solid fa-plus text-[12px]"></i>
+                                </span>
+
+                            </div>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Oluwaben Jamin
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Credit Card
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                06.Mar.2023 - 09:39
+                            </p>
+
+
+                            <p class="text-[13px] font-semibold text-[#2dbd8d]">
+                                + 10,000.00
+                            </p>
+
+
+                            <span
+                                class="flex h-[29px] items-center justify-center rounded-[6px] bg-[#2dbd8d] text-[11px] font-semibold text-white"
+                            >
+                                Completed
+                            </span>
+
+                        </div>
+
+
+                        <!-- TRANSACTION 5 -->
+
+                        <div
+                            class="transaction-row grid min-w-[760px] grid-cols-[70px_1.3fr_1fr_1.2fr_1fr_145px] items-center border-b border-[#dce4e1] py-[9px]"
+                            data-transaction-id="transaction-5"
+                            data-searchable="Oluwaben Jamin Bank Transfer 06.Mar.2023 09:39"
+                        >
+
+                            <div>
+
+                                <span
+                                    class="flex h-[29px] w-[29px] items-center justify-center rounded-full bg-[#ef5260] text-white"
+                                >
+                                    <i class="fa-solid fa-minus text-[12px]"></i>
+                                </span>
+
+                            </div>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Oluwaben Jamin
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Bank Transfer
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                06.Mar.2023 - 09:39
+                            </p>
+
+
+                            <p class="text-[13px] font-semibold text-[#ef5260]">
+                                - 10,000.00
+                            </p>
+
+
+                            <span
+                                class="flex h-[29px] items-center justify-center rounded-[6px] bg-[#d1d1d1] text-[11px] font-semibold text-[#666]"
+                            >
+                                Pending
+                            </span>
+
+                        </div>
+
+
+                        <!-- TRANSACTION 6 -->
+
+                        <div
+                            class="transaction-row grid min-w-[760px] grid-cols-[70px_1.3fr_1fr_1.2fr_1fr_145px] items-center border-b border-[#dce4e1] py-[9px]"
+                            data-transaction-id="transaction-6"
+                            data-searchable="Oluwaben Jamin Direct Pay 06.Mar.2023 09:39"
+                        >
+
+                            <div>
+
+                                <span
+                                    class="flex h-[29px] w-[29px] items-center justify-center rounded-full bg-[#2dbd8d] text-white"
+                                >
+                                    <i class="fa-solid fa-plus text-[12px]"></i>
+                                </span>
+
+                            </div>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Oluwaben Jamin
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Direct Pay
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                06.Mar.2023 - 09:39
+                            </p>
+
+
+                            <p class="text-[13px] font-semibold text-[#2dbd8d]">
+                                + 10,000.00
+                            </p>
+
+
+                            <span
+                                class="flex h-[29px] items-center justify-center rounded-[6px] bg-[#2dbd8d] text-[11px] font-semibold text-white"
+                            >
+                                Completed
+                            </span>
+
+                        </div>
+
+
+                        <!-- TRANSACTION 7 -->
+
+                        <div
+                            class="transaction-row grid min-w-[760px] grid-cols-[70px_1.3fr_1fr_1.2fr_1fr_145px] items-center border-b border-[#dce4e1] py-[9px]"
+                            data-transaction-id="transaction-7"
+                            data-searchable="Oluwaben Jamin Bank Transfer 06.Mar.2023 09:39"
+                        >
+
+                            <div>
+
+                                <span
+                                    class="flex h-[29px] w-[29px] items-center justify-center rounded-full bg-[#ef5260] text-white"
+                                >
+                                    <i class="fa-solid fa-minus text-[12px]"></i>
+                                </span>
+
+                            </div>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Oluwaben Jamin
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                Bank Transfer
+                            </p>
+
+
+                            <p class="text-[11px] text-[#888]">
+                                06.Mar.2023 - 09:39
+                            </p>
+
+
+                            <p class="text-[13px] font-semibold text-[#ef5260]">
+                                - 10,000.00
+                            </p>
+
+
+                            <span
+                                class="flex h-[29px] items-center justify-center rounded-[6px] bg-[#ef5260] text-[11px] font-semibold text-white"
+                            >
+                                Canceled
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
 
             </section>
 
-        </section>
+        </main>
 
-    </main>
+    </div>
 
 
 
-    <!-- =====================================================
-         ADD ACCOUNT MODAL
-    ====================================================== -->
-
+    <!-- =========================================================
+         MODALS
+    ========================================================== -->
+    <!-- 1. ADD ACCOUNT MODAL -->
     <div
         id="addAccountModal"
-        class="fixed inset-0 z-[100] hidden items-center justify-center bg-[#dff0eb]/90 px-5"
+        class="modal-backdrop fixed inset-0 z-[100] hidden items-center justify-center bg-black/35 px-4"
     >
 
-        <div class="w-full max-w-[470px] rounded-2xl bg-white p-8 shadow-xl">
+        <div
+            class="modal-content modal-scroll max-h-[90vh] w-full max-w-[450px] overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl sm:p-8"
+        >
 
-            <h2 class="text-2xl font-bold text-[#20b985]">
-                Add Account
-            </h2>
+            <!-- Header -->
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <h2 class="text-[21px] font-bold">
+                        Add Account
+                    </h2>
+
+                    <p class="mt-1 text-[12px] text-[#888]">
+                        Create a new savings account
+                    </p>
+
+                </div>
 
 
-            <form id="addAccountForm" class="mt-6">
-
-                <label
-                    for="accountName"
-                    class="mb-2 block text-xs font-medium"
+                <button
+                    id="closeAddAccountModal"
+                    type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3f3f3] text-[#555] transition hover:bg-[#e8e8e8]"
                 >
-                    Account Name
-                </label>
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
 
 
-                <input
-                    id="accountName"
-                    type="text"
-                    placeholder="Enter name"
-                    required
-                    class="mb-5 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                >
+            <!-- Form -->
+
+            <form
+                id="addAccountForm"
+                class="mt-7 space-y-5"
+            >
+
+                <!-- Account Name -->
+
+                <div>
+
+                    <label
+                        for="accountNameInput"
+                        class="mb-2 block text-[12px] font-semibold text-[#333]"
+                    >
+                        Account Name
+                    </label>
+
+                    <input
+                        id="accountNameInput"
+                        name="accountName"
+                        type="text"
+                        required
+                        maxlength="40"
+                        placeholder="e.g. Car Savings"
+                        class="h-[48px] w-full rounded-[8px] border border-[#ddd] bg-white px-4 text-[13px] outline-none transition focus:border-[#2dbd8d]"
+                    >
+
+                    <p
+                        id="accountNameError"
+                        class="mt-1 hidden text-[11px] text-[#ef5260]"
+                    ></p>
+
+                </div>
 
 
-                <label
-                    for="accountDescription"
-                    class="mb-2 block text-xs font-medium"
-                >
-                    Short Description
-                </label>
+                <!-- Account Type -->
+
+                <div>
+
+                    <label
+                        for="accountTypeInput"
+                        class="mb-2 block text-[12px] font-semibold text-[#333]"
+                    >
+                        Account Type
+                    </label>
+
+                    <div class="relative">
+
+                        <select
+                            id="accountTypeInput"
+                            name="accountType"
+                            class="h-[48px] w-full appearance-none rounded-[8px] border border-[#ddd] bg-white px-4 text-[13px] outline-none focus:border-[#2dbd8d]"
+                        >
+
+                            <option value="savings">
+                                Savings
+                            </option>
+
+                            <option value="goal">
+                                Goal Savings
+                            </option>
+
+                            <option value="custom">
+                                Custom Account
+                            </option>
+
+                        </select>
+
+                        <i
+                            class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[11px] text-[#777]"
+                        ></i>
+
+                    </div>
+
+                </div>
 
 
-                <textarea
-                    id="accountDescription"
-                    rows="4"
-                    placeholder="Description"
-                    class="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                ></textarea>
+                <!-- Description -->
+
+                <div>
+
+                    <label
+                        for="accountDescriptionInput"
+                        class="mb-2 block text-[12px] font-semibold text-[#333]"
+                    >
+                        Description
+                        <span class="font-normal text-[#aaa]">
+                            (Optional)
+                        </span>
+                    </label>
+
+                    <textarea
+                        id="accountDescriptionInput"
+                        name="description"
+                        rows="3"
+                        maxlength="150"
+                        placeholder="What are you saving for?"
+                        class="w-full resize-none rounded-[8px] border border-[#ddd] bg-white px-4 py-3 text-[13px] outline-none focus:border-[#2dbd8d]"
+                    ></textarea>
+
+                </div>
 
 
-                <div class="mt-6 flex justify-end gap-4">
+                <!-- Buttons -->
+
+                <div class="flex gap-3 pt-2">
 
                     <button
+                        id="cancelAddAccountButton"
                         type="button"
-                        id="cancelAddAccount"
-                        class="rounded-md bg-gray-300 px-7 py-3 text-sm font-semibold"
+                        class="h-[46px] flex-1 rounded-[7px] bg-[#eeeeee] text-[12px] font-semibold text-[#555] transition hover:bg-[#e3e3e3]"
                     >
                         Cancel
                     </button>
 
 
                     <button
+                        id="createAccountButton"
                         type="submit"
-                        class="rounded-md bg-[#20b985] px-8 py-3 text-sm font-semibold text-white"
+                        class="h-[46px] flex-1 rounded-[7px] bg-[#2dbd8d] text-[12px] font-semibold text-white transition hover:bg-[#25ad80]"
                     >
-                        Add
+                        Create Account
                     </button>
 
                 </div>
@@ -571,49 +1412,65 @@
         </div>
 
     </div>
-
-
-
-    <!-- =====================================================
-         ACCOUNT CREATED MODAL
-    ====================================================== -->
-
+    <!-- 2. ACCOUNT CREATED SUCCESS MODAL -->
     <div
         id="accountCreatedModal"
-        class="fixed inset-0 z-[110] hidden items-center justify-center bg-[#dff0eb]/90 px-5"
+        class="modal-backdrop fixed inset-0 z-[105] hidden items-center justify-center bg-black/35 px-4"
     >
 
-        <div class="w-full max-w-[470px] rounded-2xl bg-white p-10 text-center shadow-xl">
+        <div
+            class="w-full max-w-[410px] rounded-[18px] bg-white px-7 py-8 text-center shadow-2xl"
+        >
 
-            <p class="text-sm text-gray-600">
+            <!-- Success icon -->
 
-                <span
-                    id="createdAccountName"
-                    class="font-semibold text-[#20b985]"
+            <div
+                class="mx-auto flex h-[68px] w-[68px] items-center justify-center rounded-full bg-[#e2f8ef]"
+            >
+
+                <div
+                    class="flex h-[47px] w-[47px] items-center justify-center rounded-full bg-[#2dbd8d]"
                 >
-                    Account
-                </span>
 
-                has been created successfully!
+                    <i class="fa-solid fa-check text-[22px] text-white"></i>
 
+                </div>
+
+            </div>
+
+
+            <h2
+                class="mt-5 text-[21px] font-bold"
+            >
+                Account Created Successfully
+            </h2>
+
+
+            <p
+                id="createdAccountMessage"
+                class="mx-auto mt-2 max-w-[300px] text-[12px] leading-5 text-[#888]"
+            >
+                Your new account has been created successfully.
             </p>
 
 
-            <div class="mt-7 grid gap-3">
+            <!-- Buttons -->
+
+            <div class="mt-7 flex gap-3">
 
                 <button
+                    id="createdAccountGoBackButton"
                     type="button"
-                    id="goBackCreated"
-                    class="rounded-md bg-gray-300 py-3 text-sm font-semibold"
+                    class="h-[46px] flex-1 rounded-[7px] bg-[#eeeeee] text-[12px] font-semibold text-[#555]"
                 >
                     Go Back
                 </button>
 
 
                 <button
+                    id="createdAccountFundButton"
                     type="button"
-                    id="fundCreatedAccount"
-                    class="rounded-md bg-[#20b985] py-3 text-sm font-semibold text-white"
+                    class="h-[46px] flex-1 rounded-[7px] bg-[#2dbd8d] text-[12px] font-semibold text-white"
                 >
                     Fund Account
                 </button>
@@ -623,156 +1480,229 @@
         </div>
 
     </div>
-
-
-
-    <!-- =====================================================
-         FUND WALLET MODAL
-    ====================================================== -->
-
+    <!-- FUND WALLET MODAL -->
     <div
-        id="fundModal"
-        class="fixed inset-0 z-[120] hidden items-center justify-center bg-[#dff0eb]/90 px-5"
+        id="fundWalletModal"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-[#DDEAE6]/80 px-4 backdrop-blur-[2px]"
     >
 
         <div
-            class="w-full max-w-[470px] rounded-2xl bg-white p-8 shadow-xl"
+            class="w-full max-w-[468px] rounded-[28px] bg-white px-[66px] py-[58px] shadow-[0_20px_60px_rgba(0,0,0,0.08)]"
         >
 
-            <h2 class="text-2xl font-bold text-[#20b985]">
+            <!-- TITLE -->
+            <h2
+                class="mb-[34px] text-[40px] font-semibold leading-none text-[#2FB58A]"
+            >
                 Fund Wallet
             </h2>
 
 
-            <p class="mt-6 text-xs font-medium">
-                Select Payment Method
-            </p>
+            <form id="fundWalletForm">
+
+                <!-- PAYMENT METHOD -->
+                <div class="mb-[21px]">
+
+                    <label
+                        class="mb-[8px] block text-[13px] font-semibold text-[#292929]"
+                    >
+                        Select Payment Method
+                    </label>
 
 
-            <div class="mt-2 grid grid-cols-2 gap-4">
+                    <div class="flex gap-[33px]">
 
-                <button
-                    type="button"
-                    id="directPayMethod"
-                    class="payment-method rounded-lg border border-gray-300 px-4 py-3 text-xs"
-                >
-                    <i class="fa-solid fa-circle text-red-400"></i>
-                    Direct Pay
-                </button>
+                        <!-- DIRECT PAY -->
+                        <label
+                            class="flex h-[54px] flex-1 cursor-pointer items-center justify-center gap-[8px] rounded-[10px] border border-[#A8A8A8] text-[14px] font-semibold text-[#333] transition hover:border-[#2FB58A]"
+                        >
 
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="directPay"
+                                id="directPayOption"
+                                checked
+                                class="peer hidden"
+                            >
 
-                <button
-                    type="button"
-                    id="creditCardMethod"
-                    class="payment-method rounded-lg border border-gray-300 px-4 py-3 text-xs"
-                >
-                    <i class="fa-regular fa-circle"></i>
-                    Credit Card
-                </button>
+                            <span
+                                class="flex h-[14px] w-[14px] items-center justify-center rounded-full border border-[#999] peer-checked:border-[#EF476F]"
+                            >
+                                <span
+                                    class="hidden h-[8px] w-[8px] rounded-full bg-[#EF476F] peer-checked:block"
+                                ></span>
+                            </span>
 
-            </div>
+                            Direct Pay
 
-
-            <form id="fundForm" class="mt-5">
-
-                <label
-                    for="fundAmount"
-                    class="mb-2 block text-xs font-medium"
-                >
-                    Amount
-                </label>
+                        </label>
 
 
-                <input
-                    id="fundAmount"
-                    type="number"
-                    min="1"
-                    step="0.01"
-                    placeholder="100,000"
-                    required
-                    class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                >
+                        <!-- CREDIT CARD -->
+                        <label
+                            class="flex h-[54px] flex-1 cursor-pointer items-center justify-center gap-[8px] rounded-[10px] border border-[#A8A8A8] text-[14px] font-semibold text-[#333] transition hover:border-[#2FB58A]"
+                        >
+
+                            <input
+                                type="radio"
+                                name="paymentMethod"
+                                value="creditCard"
+                                id="creditCardOption"
+                                class="peer hidden"
+                            >
+
+                            <span
+                                class="flex h-[14px] w-[14px] items-center justify-center rounded-full border border-[#999]"
+                            >
+                                <span
+                                    class="hidden h-[8px] w-[8px] rounded-full bg-[#EF476F] peer-checked:block"
+                                ></span>
+                            </span>
+
+                            Credit Card
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <!-- DIRECT PAY SECTION -->
+                <div id="directPaySection">
+
+                    <label
+                        for="directPayAmount"
+                        class="mb-[7px] block text-[13px] font-semibold text-[#292929]"
+                    >
+                        Amount
+                    </label>
+
+                    <input
+                        type="number"
+                        id="directPayAmount"
+                        name="directPayAmount"
+                        placeholder="0.00"
+                        min="1"
+                        class="h-[54px] w-full rounded-[10px] border border-[#A8A8A8] px-[18px] text-[14px] outline-none transition placeholder:text-[#B8B8B8] focus:border-[#2FB58A] focus:ring-1 focus:ring-[#2FB58A]/20"
+                    >
+
+                </div>
 
 
-                <!-- CREDIT CARD -->
-
+                <!-- CREDIT CARD SECTION -->
                 <div
-                    id="creditCardFields"
-                    class="mt-4 hidden"
+                    id="creditCardSection"
+                    class="hidden"
                 >
 
-                    <label
-                        for="cardNumber"
-                        class="mb-2 block text-xs font-medium"
-                    >
-                        Card Number
-                    </label>
+                    <!-- AMOUNT -->
+                    <div class="mb-[15px]">
+
+                        <label
+                            for="cardAmount"
+                            class="mb-[7px] block text-[12px] font-semibold text-[#292929]"
+                        >
+                            Amount
+                        </label>
+
+                        <input
+                            type="number"
+                            id="cardAmount"
+                            name="cardAmount"
+                            placeholder="100,000"
+                            min="1"
+                            class="h-[42px] w-full rounded-[8px] border border-[#A8A8A8] px-[15px] text-[12px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
+                        >
+
+                    </div>
 
 
-                    <input
-                        id="cardNumber"
-                        type="text"
-                        maxlength="19"
-                        placeholder="0000 0000 0000 0000"
-                        class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                    >
+                    <!-- CARD NUMBER -->
+                    <div class="mb-[15px]">
+
+                        <label
+                            for="cardNumber"
+                            class="mb-[7px] block text-[12px] font-semibold text-[#292929]"
+                        >
+                            Card Number
+                        </label>
+
+                        <input
+                            type="text"
+                            id="cardNumber"
+                            name="cardNumber"
+                            maxlength="19"
+                            placeholder="0000 0000 0000 0000"
+                            inputmode="numeric"
+                            class="h-[42px] w-full rounded-[8px] border border-[#A8A8A8] px-[15px] text-[12px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
+                        >
+
+                    </div>
 
 
-                    <label
-                        for="cardHolder"
-                        class="mb-2 block text-xs font-medium"
-                    >
-                        Card holder name
-                    </label>
+                    <!-- CARD HOLDER -->
+                    <div class="mb-[15px]">
+
+                        <label
+                            for="cardHolderName"
+                            class="mb-[7px] block text-[12px] font-semibold text-[#292929]"
+                        >
+                            Card holder name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="cardHolderName"
+                            name="cardHolderName"
+                            placeholder="Enter card holder name"
+                            class="h-[42px] w-full rounded-[8px] border border-[#A8A8A8] px-[15px] text-[12px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
+                        >
+
+                    </div>
 
 
-                    <input
-                        id="cardHolder"
-                        type="text"
-                        placeholder="Enter card holder name"
-                        class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                    >
+                    <!-- EXPIRY + CVC -->
+                    <div class="flex gap-[15px]">
 
-
-                    <div class="grid grid-cols-2 gap-4">
-
-                        <div>
+                        <div class="flex-1">
 
                             <label
-                                for="expiryDate"
-                                class="mb-2 block text-xs font-medium"
+                                for="cardExpiry"
+                                class="mb-[7px] block text-[12px] font-semibold text-[#292929]"
                             >
                                 Expiry date
                             </label>
 
-
                             <input
-                                id="expiryDate"
                                 type="text"
+                                id="cardExpiry"
+                                name="cardExpiry"
                                 maxlength="5"
                                 placeholder="MM/YY"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
+                                class="h-[42px] w-full rounded-[8px] border border-[#A8A8A8] px-[15px] text-[12px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
                             >
 
                         </div>
 
 
-                        <div>
+                        <div class="flex-1">
 
                             <label
-                                for="cvc"
-                                class="mb-2 block text-xs font-medium"
+                                for="cardCvc"
+                                class="mb-[7px] block text-[12px] font-semibold text-[#292929]"
                             >
                                 CVC
                             </label>
 
-
                             <input
-                                id="cvc"
                                 type="password"
-                                maxlength="4"
+                                id="cardCvc"
+                                name="cardCvc"
+                                maxlength="3"
                                 placeholder="000"
-                                class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
+                                inputmode="numeric"
+                                class="h-[42px] w-full rounded-[8px] border border-[#A8A8A8] px-[15px] text-[12px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
                             >
 
                         </div>
@@ -782,12 +1712,13 @@
                 </div>
 
 
-                <div class="mt-6 flex justify-end gap-4">
+                <!-- BUTTONS -->
+                <div class="mt-[40px] flex gap-[33px]">
 
                     <button
                         type="button"
-                        id="cancelFund"
-                        class="rounded-md bg-gray-300 px-7 py-3 text-sm font-semibold"
+                        id="cancelFundWalletBtn"
+                        class="h-[54px] flex-1 rounded-[10px] bg-[#D3D3D3] text-[18px] font-semibold text-[#292929] transition hover:bg-[#C6C6C6] active:scale-[0.98]"
                     >
                         Cancel
                     </button>
@@ -795,7 +1726,8 @@
 
                     <button
                         type="submit"
-                        class="rounded-md bg-[#20b985] px-8 py-3 text-sm font-semibold text-white"
+                        id="fundWalletBtn"
+                        class="h-[54px] flex-1 rounded-[10px] bg-[#2FB58A] text-[18px] font-semibold text-white transition hover:bg-[#27A77D] active:scale-[0.98]"
                     >
                         Fund
                     </button>
@@ -807,175 +1739,581 @@
         </div>
 
     </div>
-
-
-
-    <!-- =====================================================
-         FUND SUCCESS
-    ====================================================== -->
-
+    <!-- 4. DIRECT PAY MODAL -->
     <div
-        id="fundSuccessModal"
-        class="fixed inset-0 z-[130] hidden items-center justify-center bg-[#dff0eb]/90 px-5"
+        id="directPayModal"
+        class="modal-backdrop fixed inset-0 z-[120] hidden items-center justify-center bg-black/35 px-4"
     >
 
-        <div class="w-full max-w-[470px] rounded-2xl bg-white p-10 text-center shadow-xl">
+        <div
+            class="w-full max-w-[450px] rounded-[18px] bg-white p-6 shadow-2xl sm:p-8"
+        >
 
-            <p class="text-sm text-gray-600">
+            <div class="flex items-center justify-between">
 
-                <span
-                    id="fundSuccessAmount"
-                    class="font-semibold text-[#20b985]"
+                <div>
+
+                    <h2 class="text-[21px] font-bold">
+                        Direct Pay
+                    </h2>
+
+                    <p
+                        id="directPayTarget"
+                        class="mt-1 text-[12px] text-[#888]"
+                    >
+                        Fund your account directly.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="closeDirectPayModal"
+                    type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3f3f3]"
                 >
-                    ₦0.00
-                </span>
 
-                has been added to your Wallet!
+                    <i class="fa-solid fa-xmark"></i>
 
+                </button>
+
+            </div>
+
+
+            <form
+                id="directPayForm"
+                class="mt-7 space-y-5"
+            >
+
+                <div>
+
+                    <label
+                        for="directPayAmount"
+                        class="mb-2 block text-[12px] font-semibold"
+                    >
+                        Amount
+                    </label>
+
+                    <div class="relative">
+
+                        <span
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-[13px] font-semibold"
+                        >
+                            ₦
+                        </span>
+
+                        <input
+                            id="directPayAmount"
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            required
+                            placeholder="0.00"
+                            class="h-[49px] w-full rounded-[8px] border border-[#ddd] pl-9 pr-4 text-[14px] outline-none focus:border-[#2dbd8d]"
+                        >
+
+                    </div>
+
+                    <p
+                        id="directPayAmountError"
+                        class="mt-1 hidden text-[11px] text-[#ef5260]"
+                    ></p>
+
+                </div>
+
+
+                <div>
+
+                    <label
+                        for="directPayBank"
+                        class="mb-2 block text-[12px] font-semibold"
+                    >
+                        Bank Account
+                    </label>
+
+                    <div class="relative">
+
+                        <select
+                            id="directPayBank"
+                            required
+                            class="h-[49px] w-full appearance-none rounded-[8px] border border-[#ddd] bg-white px-4 text-[13px] outline-none focus:border-[#2dbd8d]"
+                        >
+
+                            <option value="">
+                                Select bank account
+                            </option>
+
+                            <option value="main-bank">
+                                Main Bank Account **** 5678
+                            </option>
+
+                        </select>
+
+                        <i
+                            class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[11px]"
+                        ></i>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="rounded-[8px] bg-[#f5faf8] p-4"
+                >
+
+                    <div class="flex justify-between text-[12px]">
+
+                        <span class="text-[#888]">
+                            Account
+                        </span>
+
+                        <strong id="directPayAccountName">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="confirmDirectPayButton"
+                    type="submit"
+                    class="h-[48px] w-full rounded-[7px] bg-[#2dbd8d] text-[12px] font-semibold text-white transition hover:bg-[#25ad80]"
+                >
+                    Continue
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+    <!-- 5. CREDIT CARD MODAL -->
+    <div
+        id="creditCardModal"
+        class="modal-backdrop fixed inset-0 z-[120] hidden items-center justify-center bg-black/35 px-4"
+    >
+
+        <div
+            class="modal-scroll max-h-[90vh] w-full max-w-[450px] overflow-y-auto rounded-[18px] bg-white p-6 shadow-2xl sm:p-8"
+        >
+
+            <div class="flex items-center justify-between">
+
+                <div>
+
+                    <h2 class="text-[21px] font-bold">
+                        Credit Card
+                    </h2>
+
+                    <p
+                        id="creditCardTarget"
+                        class="mt-1 text-[12px] text-[#888]"
+                    >
+                        Fund your account with a card.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="closeCreditCardModal"
+                    type="button"
+                    class="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3f3f3]"
+                >
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <form
+                id="creditCardForm"
+                class="mt-7 space-y-4"
+            >
+
+                <!-- Amount -->
+
+                <div>
+
+                    <label
+                        for="creditCardAmount"
+                        class="mb-2 block text-[12px] font-semibold"
+                    >
+                        Amount
+                    </label>
+
+                    <div class="relative">
+
+                        <span
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-[13px] font-semibold"
+                        >
+                            ₦
+                        </span>
+
+                        <input
+                            id="creditCardAmount"
+                            type="number"
+                            min="1"
+                            step="0.01"
+                            required
+                            placeholder="0.00"
+                            class="h-[49px] w-full rounded-[8px] border border-[#ddd] pl-9 pr-4 text-[14px] outline-none focus:border-[#2dbd8d]"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- Card Number -->
+
+                <div>
+
+                    <label
+                        for="cardNumber"
+                        class="mb-2 block text-[12px] font-semibold"
+                    >
+                        Card Number
+                    </label>
+
+                    <input
+                        id="cardNumber"
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="19"
+                        autocomplete="cc-number"
+                        required
+                        placeholder="0000 0000 0000 0000"
+                        class="h-[49px] w-full rounded-[8px] border border-[#ddd] px-4 text-[13px] outline-none focus:border-[#2dbd8d]"
+                    >
+
+                </div>
+
+
+                <!-- Name -->
+
+                <div>
+
+                    <label
+                        for="cardName"
+                        class="mb-2 block text-[12px] font-semibold"
+                    >
+                        Cardholder Name
+                    </label>
+
+                    <input
+                        id="cardName"
+                        type="text"
+                        autocomplete="cc-name"
+                        required
+                        placeholder="Name on card"
+                        class="h-[49px] w-full rounded-[8px] border border-[#ddd] px-4 text-[13px] outline-none focus:border-[#2dbd8d]"
+                    >
+
+                </div>
+
+
+                <!-- Expiry + CVV -->
+
+                <div class="grid grid-cols-2 gap-3">
+
+                    <div>
+
+                        <label
+                            for="cardExpiry"
+                            class="mb-2 block text-[12px] font-semibold"
+                        >
+                            Expiry Date
+                        </label>
+
+                        <input
+                            id="cardExpiry"
+                            type="text"
+                            maxlength="5"
+                            placeholder="MM/YY"
+                            autocomplete="cc-exp"
+                            required
+                            class="h-[49px] w-full rounded-[8px] border border-[#ddd] px-4 text-[13px] outline-none focus:border-[#2dbd8d]"
+                        >
+
+                    </div>
+
+
+                    <div>
+
+                        <label
+                            for="cardCvv"
+                            class="mb-2 block text-[12px] font-semibold"
+                        >
+                            CVV
+                        </label>
+
+                        <input
+                            id="cardCvv"
+                            type="password"
+                            inputmode="numeric"
+                            maxlength="4"
+                            autocomplete="cc-csc"
+                            required
+                            placeholder="•••"
+                            class="h-[49px] w-full rounded-[8px] border border-[#ddd] px-4 text-[13px] outline-none focus:border-[#2dbd8d]"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- Account -->
+
+                <div
+                    class="rounded-[8px] bg-[#f5faf8] p-4"
+                >
+
+                    <div class="flex justify-between">
+
+                        <span class="text-[11px] text-[#888]">
+                            Funding
+                        </span>
+
+                        <strong
+                            id="creditCardAccountName"
+                            class="text-[12px]"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="confirmCreditCardButton"
+                    type="submit"
+                    class="h-[48px] w-full rounded-[7px] bg-[#2dbd8d] text-[12px] font-semibold text-white transition hover:bg-[#25ad80]"
+                >
+                    Fund Account
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+    <!-- 6. DEPOSIT SUCCESS MODAL -->
+    <div
+        id="depositSuccessModal"
+        class="modal-backdrop fixed inset-0 z-[130] hidden items-center justify-center bg-black/35 px-4"
+    >
+
+        <div
+            class="w-full max-w-[410px] rounded-[18px] bg-white px-7 py-9 text-center shadow-2xl"
+        >
+
+            <!-- Green success -->
+
+            <div
+                class="mx-auto flex h-[75px] w-[75px] items-center justify-center rounded-full bg-[#e2f8ef]"
+            >
+
+                <div
+                    class="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[#2dbd8d]"
+                >
+
+                    <i
+                        class="fa-solid fa-check text-[25px] text-white"
+                    ></i>
+
+                </div>
+
+            </div>
+
+
+            <h2
+                class="mt-6 text-[22px] font-bold"
+            >
+                Deposit Successful
+            </h2>
+
+
+            <p
+                id="depositSuccessMessage"
+                class="mx-auto mt-2 max-w-[300px] text-[12px] leading-5 text-[#888]"
+            >
+                Your deposit has been successfully added to your account.
             </p>
 
 
-            <button
-                type="button"
-                id="fundSuccessBack"
-                class="mt-7 w-full rounded-md bg-[#20b985] py-3 text-sm font-semibold text-white"
+            <div
+                class="mt-5 rounded-[9px] bg-[#f5faf8] px-5 py-4"
             >
-                Go Back
+
+                <p
+                    class="text-[11px] text-[#888]"
+                >
+                    Amount Deposited
+                </p>
+
+                <p
+                    id="successfulDepositAmount"
+                    class="mt-1 text-[20px] font-bold text-[#25b989]"
+                >
+                    ₦ 0.00
+                </p>
+
+            </div>
+
+
+            <button
+                id="closeDepositSuccessButton"
+                type="button"
+                class="mt-6 h-[47px] w-full rounded-[7px] bg-[#2dbd8d] text-[12px] font-semibold text-white"
+            >
+                Done
             </button>
 
         </div>
 
     </div>
-
-
-
-    <!-- =====================================================
-         WITHDRAW MODAL
-    ====================================================== -->
-
+    <!-- 7. WITHDRAW MODAL -->
     <div
         id="withdrawModal"
-        class="fixed inset-0 z-[120] hidden items-center justify-center bg-[#dff0eb]/90 px-5"
+        class="fixed inset-0 z-[100] hidden items-center justify-center bg-[#DDEAE6]/80 px-4 backdrop-blur-[2px]"
     >
 
-        <div class="w-full max-w-[470px] rounded-2xl bg-white p-8 shadow-xl">
+        <div
+            class="w-full max-w-[390px] rounded-[18px] bg-white px-[33px] py-[34px] shadow-xl"
+        >
 
-            <h2 class="text-2xl font-bold text-[#20b985]">
+            <!-- TITLE -->
+            <h2
+                class="mb-[27px] text-[22px] font-semibold text-[#2FB58A]"
+            >
                 Withdraw
             </h2>
 
 
-            <form id="withdrawForm" class="mt-6">
+            <form id="withdrawForm">
 
-                <label
-                    for="withdrawAmount"
-                    class="mb-2 block text-xs font-medium"
-                >
-                    Amount
-                </label>
+                <!-- AMOUNT -->
+                <div class="mb-[12px]">
 
+                    <label
+                        for="withdrawAmount"
+                        class="mb-[4px] block text-[9px] font-semibold text-[#292929]"
+                    >
+                        Amount
+                    </label>
 
-                <input
-                    id="withdrawAmount"
-                    type="number"
-                    min="1"
-                    step="0.01"
-                    placeholder="100,000"
-                    required
-                    class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                >
+                    <input
+                        type="number"
+                        id="withdrawAmount"
+                        name="withdrawAmount"
+                        placeholder="100,000"
+                        min="1"
+                        required
+                        class="h-[34px] w-full rounded-[7px] border border-[#A8A8A8] px-[10px] text-[10px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
+                    >
 
-
-                <label
-                    for="withdrawAccountNumber"
-                    class="mb-2 block text-xs font-medium"
-                >
-                    Account Number
-                </label>
+                </div>
 
 
-                <input
-                    id="withdrawAccountNumber"
-                    type="text"
-                    inputmode="numeric"
-                    placeholder="00 00 00 00 00"
-                    required
-                    class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                >
+                <!-- ACCOUNT NUMBER -->
+                <div class="mb-[12px]">
+
+                    <label
+                        for="withdrawAccountNumber"
+                        class="mb-[4px] block text-[9px] font-semibold text-[#292929]"
+                    >
+                        Account Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="withdrawAccountNumber"
+                        name="withdrawAccountNumber"
+                        placeholder="00 00 00 00 00"
+                        maxlength="10"
+                        inputmode="numeric"
+                        required
+                        class="h-[34px] w-full rounded-[7px] border border-[#A8A8A8] px-[10px] text-[10px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
+                    >
+
+                </div>
 
 
-                <label
-                    for="withdrawAccountName"
-                    class="mb-2 block text-xs font-medium"
-                >
-                    Account Name
-                </label>
+                <!-- ACCOUNT NAME -->
+                <div class="mb-[12px]">
+
+                    <label
+                        for="withdrawAccountName"
+                        class="mb-[4px] block text-[9px] font-semibold text-[#292929]"
+                    >
+                        Account Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="withdrawAccountName"
+                        name="withdrawAccountName"
+                        placeholder="Enter account name"
+                        required
+                        class="h-[34px] w-full rounded-[7px] border border-[#A8A8A8] px-[10px] text-[10px] outline-none placeholder:text-[#B8B8B8] focus:border-[#2FB58A]"
+                    >
+
+                </div>
 
 
-                <input
-                    id="withdrawAccountName"
-                    type="text"
-                    placeholder="Enter account name"
-                    required
-                    class="mb-4 w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                >
+                <!-- BANK -->
+                <div class="mb-[28px]">
+
+                    <label
+                        for="withdrawBank"
+                        class="mb-[4px] block text-[9px] font-semibold text-[#292929]"
+                    >
+                        Bank
+                    </label>
+
+                    <div class="relative">
+
+                        <select
+                            id="withdrawBank"
+                            name="withdrawBank"
+                            required
+                            class="h-[34px] w-full appearance-none rounded-[7px] border border-[#A8A8A8] bg-white px-[10px] text-[10px] text-[#999] outline-none focus:border-[#2FB58A]"
+                        >
+                            <option value="">Bank Name</option>
+                            <option value="access">Access Bank</option>
+                            <option value="gtb">GTBank</option>
+                            <option value="firstbank">First Bank</option>
+                            <option value="uba">UBA</option>
+                            <option value="zenith">Zenith Bank</option>
+                            <option value="opay">OPay</option>
+                            <option value="palmpay">PalmPay</option>
+                        </select>
+
+                        <i
+                            class="fa-solid fa-chevron-down pointer-events-none absolute right-[12px] top-1/2 -translate-y-1/2 text-[8px] text-[#999]"
+                        ></i>
+
+                    </div>
+
+                </div>
 
 
-                <label
-                    for="withdrawBank"
-                    class="mb-2 block text-xs font-medium"
-                >
-                    Bank
-                </label>
-
-
-                <select
-                    id="withdrawBank"
-                    required
-                    class="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-[#20b985]"
-                >
-
-                    <option value="">
-                        Bank Name
-                    </option>
-
-                    <option value="Access Bank">
-                        Access Bank
-                    </option>
-
-                    <option value="GTBank">
-                        GTBank
-                    </option>
-
-                    <option value="First Bank">
-                        First Bank
-                    </option>
-
-                    <option value="UBA">
-                        UBA
-                    </option>
-
-                    <option value="Zenith Bank">
-                        Zenith Bank
-                    </option>
-
-                    <option value="Opay">
-                        Opay
-                    </option>
-
-                    <option value="Palmpay">
-                        Palmpay
-                    </option>
-
-                </select>
-
-
-                <div class="mt-6 flex justify-end gap-4">
+                <!-- BUTTONS -->
+                <div class="flex gap-[17px]">
 
                     <button
                         type="button"
-                        id="cancelWithdraw"
-                        class="rounded-md bg-gray-300 px-7 py-3 text-sm font-semibold"
+                        id="cancelWithdrawBtn"
+                        class="h-[34px] flex-1 rounded-[7px] bg-[#D3D3D3] text-[11px] font-semibold text-[#292929] transition hover:bg-[#C5C5C5]"
                     >
                         Cancel
                     </button>
@@ -983,7 +2321,8 @@
 
                     <button
                         type="submit"
-                        class="rounded-md bg-[#20b985] px-8 py-3 text-sm font-semibold text-white"
+                        id="withdrawBtn"
+                        class="h-[34px] flex-1 rounded-[7px] bg-[#2FB58A] text-[11px] font-semibold text-white transition hover:bg-[#27A77D]"
                     >
                         Withdraw
                     </button>
@@ -995,84 +2334,117 @@
         </div>
 
     </div>
-
-
-
-    <!-- =====================================================
-         WITHDRAW SUCCESS
-    ====================================================== -->
-
+    <!-- 8. WITHDRAW SUCCESS MODAL -->
     <div
         id="withdrawSuccessModal"
-        class="fixed inset-0 z-[130] hidden items-center justify-center bg-[#dff0eb]/90 px-5"
+        class="modal-backdrop fixed inset-0 z-[130] hidden items-center justify-center bg-black/35 px-4"
     >
 
-        <div class="w-full max-w-[470px] rounded-2xl bg-white p-10 text-center shadow-xl">
+        <div
+            class="w-full max-w-[410px] rounded-[18px] bg-white px-7 py-9 text-center shadow-2xl"
+        >
 
-            <p class="text-sm text-gray-600">
+            <div
+                class="mx-auto flex h-[75px] w-[75px] items-center justify-center rounded-full bg-[#fff0f1]"
+            >
 
-                <span
-                    id="withdrawSuccessAmount"
-                    class="font-semibold text-[#20b985]"
+                <div
+                    class="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[#ef5260]"
                 >
-                    ₦0.00
-                </span>
 
-                has been sent to your Bank Account!
+                    <i
+                        class="fa-solid fa-check text-[25px] text-white"
+                    ></i>
 
+                </div>
+
+            </div>
+
+
+            <h2
+                class="mt-6 text-[22px] font-bold"
+            >
+                Withdrawal Successful
+            </h2>
+
+
+            <p
+                id="withdrawSuccessMessage"
+                class="mt-2 text-[12px] leading-5 text-[#888]"
+            >
+                Your withdrawal has been successfully processed.
+            </p>
+
+
+            <p
+                id="successfulWithdrawAmount"
+                class="mt-5 text-[21px] font-bold text-[#ef5260]"
+            >
+                ₦ 0.00
             </p>
 
 
             <button
+                id="closeWithdrawSuccessButton"
                 type="button"
-                id="withdrawSuccessBack"
-                class="mt-7 w-full rounded-md bg-[#20b985] py-3 text-sm font-semibold text-white"
+                class="mt-6 h-[47px] w-full rounded-[7px] bg-[#ef5260] text-[12px] font-semibold text-white"
             >
-                Go Back
+                Done
             </button>
 
         </div>
 
     </div>
-
-
-
-    <!-- =====================================================
-         LOGOUT MODAL
-    ====================================================== -->
-
+    <!-- 9. LOGOUT CONFIRMATION MODAL -->
     <div
         id="logoutModal"
-        class="fixed inset-0 z-[200] hidden items-center justify-center bg-black/30 px-5"
+        class="modal-backdrop fixed inset-0 z-[140] hidden items-center justify-center bg-black/35 px-4"
     >
 
-        <div class="w-full max-w-md rounded-2xl bg-white p-8 text-center">
+        <div
+            class="w-full max-w-[380px] rounded-[18px] bg-white p-7 text-center shadow-2xl"
+        >
 
-            <h2 class="text-xl font-bold">
-                Logout
+            <div
+                class="mx-auto flex h-[58px] w-[58px] items-center justify-center rounded-full bg-[#fff1f2]"
+            >
+
+                <i
+                    class="fa-solid fa-arrow-right-from-bracket text-[21px] text-[#ef5260]"
+                ></i>
+
+            </div>
+
+
+            <h2
+                class="mt-5 text-[20px] font-bold"
+            >
+                Logout?
             </h2>
 
 
-            <p class="mt-2 text-sm text-gray-500">
-                Are you sure you want to logout?
+            <p
+                class="mt-2 text-[12px] leading-5 text-[#888]"
+            >
+                Are you sure you want to log out of your Reen Bank account?
             </p>
 
 
-            <div class="mt-6 flex justify-center gap-4">
+            <div class="mt-6 flex gap-3">
 
                 <button
-                    id="cancelLogout"
+                    id="cancelLogoutButton"
                     type="button"
-                    class="rounded-lg bg-gray-200 px-6 py-3 text-sm font-semibold"
+                    class="h-[45px] flex-1 rounded-[7px] bg-[#eeeeee] text-[12px] font-semibold text-[#555]"
                 >
                     Cancel
                 </button>
 
 
                 <button
-                    id="confirmLogout"
+                    id="confirmLogoutButton"
                     type="button"
-                    class="rounded-lg bg-[#20b985] px-6 py-3 text-sm font-semibold text-white"
+                    class="h-[45px] flex-1 rounded-[7px] bg-[#ef5260] text-[12px] font-semibold text-white"
                 >
                     Logout
                 </button>
@@ -1082,243 +2454,56 @@
         </div>
 
     </div>
-
-    <!-- WITHDRAWAL MODAL -->
+    <!-- 10. GENERIC ERROR MODAL -->
     <div
-        id="withdrawModal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 px-4"
+        id="errorModal"
+        class="modal-backdrop fixed inset-0 z-[150] hidden items-center justify-center bg-black/35 px-4"
     >
+
         <div
-            class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+            class="w-full max-w-[380px] rounded-[18px] bg-white p-7 text-center shadow-2xl"
         >
 
-            <div class="mb-6 flex items-center justify-between">
+            <div
+                class="mx-auto flex h-[62px] w-[62px] items-center justify-center rounded-full bg-[#fff0f1]"
+            >
 
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900">
-                        Withdraw Money
-                    </h2>
-
-                    <p class="mt-1 text-sm text-gray-500">
-                        Withdraw money from your main account.
-                    </p>
-                </div>
-
-                <button
-                    type="button"
-                    id="cancelWithdraw"
-                    class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200"
-                >
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <i
+                    class="fa-solid fa-xmark text-[23px] text-[#ef5260]"
+                ></i>
 
             </div>
 
-            <form id="withdrawForm">
 
-                <!-- Amount -->
-                <div class="mb-4">
-
-                    <label
-                        for="withdrawAmount"
-                        class="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                        Amount
-                    </label>
-
-                    <div class="relative">
-
-                        <span
-                            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-                        >
-                            ₦
-                        </span>
-
-                        <input
-                            type="number"
-                            id="withdrawAmount"
-                            name="amount"
-                            min="1"
-                            step="0.01"
-                            required
-                            placeholder="0.00"
-                            class="w-full rounded-xl border border-gray-200 py-3 pl-9 pr-4 outline-none focus:border-gray-900"
-                        >
-
-                    </div>
-
-                </div>
-
-                <!-- Account Number -->
-                <div class="mb-4">
-
-                    <label
-                        for="withdrawAccountNumber"
-                        class="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                        Bank Account Number
-                    </label>
-
-                    <input
-                        type="text"
-                        id="withdrawAccountNumber"
-                        name="accountNumber"
-                        required
-                        placeholder="Enter account number"
-                        class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-gray-900"
-                    >
-
-                </div>
-
-                <!-- Account Name -->
-                <div class="mb-4">
-
-                    <label
-                        for="withdrawAccountName"
-                        class="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                        Account Name
-                    </label>
-
-                    <input
-                        type="text"
-                        id="withdrawAccountName"
-                        name="accountName"
-                        required
-                        placeholder="Enter account name"
-                        class="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-gray-900"
-                    >
-
-                </div>
-
-                <!-- Bank -->
-                <div class="mb-6">
-
-                    <label
-                        for="withdrawBank"
-                        class="mb-2 block text-sm font-medium text-gray-700"
-                    >
-                        Bank
-                    </label>
-
-                    <select
-                        id="withdrawBank"
-                        name="bank"
-                        required
-                        class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 outline-none focus:border-gray-900"
-                    >
-                        <option value="">
-                            Select bank
-                        </option>
-
-                        <option value="Access Bank">
-                            Access Bank
-                        </option>
-
-                        <option value="GTBank">
-                            GTBank
-                        </option>
-
-                        <option value="First Bank">
-                            First Bank
-                        </option>
-
-                        <option value="UBA">
-                            UBA
-                        </option>
-
-                        <option value="Zenith Bank">
-                            Zenith Bank
-                        </option>
-
-                        <option value="Opay">
-                            Opay
-                        </option>
-
-                        <option value="Kuda">
-                            Kuda
-                        </option>
-
-                        <option value="Moniepoint">
-                            Moniepoint
-                        </option>
-
-                        <option value="Other">
-                            Other
-                        </option>
-                    </select>
-
-                </div>
-
-                <!-- Buttons -->
-                <div class="flex gap-3">
-
-                    <button
-                        type="button"
-                        id="cancelWithdrawButton"
-                        class="w-1/2 rounded-xl border border-gray-200 px-4 py-3 font-semibold text-gray-700 hover:bg-gray-50"
-                    >
-                        Cancel
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="w-1/2 rounded-xl bg-gray-900 px-4 py-3 font-semibold text-white hover:bg-gray-800"
-                    >
-                        Withdraw
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-
-
-<!-- WITHDRAWAL SUCCESS MODAL -->
-<div
-    id="withdrawSuccessModal"
-    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 px-4"
->
-    <div
-        class="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl"
-    >
-
-        <div
-            class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100"
-        >
-            <i class="fa-solid fa-check text-2xl text-green-600"></i>
-        </div>
-
-        <h2 class="text-xl font-bold text-gray-900">
-            Withdrawal Successful
-        </h2>
-
-        <p class="mt-2 text-sm text-gray-500">
-            Your withdrawal of
-            <span
-                id="withdrawSuccessAmount"
-                class="font-semibold text-gray-900"
+            <h2
+                id="errorModalTitle"
+                class="mt-5 text-[20px] font-bold"
             >
-                ₦0.00
-            </span>
-            has been processed.
-        </p>
+                Something went wrong
+            </h2>
 
-        <button
-            type="button"
-            id="withdrawSuccessBack"
-            class="mt-6 w-full rounded-xl bg-gray-900 px-4 py-3 font-semibold text-white hover:bg-gray-800"
-        >
-            Done
-        </button>
+
+            <p
+                id="errorModalMessage"
+                class="mt-2 text-[12px] leading-5 text-[#888]"
+            >
+                Please try again.
+            </p>
+
+
+            <button
+                id="closeErrorModal"
+                type="button"
+                class="mt-6 h-[45px] w-full rounded-[7px] bg-[#2dbd8d] text-[12px] font-semibold text-white"
+            >
+                Okay
+            </button>
+
+        </div>
 
     </div>
-</div>
-
+    <!-- JAVASCRIPT -->
     <script src="./js/account.js"></script>
 
 </body>
-
 </html>

@@ -1,954 +1,235 @@
 /* =========================================================
    REEN BANK — PROFILE PAGE JAVASCRIPT
-   ---------------------------------------------------------
-   Works with:
-   - reenUsers      -> localStorage
-   - currentUser    -> localStorage OR sessionStorage
+   =========================================================
 
-   Features:
-   - Load current user
-   - Profile information
-   - Profile image upload
-   - Header avatar
-   - Balance display
-   - Balance visibility
-   - Recent transactions
-   - Search transactions
-   - Mobile sidebar
-   - Logout modal
-   - Reset password modal
-   - Password visibility
-   - Password validation
-   - Password update
-   - Storage persistence
+   STORAGE
+   ---------------------------------------------------------
+   localStorage:
+       reenUsers
+       currentUser (legacy compatibility)
+
+   sessionStorage:
+       currentUser
+       pendingEmailChange
+
+   FEATURES
+   ---------------------------------------------------------
+   ✓ Load current user
+   ✓ Profile information
+   ✓ Phone number
+   ✓ Gender
+   ✓ Change name
+   ✓ Change email
+   ✓ Email verification OTP
+   ✓ OTP expiration
+   ✓ OTP resend
+   ✓ Profile picture
+   ✓ Balance
+   ✓ Balance visibility
+   ✓ Account number copy
+   ✓ Recent transactions
+   ✓ Transaction search
+   ✓ Reset password
+   ✓ Logout confirmation
+   ✓ Notifications
+   ✓ Mobile sidebar
+   ✓ Modal system
+   ✓ No alert()
 ========================================================= */
 
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
 
-    /* =====================================================
-       1. STORAGE
-    ===================================================== */
+        /* =====================================================
+           1. STORAGE
+        ===================================================== */
 
-    let users =
-        JSON.parse(
-            localStorage.getItem("reenUsers")
-        ) || [];
+        let users =
+            JSON.parse(
+                localStorage.getItem(
+                    "reenUsers"
+                )
+            ) || [];
 
 
-    let currentUser =
-        JSON.parse(
-            localStorage.getItem("currentUser")
-        ) ||
-        JSON.parse(
-            sessionStorage.getItem("currentUser")
-        ) ||
-        null;
-
-
-
-    /* =====================================================
-       2. CHECK LOGIN
-    ===================================================== */
-
-    if (!currentUser) {
-
-        window.location.href =
-            "./register.html";
-
-        return;
-    }
-
-
-
-    /* =====================================================
-       3. FIND COMPLETE USER
-    ===================================================== */
-
-    let userIndex = -1;
-
-
-    if (currentUser.email) {
-
-        userIndex =
-            users.findIndex(
-                user =>
-                    user.email &&
-                    user.email.toLowerCase() ===
-                    currentUser.email.toLowerCase()
-            );
-    }
-
-
-    /*
-        Fallback using account number.
-    */
-
-    if (
-        userIndex === -1 &&
-        currentUser.accountNumber
-    ) {
-
-        userIndex =
-            users.findIndex(
-                user =>
-                    user.accountNumber ===
-                    currentUser.accountNumber
-            );
-    }
-
-
-    /*
-        Fallback using name.
-    */
-
-    if (
-        userIndex === -1 &&
-        currentUser.name
-    ) {
-
-        userIndex =
-            users.findIndex(
-                user =>
-                    user.name ===
-                    currentUser.name
-            );
-    }
-
-
-    if (userIndex === -1) {
-
-        alert(
-            "Your account could not be found. Please log in again."
-        );
-
-
-        localStorage.removeItem(
-            "currentUser"
-        );
-
-
-        sessionStorage.removeItem(
-            "currentUser"
-        );
-
-
-        window.location.href =
-            "./register.html";
-
-
-        return;
-    }
-
-
-
-    /* =====================================================
-       4. USE COMPLETE USER
-    ===================================================== */
-
-    currentUser =
-        users[userIndex];
-
-
-
-    /* =====================================================
-       5. INITIALIZE USER DATA
-    ===================================================== */
-
-    if (
-        typeof currentUser.balance !==
-        "number"
-    ) {
-
-        currentUser.balance = 0;
-    }
-
-
-    if (
-        typeof currentUser.income !==
-        "number"
-    ) {
-
-        currentUser.income = 0;
-    }
-
-
-    if (
-        typeof currentUser.expense !==
-        "number"
-    ) {
-
-        currentUser.expense = 0;
-    }
-
-
-    if (
-        !Array.isArray(
-            currentUser.transactions
-        )
-    ) {
-
-        currentUser.transactions = [];
-    }
-
-
-    if (
-        !Array.isArray(
-            currentUser.accounts
-        )
-    ) {
-
-        currentUser.accounts = [];
-    }
-
-
-
-    /* =====================================================
-       6. SAVE USER
-    ===================================================== */
-
-    function saveUser() {
-
-        users[userIndex] =
-            currentUser;
-
-
-        localStorage.setItem(
-            "reenUsers",
-            JSON.stringify(users)
-        );
+        let sessionUser = null;
 
 
         /*
-            Keep current session information.
+            Try sessionStorage first.
         */
 
-        const sessionUser = {
-
-            name:
-                currentUser.name,
-
-            email:
-                currentUser.email,
-
-            accountNumber:
-                currentUser.accountNumber
-        };
-
-
-        localStorage.setItem(
-            "currentUser",
-            JSON.stringify(sessionUser)
-        );
-
-
-        sessionStorage.setItem(
-            "currentUser",
-            JSON.stringify(sessionUser)
-        );
-    }
-
-
-
-    /* =====================================================
-       7. HELPER — FORMAT MONEY
-    ===================================================== */
-
-    function formatMoney(amount) {
-
-        return (
-            "₦" +
-            (
-                Number(amount) || 0
-            ).toLocaleString(
-                "en-NG",
-                {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }
-            )
-        );
-    }
-
-
-
-    /* =====================================================
-       8. HELPER — FORMAT DATE
-    ===================================================== */
-
-    function formatDate(date) {
-
-        if (!date) {
-
-            return "Not available";
-        }
-
-
-        const parsedDate =
-            new Date(date);
-
-
-        if (
-            Number.isNaN(
-                parsedDate.getTime()
-            )
-        ) {
-
-            return "Not available";
-        }
-
-
-        return parsedDate.toLocaleDateString(
-            "en-NG",
-            {
-                day: "2-digit",
-                month: "long",
-                year: "numeric"
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       9. HELPER — INITIALS
-    ===================================================== */
-
-    function getInitials(name) {
-
-        if (!name) {
-
-            return "U";
-        }
-
-
-        const words =
-            name
-                .trim()
-                .split(/\s+/)
-                .filter(Boolean);
-
-
-        if (
-            words.length === 1
-        ) {
-
-            return (
-                words[0]
-                    .substring(0, 2)
-                    .toUpperCase()
-            );
-        }
-
-
-        return (
-            words[0].charAt(0) +
-            words[
-                words.length - 1
-            ].charAt(0)
-        ).toUpperCase();
-    }
-
-
-
-    /* =====================================================
-       10. HELPER — MODALS
-    ===================================================== */
-
-    function openModal(modal) {
-
-        if (!modal) {
-            return;
-        }
-
-
-        modal.classList.remove(
-            "hidden"
-        );
-
-
-        modal.classList.add(
-            "flex"
-        );
-
-
-        document.body.classList.add(
-            "overflow-hidden"
-        );
-    }
-
-
-
-    function closeModal(modal) {
-
-        if (!modal) {
-            return;
-        }
-
-
-        modal.classList.add(
-            "hidden"
-        );
-
-
-        modal.classList.remove(
-            "flex"
-        );
-
-
-        const visibleModal =
-            document.querySelector(
-                '[id$="Modal"]:not(.hidden)'
-            );
-
-
-        if (!visibleModal) {
-
-            document.body.classList.remove(
-                "overflow-hidden"
-            );
-        }
-    }
-
-
-
-    /* =====================================================
-       11. LOAD PROFILE INFORMATION
-    ===================================================== */
-
-    const headerUserName =
-        document.getElementById(
-            "headerUserName"
-        );
-
-
-    const accountNumber =
-        document.getElementById(
-            "accountNumber"
-        );
-
-
-    const profileName =
-        document.getElementById(
-            "profileName"
-        );
-
-
-    const profileEmail =
-        document.getElementById(
-            "profileEmail"
-        );
-
-
-    const profilePhone =
-        document.getElementById(
-            "profilePhone"
-        );
-
-
-    const profileGender =
-        document.getElementById(
-            "profileGender"
-        );
-
-
-    const profileAccountNumber =
-        document.getElementById(
-            "profileAccountNumber"
-        );
-
-
-    const profileCreatedAt =
-        document.getElementById(
-            "profileCreatedAt"
-        );
-
-
-
-    /* =====================================================
-       12. NAME
-    ===================================================== */
-
-    const userName =
-        currentUser.name ||
-        "User";
-
-
-    if (headerUserName) {
-
-        headerUserName.textContent =
-            userName;
-    }
-
-
-    if (profileName) {
-
-        profileName.textContent =
-            userName;
-    }
-
-
-
-    /* =====================================================
-       13. EMAIL
-    ===================================================== */
-
-    if (profileEmail) {
-
-        profileEmail.textContent =
-            currentUser.email ||
-            "Not provided";
-    }
-
-
-
-    /* =====================================================
-       14. PHONE
-    ===================================================== */
-
-    if (profilePhone) {
-
-        profilePhone.textContent =
-            currentUser.phone ||
-            currentUser.phoneNumber ||
-            "Not provided";
-    }
-
-
-
-    /* =====================================================
-       15. GENDER
-    ===================================================== */
-
-    if (profileGender) {
-
-        profileGender.textContent =
-            currentUser.gender ||
-            "Not provided";
-    }
-
-
-
-    /* =====================================================
-       16. ACCOUNT NUMBER
-    ===================================================== */
-
-    if (accountNumber) {
-
-        accountNumber.textContent =
-            currentUser.accountNumber ||
-            "0000000000";
-    }
-
-
-    if (profileAccountNumber) {
-
-        profileAccountNumber.textContent =
-            currentUser.accountNumber ||
-            "0000000000";
-    }
-
-
-
-    /* =====================================================
-       17. MEMBER SINCE
-    ===================================================== */
-
-    if (profileCreatedAt) {
-
-        profileCreatedAt.textContent =
-            formatDate(
-                currentUser.createdAt
-            );
-    }
-
-
-
-    /* =====================================================
-       18. PROFILE IMAGE / AVATAR
-    ===================================================== */
-
-    const profileImage =
-        document.getElementById(
-            "profileImage"
-        );
-
-
-    const profileAvatar =
-        document.getElementById(
-            "profileAvatar"
-        );
-
-
-    const savedProfileImage =
-        currentUser.profileImage ||
-        currentUser.profilePicture ||
-        currentUser.avatar ||
-        null;
-
-
-    const initials =
-        getInitials(
-            currentUser.name
-        );
-
-
-
-    function displayProfileImage() {
-
-        const imageSource =
-            currentUser.profileImage ||
-            currentUser.profilePicture ||
-            currentUser.avatar ||
-            null;
-
-
-        /*
-            Large profile image.
-        */
-
-        if (profileImage) {
-
-            profileImage.innerHTML = "";
-
-
-            if (imageSource) {
-
-                const image =
-                    document.createElement(
-                        "img"
-                    );
-
-
-                image.src =
-                    imageSource;
-
-
-                image.alt =
-                    currentUser.name ||
-                    "Profile picture";
-
-
-                image.className =
-                    "h-full w-full object-cover";
-
-
-                profileImage.appendChild(
-                    image
-                );
-
-            } else {
-
-                profileImage.textContent =
-                    initials;
-            }
-        }
-
-
-        /*
-            Header avatar.
-        */
-
-        if (profileAvatar) {
-
-            profileAvatar.innerHTML = "";
-
-
-            if (imageSource) {
-
-                const image =
-                    document.createElement(
-                        "img"
-                    );
-
-
-                image.src =
-                    imageSource;
-
-
-                image.alt =
-                    currentUser.name ||
-                    "Profile picture";
-
-
-                image.className =
-                    "h-full w-full object-cover";
-
-
-                profileAvatar.appendChild(
-                    image
-                );
-
-            } else {
-
-                profileAvatar.textContent =
-                    initials;
-            }
-        }
-    }
-
-
-    displayProfileImage();
-
-
-
-    /* =====================================================
-       19. CHANGE PROFILE IMAGE
-    ===================================================== */
-
-    const editProfileImage =
-        document.getElementById(
-            "editProfileImage"
-        );
-
-
-    const profileImageInput =
-        document.getElementById(
-            "profileImageInput"
-        );
-
-
-    if (editProfileImage) {
-
-        editProfileImage.addEventListener(
-            "click",
-            () => {
-
-                if (profileImageInput) {
-
-                    profileImageInput.click();
-                }
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       20. SAVE PROFILE IMAGE
-    ===================================================== */
-
-    if (profileImageInput) {
-
-        profileImageInput.addEventListener(
-            "change",
-            event => {
-
-                const file =
-                    event.target.files[0];
-
-
-                if (!file) {
-
-                    return;
-                }
-
-
-                /*
-                    Only allow image files.
-                */
-
-                if (
-                    !file.type.startsWith(
-                        "image/"
+        try {
+
+            sessionUser =
+                JSON.parse(
+                    sessionStorage.getItem(
+                        "currentUser"
                     )
-                ) {
+                );
 
-                    alert(
-                        "Please select a valid image file."
+        } catch (error) {
+
+            sessionUser = null;
+
+        }
+
+
+        /*
+            Compatibility with older version.
+        */
+
+        if (!sessionUser) {
+
+            try {
+
+                sessionUser =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "currentUser"
+                        )
                     );
 
+            } catch (error) {
 
-                    profileImageInput.value =
-                        "";
+                sessionUser = null;
 
-
-                    return;
-                }
-
-
-                /*
-                    Limit file size to 5MB.
-                */
-
-                if (
-                    file.size >
-                    5 * 1024 * 1024
-                ) {
-
-                    alert(
-                        "Please choose an image smaller than 5MB."
-                    );
-
-
-                    profileImageInput.value =
-                        "";
-
-
-                    return;
-                }
-
-
-                const reader =
-                    new FileReader();
-
-
-                reader.onload =
-                    function () {
-
-                        currentUser.profileImage =
-                            reader.result;
-
-
-                        saveUser();
-
-
-                        displayProfileImage();
-
-
-                        profileImageInput.value =
-                            "";
-                    };
-
-
-                reader.onerror =
-                    function () {
-
-                        alert(
-                            "Unable to load the selected image."
-                        );
-                    };
-
-
-                reader.readAsDataURL(
-                    file
-                );
             }
-        );
-    }
 
-
-
-    /* =====================================================
-       21. BALANCE
-    ===================================================== */
-
-    const mainAccountBalance =
-        document.getElementById(
-            "mainAccountBalance"
-        );
-
-
-    const balanceToggle =
-        document.getElementById(
-            "balanceToggle"
-        );
-
-
-    const balanceToggleIcon =
-        document.getElementById(
-            "balanceToggleIcon"
-        );
-
-
-    let balanceHidden = false;
-
-
-    function updateBalance() {
-
-        if (!mainAccountBalance) {
-            return;
         }
 
 
-        if (balanceHidden) {
+        /*
+            User is not logged in.
+        */
 
-            mainAccountBalance.textContent =
-                "₦••••••";
+        if (!sessionUser) {
 
-        } else {
-
-            mainAccountBalance.textContent =
-                formatMoney(
-                    currentUser.balance
-                );
-        }
-    }
-
-
-    updateBalance();
-
-
-
-    /* =====================================================
-       22. BALANCE SHOW / HIDE
-    ===================================================== */
-
-    if (balanceToggle) {
-
-        balanceToggle.addEventListener(
-            "click",
-            () => {
-
-                balanceHidden =
-                    !balanceHidden;
-
-
-                updateBalance();
-
-
-                if (
-                    balanceToggleIcon
-                ) {
-
-                    if (balanceHidden) {
-
-                        balanceToggleIcon.className =
-                            "fa-regular fa-eye";
-
-                    } else {
-
-                        balanceToggleIcon.className =
-                            "fa-regular fa-eye-slash";
-                    }
-                }
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       23. PROFILE TRANSACTIONS
-    ===================================================== */
-
-    const profileTransactions =
-        document.getElementById(
-            "profileTransactions"
-        );
-
-
-    const emptyProfileTransactions =
-        document.getElementById(
-            "emptyProfileTransactions"
-        );
-
-
-
-    function renderTransactions() {
-
-        if (!profileTransactions) {
+            window.location.href =
+                "./login.html";
 
             return;
+
         }
 
 
-        profileTransactions.innerHTML =
+
+        /* =====================================================
+           2. FIND COMPLETE USER
+        ===================================================== */
+
+        let currentUser = null;
+
+
+        /*
+            Find using email.
+        */
+
+        if (sessionUser.email) {
+
+            currentUser =
+                users.find(
+                    user =>
+                        String(
+                            user.email || ""
+                        )
+                        .toLowerCase()
+                        ===
+                        String(
+                            sessionUser.email || ""
+                        )
+                        .toLowerCase()
+                );
+
+        }
+
+
+        /*
+            Fallback using name.
+        */
+
+        if (
+            !currentUser &&
+            sessionUser.name
+        ) {
+
+            currentUser =
+                users.find(
+                    user =>
+                        String(
+                            user.name || ""
+                        )
+                        .toLowerCase()
+                        ===
+                        String(
+                            sessionUser.name || ""
+                        )
+                        .toLowerCase()
+                );
+
+        }
+
+
+        /*
+            Final fallback.
+        */
+
+        if (!currentUser) {
+
+            currentUser = {
+                ...sessionUser
+            };
+
+        }
+
+
+
+        /* =====================================================
+           3. NORMALIZE USER
+        ===================================================== */
+
+        currentUser.name =
+            currentUser.name ||
+            "Reen Bank User";
+
+
+        currentUser.email =
+            currentUser.email ||
             "";
 
 
-        const transactions =
+        currentUser.phone =
+            currentUser.phone ||
+            currentUser.phoneNumber ||
+            "";
+
+
+        currentUser.phoneNumber =
+            currentUser.phoneNumber ||
+            currentUser.phone ||
+            "";
+
+
+        currentUser.gender =
+            currentUser.gender ||
+            "";
+
+
+        currentUser.accountNumber =
+            currentUser.accountNumber ||
+            "";
+
+
+        currentUser.balance =
+            Number(
+                currentUser.balance
+            ) || 0;
+
+
+        currentUser.transactions =
             Array.isArray(
                 currentUser.transactions
             )
@@ -956,1284 +237,3694 @@ document.addEventListener("DOMContentLoaded", () => {
                 : [];
 
 
+        currentUser.profileImage =
+            currentUser.profileImage ||
+            currentUser.profilePicture ||
+            currentUser.avatar ||
+            "";
+
+
         /*
-            Show only latest 5.
+            Email verification compatibility.
         */
 
-        const recentTransactions =
-            transactions.slice(
-                0,
-                5
-            );
-
-
         if (
-            recentTransactions.length === 0
+            typeof currentUser.emailVerified
+            !== "boolean"
         ) {
 
-            if (
-                emptyProfileTransactions
-            ) {
-
-                emptyProfileTransactions.classList.remove(
-                    "hidden"
+            currentUser.emailVerified =
+                Boolean(
+                    currentUser.verified
                 );
-            }
 
-
-            return;
         }
 
 
-        if (
-            emptyProfileTransactions
+
+        /* =====================================================
+           4. ELEMENTS
+        ===================================================== */
+
+        const profileName =
+            document.getElementById(
+                "profileName"
+            );
+
+
+        const profileEmail =
+            document.getElementById(
+                "profileEmail"
+            );
+
+
+        const profilePhone =
+            document.getElementById(
+                "profilePhone"
+            );
+
+
+        const profileGender =
+            document.getElementById(
+                "profileGender"
+            );
+
+
+        const profileBalance =
+            document.getElementById(
+                "profileBalance"
+            );
+
+
+        const profileImage =
+            document.getElementById(
+                "profileImage"
+            );
+
+
+        const profileInitials =
+            document.getElementById(
+                "profileInitials"
+            );
+
+
+        const headerUserName =
+            document.getElementById(
+                "headerUserName"
+            );
+
+
+        const headerAccountNumber =
+            document.getElementById(
+                "headerAccountNumber"
+            );
+
+
+        const headerProfileImage =
+            document.getElementById(
+                "headerProfileImage"
+            );
+
+
+        const headerProfileInitials =
+            document.getElementById(
+                "headerProfileInitials"
+            );
+
+
+        const profileTransactionList =
+            document.getElementById(
+                "profileTransactionList"
+            );
+
+
+        const transactionEmptyState =
+            document.getElementById(
+                "transactionEmptyState"
+            );
+
+
+        const transactionSearch =
+            document.getElementById(
+                "transactionSearch"
+            );
+
+
+        const searchResults =
+            document.getElementById(
+                "searchResults"
+            );
+
+
+        const balanceToggle =
+            document.getElementById(
+                "balanceToggle"
+            );
+
+
+        const balanceToggleIcon =
+            document.getElementById(
+                "balanceToggleIcon"
+            );
+
+
+        const notificationButton =
+            document.getElementById(
+                "notificationButton"
+            );
+
+
+        const notificationDot =
+            document.getElementById(
+                "notificationDot"
+            );
+
+
+        const editProfileImageButton =
+            document.getElementById(
+                "editProfileImageButton"
+            );
+
+
+        const profileImageInput =
+            document.getElementById(
+                "profileImageInput"
+            );
+
+
+        const profileImagePreview =
+            document.getElementById(
+                "profileImagePreview"
+            );
+
+
+        const profileImagePreviewInitials =
+            document.getElementById(
+                "profileImagePreviewInitials"
+            );
+
+
+        const profileImageFileName =
+            document.getElementById(
+                "profileImageFileName"
+            );
+
+
+        const resetPasswordButton =
+            document.getElementById(
+                "resetPasswordButton"
+            );
+
+
+        const resetPasswordForm =
+            document.getElementById(
+                "resetPasswordForm"
+            );
+
+
+        const passwordFormError =
+            document.getElementById(
+                "passwordFormError"
+            );
+
+
+        const logoutButton =
+            document.getElementById(
+                "logoutButton"
+            );
+
+
+        const confirmLogoutButton =
+            document.getElementById(
+                "confirmLogoutButton"
+            );
+
+
+        const mobileMenuButton =
+            document.getElementById(
+                "mobileMenuButton"
+            );
+
+
+        const sidebar =
+            document.getElementById(
+                "sidebar"
+            );
+
+
+        const sidebarOverlay =
+            document.getElementById(
+                "sidebarOverlay"
+            );
+
+
+
+        /* =====================================================
+           5. EDIT PROFILE ELEMENTS
+        ===================================================== */
+
+        const editProfileButton =
+            document.getElementById(
+                "editProfileButton"
+            );
+
+
+        const editProfileForm =
+            document.getElementById(
+                "editProfileForm"
+            );
+
+
+        const editProfileName =
+            document.getElementById(
+                "editProfileName"
+            );
+
+
+        const editProfileEmail =
+            document.getElementById(
+                "editProfileEmail"
+            );
+
+
+        const editProfilePhone =
+            document.getElementById(
+                "editProfilePhone"
+            );
+
+
+        const editProfileGender =
+            document.getElementById(
+                "editProfileGender"
+            );
+
+
+        const editProfileError =
+            document.getElementById(
+                "editProfileError"
+            );
+
+
+        const emailChangeHint =
+            document.getElementById(
+                "emailChangeHint"
+            );
+
+
+        const currentEmailVerifiedBadge =
+            document.getElementById(
+                "currentEmailVerifiedBadge"
+            );
+
+
+        const emailVerifiedStatus =
+            document.getElementById(
+                "emailVerifiedStatus"
+            );
+
+
+
+        /* =====================================================
+           6. EMAIL VERIFICATION ELEMENTS
+        ===================================================== */
+
+        const emailVerificationForm =
+            document.getElementById(
+                "emailVerificationForm"
+            );
+
+
+        const emailVerificationCode =
+            document.getElementById(
+                "emailVerificationCode"
+            );
+
+
+        const verificationEmailAddress =
+            document.getElementById(
+                "verificationEmailAddress"
+            );
+
+
+        const emailVerificationError =
+            document.getElementById(
+                "emailVerificationError"
+            );
+
+
+        const resendEmailVerificationButton =
+            document.getElementById(
+                "resendEmailVerificationButton"
+            );
+
+
+
+        /* =====================================================
+           7. FEEDBACK ELEMENTS
+        ===================================================== */
+
+        const feedbackCloseButton =
+            document.getElementById(
+                "feedbackCloseButton"
+            );
+
+
+        const feedbackTitle =
+            document.getElementById(
+                "feedbackTitle"
+            );
+
+
+        const feedbackMessage =
+            document.getElementById(
+                "feedbackMessage"
+            );
+
+
+        const feedbackIcon =
+            document.getElementById(
+                "feedbackIcon"
+            );
+
+
+        const copiedAccountNumber =
+            document.getElementById(
+                "copiedAccountNumber"
+            );
+
+
+
+        /* =====================================================
+           8. MODAL FUNCTIONS
+        ===================================================== */
+
+        function openModal(
+            modalId
         ) {
 
-            emptyProfileTransactions.classList.add(
-                "hidden"
-            );
-        }
-
-
-        recentTransactions.forEach(
-            transaction => {
-
-                const isIncome =
-                    transaction.type ===
-                    "income";
-
-
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                row.className =
-                    "flex items-center justify-between py-4";
-
-
-                /* -----------------------------------------
-                   LEFT
-                ----------------------------------------- */
-
-                const left =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                left.className =
-                    "flex min-w-0 items-center gap-3";
-
-
-                /* ICON */
-
-                const icon =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                icon.className =
-                    isIncome
-                        ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#d8f6ed] text-[#33B786]"
-                        : "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500";
-
-
-                icon.innerHTML =
-                    isIncome
-                        ? '<i class="fa-solid fa-arrow-down"></i>'
-                        : '<i class="fa-solid fa-arrow-up"></i>';
-
-
-                /* DETAILS */
-
-                const details =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                details.className =
-                    "min-w-0";
-
-
-                const description =
-                    document.createElement(
-                        "p"
-                    );
-
-
-                description.className =
-                    "truncate text-sm font-semibold text-gray-800";
-
-
-                description.textContent =
-                    transaction.description ||
-                    transaction.category ||
-                    "Transaction";
-
-
-                const date =
-                    document.createElement(
-                        "p"
-                    );
-
-
-                date.className =
-                    "mt-1 text-xs text-gray-400";
-
-
-                date.textContent =
-                    formatShortDate(
-                        transaction.date
-                    );
-
-
-                details.appendChild(
-                    description
+            const modal =
+                document.getElementById(
+                    modalId
                 );
 
 
-                details.appendChild(
-                    date
-                );
-
-
-                left.appendChild(
-                    icon
-                );
-
-
-                left.appendChild(
-                    details
-                );
-
-
-                /* -----------------------------------------
-                   AMOUNT
-                ----------------------------------------- */
-
-                const amount =
-                    document.createElement(
-                        "p"
-                    );
-
-
-                amount.className =
-                    isIncome
-                        ? "ml-3 shrink-0 text-sm font-semibold text-[#33B786]"
-                        : "ml-3 shrink-0 text-sm font-semibold text-red-500";
-
-
-                amount.textContent =
-                    isIncome
-                        ? "+" +
-                          formatMoney(
-                              transaction.amount
-                          )
-                        : "-" +
-                          formatMoney(
-                              transaction.amount
-                          );
-
-
-                row.appendChild(
-                    left
-                );
-
-
-                row.appendChild(
-                    amount
-                );
-
-
-                profileTransactions.appendChild(
-                    row
-                );
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       24. SHORT DATE
-    ===================================================== */
-
-    function formatShortDate(
-        date
-    ) {
-
-        if (!date) {
-
-            return "Recently";
-        }
-
-
-        const parsedDate =
-            new Date(date);
-
-
-        if (
-            Number.isNaN(
-                parsedDate.getTime()
-            )
-        ) {
-
-            return "Recently";
-        }
-
-
-        return parsedDate.toLocaleDateString(
-            "en-NG",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
-            }
-        );
-    }
-
-
-
-    renderTransactions();
-
-
-
-    /* =====================================================
-       25. SEARCH
-    ===================================================== */
-
-    const searchInput =
-        document.getElementById(
-            "searchInput"
-        );
-
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            "input",
-            () => {
-
-                const query =
-                    searchInput.value
-                        .trim()
-                        .toLowerCase();
-
-
-                if (!query) {
-
-                    renderTransactions();
-
-                    return;
-                }
-
-
-                const transactions =
-                    Array.isArray(
-                        currentUser.transactions
-                    )
-                        ? currentUser.transactions
-                        : [];
-
-
-                const filtered =
-                    transactions.filter(
-                        transaction => {
-
-                            const searchableText =
-                                [
-
-                                    transaction.description,
-
-                                    transaction.category,
-
-                                    transaction.account,
-
-                                    transaction.bank,
-
-                                    transaction.paymentMethod,
-
-                                    transaction.type
-
-                                ]
-                                    .filter(Boolean)
-                                    .join(" ")
-                                    .toLowerCase();
-
-
-                            return searchableText.includes(
-                                query
-                            );
-                        }
-                    );
-
-
-                /*
-                    Temporarily render search results.
-                */
-
-                profileTransactions.innerHTML =
-                    "";
-
-
-                if (
-                    filtered.length === 0
-                ) {
-
-                    if (
-                        emptyProfileTransactions
-                    ) {
-
-                        emptyProfileTransactions.textContent =
-                            "No matching transactions found.";
-
-                        emptyProfileTransactions.classList.remove(
-                            "hidden"
-                        );
-                    }
-
-
-                    return;
-                }
-
-
-                if (
-                    emptyProfileTransactions
-                ) {
-
-                    emptyProfileTransactions.classList.add(
-                        "hidden"
-                    );
-                }
-
-
-                filtered
-                    .slice(0, 5)
-                    .forEach(
-                        transaction => {
-
-                            renderSingleSearchTransaction(
-                                transaction
-                            );
-                        }
-                    );
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       26. SEARCH TRANSACTION ROW
-    ===================================================== */
-
-    function renderSingleSearchTransaction(
-        transaction
-    ) {
-
-        const isIncome =
-            transaction.type ===
-            "income";
-
-
-        const row =
-            document.createElement(
-                "div"
-            );
-
-
-        row.className =
-            "flex items-center justify-between py-4";
-
-
-        const left =
-            document.createElement(
-                "div"
-            );
-
-
-        left.className =
-            "flex min-w-0 items-center gap-3";
-
-
-        const icon =
-            document.createElement(
-                "div"
-            );
-
-
-        icon.className =
-            isIncome
-                ? "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#d8f6ed] text-[#33B786]"
-                : "flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-500";
-
-
-        icon.innerHTML =
-            isIncome
-                ? '<i class="fa-solid fa-arrow-down"></i>'
-                : '<i class="fa-solid fa-arrow-up"></i>';
-
-
-        const details =
-            document.createElement(
-                "div"
-            );
-
-
-        details.className =
-            "min-w-0";
-
-
-        const description =
-            document.createElement(
-                "p"
-            );
-
-
-        description.className =
-            "truncate text-sm font-semibold text-gray-800";
-
-
-        description.textContent =
-            transaction.description ||
-            transaction.category ||
-            "Transaction";
-
-
-        const date =
-            document.createElement(
-                "p"
-            );
-
-
-        date.className =
-            "mt-1 text-xs text-gray-400";
-
-
-        date.textContent =
-            formatShortDate(
-                transaction.date
-            );
-
-
-        details.appendChild(
-            description
-        );
-
-
-        details.appendChild(
-            date
-        );
-
-
-        left.appendChild(
-            icon
-        );
-
-
-        left.appendChild(
-            details
-        );
-
-
-        const amount =
-            document.createElement(
-                "p"
-            );
-
-
-        amount.className =
-            isIncome
-                ? "ml-3 shrink-0 text-sm font-semibold text-[#33B786]"
-                : "ml-3 shrink-0 text-sm font-semibold text-red-500";
-
-
-        amount.textContent =
-            isIncome
-                ? "+" +
-                  formatMoney(
-                      transaction.amount
-                  )
-                : "-" +
-                  formatMoney(
-                      transaction.amount
-                  );
-
-
-        row.appendChild(
-            left
-        );
-
-
-        row.appendChild(
-            amount
-        );
-
-
-        profileTransactions.appendChild(
-            row
-        );
-    }
-
-
-
-    /* =====================================================
-       27. MOBILE SIDEBAR
-    ===================================================== */
-
-    const sidebar =
-        document.getElementById(
-            "sidebar"
-        );
-
-
-    const sidebarOverlay =
-        document.getElementById(
-            "sidebarOverlay"
-        );
-
-
-    const menuButton =
-        document.getElementById(
-            "menuButton"
-        );
-
-
-
-    function openSidebar() {
-
-        if (!sidebar) {
-            return;
-        }
-
-
-        sidebar.classList.remove(
-            "-translate-x-full"
-        );
-
-
-        sidebar.classList.add(
-            "translate-x-0"
-        );
-
-
-        if (sidebarOverlay) {
-
-            sidebarOverlay.classList.remove(
-                "hidden"
-            );
-        }
-
-
-        document.body.classList.add(
-            "overflow-hidden"
-        );
-    }
-
-
-
-    function closeSidebar() {
-
-        if (!sidebar) {
-            return;
-        }
-
-
-        sidebar.classList.remove(
-            "translate-x-0"
-        );
-
-
-        sidebar.classList.add(
-            "-translate-x-full"
-        );
-
-
-        if (sidebarOverlay) {
-
-            sidebarOverlay.classList.add(
-                "hidden"
-            );
-        }
-
-
-        document.body.classList.remove(
-            "overflow-hidden"
-        );
-    }
-
-
-
-    if (menuButton) {
-
-        menuButton.addEventListener(
-            "click",
-            openSidebar
-        );
-    }
-
-
-
-    if (sidebarOverlay) {
-
-        sidebarOverlay.addEventListener(
-            "click",
-            closeSidebar
-        );
-    }
-
-
-
-    /* =====================================================
-       28. CLOSE SIDEBAR WHEN NAV LINK CLICKED
-    ===================================================== */
-
-    document.querySelectorAll(
-        ".dashboard-nav"
-    ).forEach(
-        link => {
-
-            link.addEventListener(
-                "click",
-                () => {
-
-                    closeSidebar();
-                }
-            );
-        }
-    );
-
-
-
-    /* =====================================================
-       29. LOGOUT MODAL
-    ===================================================== */
-
-    const logoutButton =
-        document.getElementById(
-            "logoutButton"
-        );
-
-
-    const logoutModal =
-        document.getElementById(
-            "logoutModal"
-        );
-
-
-    const cancelLogout =
-        document.getElementById(
-            "cancelLogout"
-        );
-
-
-    const confirmLogout =
-        document.getElementById(
-            "confirmLogout"
-        );
-
-
-
-    /* OPEN */
-
-    if (logoutButton) {
-
-        logoutButton.addEventListener(
-            "click",
-            () => {
-
-                closeSidebar();
-
-                openModal(
-                    logoutModal
-                );
-            }
-        );
-    }
-
-
-
-    /* CANCEL */
-
-    if (cancelLogout) {
-
-        cancelLogout.addEventListener(
-            "click",
-            () => {
-
-                closeModal(
-                    logoutModal
-                );
-            }
-        );
-    }
-
-
-
-    /* CONFIRM */
-
-    if (confirmLogout) {
-
-        confirmLogout.addEventListener(
-            "click",
-            () => {
-
-                /*
-                    Do NOT remove reenUsers.
-
-                    That contains the registered
-                    user's account.
-
-                    Only remove login/session data.
-                */
-
-                localStorage.removeItem(
-                    "currentUser"
-                );
-
-
-                sessionStorage.removeItem(
-                    "currentUser"
-                );
-
-
-                window.location.href =
-                    "./register.html";
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       30. RESET PASSWORD MODAL
-    ===================================================== */
-
-    const resetPasswordButton =
-        document.getElementById(
-            "resetPasswordButton"
-        );
-
-
-    const resetPasswordModal =
-        document.getElementById(
-            "resetPasswordModal"
-        );
-
-
-    const cancelResetPassword =
-        document.getElementById(
-            "cancelResetPassword"
-        );
-
-
-    const saveNewPassword =
-        document.getElementById(
-            "saveNewPassword"
-        );
-
-
-    const newPassword =
-        document.getElementById(
-            "newPassword"
-        );
-
-
-    const confirmPassword =
-        document.getElementById(
-            "confirmPassword"
-        );
-
-
-    const passwordMessage =
-        document.getElementById(
-            "passwordMessage"
-        );
-
-
-
-    /* =====================================================
-       31. OPEN RESET PASSWORD
-    ===================================================== */
-
-    if (resetPasswordButton) {
-
-        resetPasswordButton.addEventListener(
-            "click",
-            () => {
-
-                if (newPassword) {
-
-                    newPassword.value =
-                        "";
-                }
-
-
-                if (confirmPassword) {
-
-                    confirmPassword.value =
-                        "";
-                }
-
-
-                if (passwordMessage) {
-
-                    passwordMessage.textContent =
-                        "";
-
-                    passwordMessage.classList.add(
-                        "hidden"
-                    );
-
-                    passwordMessage.classList.remove(
-                        "bg-red-50",
-                        "text-red-600",
-                        "bg-green-50",
-                        "text-green-600"
-                    );
-                }
-
-
-                openModal(
-                    resetPasswordModal
-                );
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       32. CANCEL RESET PASSWORD
-    ===================================================== */
-
-    if (cancelResetPassword) {
-
-        cancelResetPassword.addEventListener(
-            "click",
-            () => {
-
-                closeModal(
-                    resetPasswordModal
-                );
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       33. PASSWORD MESSAGE
-    ===================================================== */
-
-    function showPasswordMessage(
-        message,
-        type
-    ) {
-
-        if (!passwordMessage) {
-
-            return;
-        }
-
-
-        passwordMessage.textContent =
-            message;
-
-
-        passwordMessage.classList.remove(
-            "hidden",
-            "bg-red-50",
-            "text-red-600",
-            "bg-green-50",
-            "text-green-600"
-        );
-
-
-        if (type === "error") {
-
-            passwordMessage.classList.add(
-                "bg-red-50",
-                "text-red-600"
-            );
-
-        } else {
-
-            passwordMessage.classList.add(
-                "bg-green-50",
-                "text-green-600"
-            );
-        }
-    }
-
-
-
-    /* =====================================================
-       34. TOGGLE NEW PASSWORD
-    ===================================================== */
-
-    const toggleNewPassword =
-        document.getElementById(
-            "toggleNewPassword"
-        );
-
-
-    if (toggleNewPassword) {
-
-        toggleNewPassword.addEventListener(
-            "click",
-            () => {
-
-                if (!newPassword) {
-                    return;
-                }
-
-
-                const icon =
-                    toggleNewPassword.querySelector(
-                        "i"
-                    );
-
-
-                if (
-                    newPassword.type ===
-                    "password"
-                ) {
-
-                    newPassword.type =
-                        "text";
-
-
-                    if (icon) {
-
-                        icon.className =
-                            "fa-solid fa-eye-slash";
-                    }
-
-                } else {
-
-                    newPassword.type =
-                        "password";
-
-
-                    if (icon) {
-
-                        icon.className =
-                            "fa-solid fa-eye";
-                    }
-                }
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       35. TOGGLE CONFIRM PASSWORD
-    ===================================================== */
-
-    const toggleConfirmPassword =
-        document.getElementById(
-            "toggleConfirmPassword"
-        );
-
-
-    if (toggleConfirmPassword) {
-
-        toggleConfirmPassword.addEventListener(
-            "click",
-            () => {
-
-                if (!confirmPassword) {
-                    return;
-                }
-
-
-                const icon =
-                    toggleConfirmPassword.querySelector(
-                        "i"
-                    );
-
-
-                if (
-                    confirmPassword.type ===
-                    "password"
-                ) {
-
-                    confirmPassword.type =
-                        "text";
-
-
-                    if (icon) {
-
-                        icon.className =
-                            "fa-solid fa-eye-slash";
-                    }
-
-                } else {
-
-                    confirmPassword.type =
-                        "password";
-
-
-                    if (icon) {
-
-                        icon.className =
-                            "fa-solid fa-eye";
-                    }
-                }
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       36. SAVE NEW PASSWORD
-    ===================================================== */
-
-    if (saveNewPassword) {
-
-        saveNewPassword.addEventListener(
-            "click",
-            () => {
-
-                if (
-                    !newPassword ||
-                    !confirmPassword
-                ) {
-
-                    return;
-                }
-
-
-                const password =
-                    newPassword.value;
-
-
-                const confirmation =
-                    confirmPassword.value;
-
-
-
-                /* -----------------------------------------
-                   EMPTY
-                ----------------------------------------- */
-
-                if (!password) {
-
-                    showPasswordMessage(
-                        "Please enter a new password.",
-                        "error"
-                    );
-
-                    return;
-                }
-
-
-
-                /* -----------------------------------------
-                   MINIMUM LENGTH
-                ----------------------------------------- */
-
-                if (
-                    password.length < 8
-                ) {
-
-                    showPasswordMessage(
-                        "Password must be at least 8 characters.",
-                        "error"
-                    );
-
-                    return;
-                }
-
-
-
-                /* -----------------------------------------
-                   MATCH
-                ----------------------------------------- */
-
-                if (
-                    password !==
-                    confirmation
-                ) {
-
-                    showPasswordMessage(
-                        "Passwords do not match.",
-                        "error"
-                    );
-
-                    return;
-                }
-
-
-
-                /* -----------------------------------------
-                   PREVENT SAME PASSWORD
-                ----------------------------------------- */
-
-                if (
-                    currentUser.password ===
-                    password
-                ) {
-
-                    showPasswordMessage(
-                        "Your new password must be different from your current password.",
-                        "error"
-                    );
-
-                    return;
-                }
-
-
-
-                /* -----------------------------------------
-                   UPDATE
-                ----------------------------------------- */
-
-                currentUser.password =
-                    password;
-
-
-                saveUser();
-
-
-
-                showPasswordMessage(
-                    "Password updated successfully.",
-                    "success"
-                );
-
-
-                /*
-                    Close modal after a short delay.
-                */
-
-                setTimeout(
-                    () => {
-
-                        closeModal(
-                            resetPasswordModal
-                        );
-
-                    },
-                    1200
-                );
-            }
-        );
-    }
-
-
-
-    /* =====================================================
-       37. CLOSE MODALS BY CLICKING OUTSIDE
-    ===================================================== */
-
-    document.querySelectorAll(
-        '[id$="Modal"]'
-    ).forEach(
-        modal => {
-
-            modal.addEventListener(
-                "click",
-                event => {
-
-                    /*
-                        Close only if the user clicks
-                        the overlay itself.
-                    */
-
-                    if (
-                        event.target ===
-                        modal
-                    ) {
-
-                        closeModal(
-                            modal
-                        );
-                    }
-                }
-            );
-        }
-    );
-
-
-
-    /* =====================================================
-       38. ESC KEY
-    ===================================================== */
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key !==
-                "Escape"
-            ) {
-
+            if (!modal) {
                 return;
             }
 
 
-            closeModal(
-                logoutModal
+            modal.classList.remove(
+                "hidden"
             );
 
 
-            closeModal(
-                resetPasswordModal
+            modal.classList.add(
+                "flex"
             );
 
 
-            closeSidebar();
+            document.body.classList.add(
+                "overflow-hidden"
+            );
+
         }
-    );
 
 
 
-    /* =====================================================
-       39. INITIAL SAVE
-    ===================================================== */
+        function closeModal(
+            modalId
+        ) {
 
-    saveUser();
+            const modal =
+                document.getElementById(
+                    modalId
+                );
+
+
+            if (!modal) {
+                return;
+            }
+
+
+            modal.classList.add(
+                "hidden"
+            );
+
+
+            modal.classList.remove(
+                "flex"
+            );
+
+
+            const visibleModal =
+                document.querySelector(
+                    '[id$="Modal"]:not(.hidden)'
+                );
+
+
+            if (!visibleModal) {
+
+                document.body.classList.remove(
+                    "overflow-hidden"
+                );
+
+            }
+
+        }
 
 
 
-    /* =====================================================
-       40. DEBUG
-    ===================================================== */
+        /* =====================================================
+           9. FEEDBACK MODAL
+        ===================================================== */
 
-    console.log(
-        "===================================="
-    );
+        function showFeedback(
+            title,
+            message,
+            type = "success"
+        ) {
 
-    console.log(
-        "REEN BANK PROFILE PAGE"
-    );
+            if (
+                !feedbackTitle ||
+                !feedbackMessage ||
+                !feedbackIcon
+            ) {
+                return;
+            }
 
-    console.log(
-        "Current User:",
-        currentUser
-    );
 
-    console.log(
-        "Balance:",
-        currentUser.balance
-    );
+            feedbackTitle.textContent =
+                title;
 
-    console.log(
-        "Transactions:",
-        currentUser.transactions
-    );
 
-    console.log(
-        "===================================="
-    );
+            feedbackMessage.textContent =
+                message;
 
-});
+
+            if (
+                type === "error"
+            ) {
+
+                feedbackIcon.className =
+                    "mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#fff0f2] text-[#ef5368]";
+
+
+                feedbackIcon.innerHTML =
+                    '<i class="fa-solid fa-xmark"></i>';
+
+            } else {
+
+                feedbackIcon.className =
+                    "mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e3f7f0] text-[#2db88a]";
+
+
+                feedbackIcon.innerHTML =
+                    '<i class="fa-solid fa-check"></i>';
+
+            }
+
+
+            openModal(
+                "feedbackModal"
+            );
+
+        }
+
+
+        if (
+            feedbackCloseButton
+        ) {
+
+            feedbackCloseButton.addEventListener(
+                "click",
+                () => {
+
+                    closeModal(
+                        "feedbackModal"
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           10. INITIALS
+        ===================================================== */
+
+        function getInitials(
+            name
+        ) {
+
+            if (!name) {
+                return "RB";
+            }
+
+
+            const parts =
+                String(name)
+                    .trim()
+                    .split(/\s+/)
+                    .filter(Boolean);
+
+
+            if (
+                parts.length === 1
+            ) {
+
+                return parts[0]
+                    .substring(0, 2)
+                    .toUpperCase();
+
+            }
+
+
+            return (
+                parts[0][0] +
+                parts[
+                    parts.length - 1
+                ][0]
+            ).toUpperCase();
+
+        }
+
+
+        /* =====================================================
+           11. CURRENCY
+        ===================================================== */
+
+        function formatCurrency(
+            amount
+        ) {
+
+            const number =
+                Number(amount) || 0;
+
+
+            return (
+                "₦ " +
+                number.toLocaleString(
+                    "en-NG",
+                    {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }
+                )
+            );
+
+        }
+
+
+
+        /* =====================================================
+           12. DATE
+        ===================================================== */
+
+        function formatTransactionDate(
+            transaction
+        ) {
+
+            const rawDate =
+                transaction.date ||
+                transaction.createdAt ||
+                transaction.timestamp ||
+                transaction.time;
+
+
+            if (!rawDate) {
+
+                return "Date unavailable";
+
+            }
+
+
+            const date =
+                new Date(
+                    rawDate
+                );
+
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return String(
+                    rawDate
+                );
+
+            }
+
+
+            const day =
+                String(
+                    date.getDate()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const month =
+                date.toLocaleString(
+                    "en-GB",
+                    {
+                        month: "short"
+                    }
+                );
+
+
+            const year =
+                date.getFullYear();
+
+
+            const hours =
+                String(
+                    date.getHours()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            const minutes =
+                String(
+                    date.getMinutes()
+                ).padStart(
+                    2,
+                    "0"
+                );
+
+
+            return (
+                `${day}.${month}.${year} - ${hours}:${minutes}`
+            );
+
+        }
+
+
+
+        /* =====================================================
+           13. TRANSACTION TYPE
+        ===================================================== */
+
+        function isCreditTransaction(
+            transaction
+        ) {
+
+            const direction =
+                String(
+                    transaction.direction ||
+                    ""
+                ).toLowerCase();
+
+
+            const type =
+                String(
+                    transaction.type ||
+                    transaction.transactionType ||
+                    ""
+                ).toLowerCase();
+
+
+            const category =
+                String(
+                    transaction.category ||
+                    ""
+                ).toLowerCase();
+
+
+            if (
+                direction === "credit" ||
+                direction === "income"
+            ) {
+
+                return true;
+
+            }
+
+
+            if (
+                type === "income" ||
+                type === "deposit" ||
+                type === "credit" ||
+                type === "funding"
+            ) {
+
+                return true;
+
+            }
+
+
+            if (
+                category === "deposit" ||
+                category === "income" ||
+                category === "funding"
+            ) {
+
+                return true;
+
+            }
+
+
+            if (
+                direction === "debit" ||
+                direction === "expense"
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                type === "expense" ||
+                type === "withdrawal" ||
+                type === "debit"
+            ) {
+
+                return false;
+
+            }
+
+
+            const amount =
+                Number(
+                    transaction.amount
+                ) || 0;
+
+
+            return amount >= 0;
+
+        }
+
+
+
+        /* =====================================================
+           14. TRANSACTION NAME
+        ===================================================== */
+
+        function getTransactionName(
+            transaction
+        ) {
+
+            return (
+                transaction.description ||
+                transaction.name ||
+                transaction.title ||
+                transaction.accountName ||
+                transaction.recipient ||
+                transaction.sender ||
+                "Transaction"
+            );
+
+        }
+
+
+
+        /* =====================================================
+           15. TRANSACTION AMOUNT
+        ===================================================== */
+
+        function getTransactionAmount(
+            transaction
+        ) {
+
+            return Math.abs(
+                Number(
+                    transaction.amount ||
+                    transaction.value ||
+                    0
+                )
+            );
+
+        }
+
+
+
+        /* =====================================================
+           16. HTML ESCAPE
+        ===================================================== */
+
+        function escapeHTML(
+            value
+        ) {
+
+            return String(
+                value
+            )
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+
+        /* =====================================================
+           17. RENDER PROFILE
+        ===================================================== */
+
+        function renderProfile() {
+
+            if (profileName) {
+
+                profileName.textContent =
+                    currentUser.name;
+
+            }
+
+
+            if (profileEmail) {
+
+                profileEmail.textContent =
+                    currentUser.email ||
+                    "Not provided";
+
+            }
+
+
+            if (profilePhone) {
+
+                profilePhone.textContent =
+                    currentUser.phone ||
+                    currentUser.phoneNumber ||
+                    "Not provided";
+
+            }
+
+
+            if (profileGender) {
+
+                profileGender.textContent =
+                    currentUser.gender ||
+                    "Not provided";
+
+            }
+
+
+            if (headerUserName) {
+
+                headerUserName.textContent =
+                    currentUser.name;
+
+            }
+
+
+            if (headerAccountNumber) {
+
+                headerAccountNumber.textContent =
+                    currentUser.accountNumber ||
+                    "0000000000";
+
+            }
+
+
+            renderEmailVerificationStatus();
+
+            renderProfileImages();
+
+            renderBalance();
+
+            renderTransactions(
+                currentUser.transactions
+            );
+
+        }
+
+
+
+        /* =====================================================
+           18. EMAIL VERIFIED STATUS
+        ===================================================== */
+
+        function renderEmailVerificationStatus() {
+
+            const verified =
+                Boolean(
+                    currentUser.emailVerified ||
+                    currentUser.verified
+                );
+
+
+            if (
+                emailVerifiedStatus
+            ) {
+
+                if (verified) {
+
+                    emailVerifiedStatus.classList.remove(
+                        "hidden"
+                    );
+
+                    emailVerifiedStatus.classList.add(
+                        "flex"
+                    );
+
+                } else {
+
+                    emailVerifiedStatus.classList.add(
+                        "hidden"
+                    );
+
+                    emailVerifiedStatus.classList.remove(
+                        "flex"
+                    );
+
+                }
+
+            }
+
+
+            if (
+                currentEmailVerifiedBadge
+            ) {
+
+                if (verified) {
+
+                    currentEmailVerifiedBadge.classList.remove(
+                        "hidden"
+                    );
+
+                } else {
+
+                    currentEmailVerifiedBadge.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            }
+
+        }
+
+
+
+        /* =====================================================
+           19. PROFILE IMAGES
+        ===================================================== */
+
+        function renderProfileImages() {
+
+            const initials =
+                getInitials(
+                    currentUser.name
+                );
+
+
+            const image =
+                currentUser.profileImage;
+
+
+            /*
+                Main image
+            */
+
+            if (
+                image &&
+                profileImage
+            ) {
+
+                profileImage.src =
+                    image;
+
+                profileImage.classList.remove(
+                    "hidden"
+                );
+
+
+                if (
+                    profileInitials
+                ) {
+
+                    profileInitials.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            } else {
+
+                if (
+                    profileImage
+                ) {
+
+                    profileImage.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (
+                    profileInitials
+                ) {
+
+                    profileInitials.textContent =
+                        initials;
+
+                    profileInitials.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+            }
+
+
+
+            /*
+                Header image
+            */
+
+            if (
+                image &&
+                headerProfileImage
+            ) {
+
+                headerProfileImage.src =
+                    image;
+
+                headerProfileImage.classList.remove(
+                    "hidden"
+                );
+
+
+                if (
+                    headerProfileInitials
+                ) {
+
+                    headerProfileInitials.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            } else {
+
+                if (
+                    headerProfileImage
+                ) {
+
+                    headerProfileImage.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (
+                    headerProfileInitials
+                ) {
+
+                    headerProfileInitials.textContent =
+                        initials;
+
+                    headerProfileInitials.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+            }
+
+
+
+            /*
+                Modal preview
+            */
+
+            if (
+                image &&
+                profileImagePreview
+            ) {
+
+                profileImagePreview.src =
+                    image;
+
+                profileImagePreview.classList.remove(
+                    "hidden"
+                );
+
+
+                if (
+                    profileImagePreviewInitials
+                ) {
+
+                    profileImagePreviewInitials.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            } else {
+
+                if (
+                    profileImagePreview
+                ) {
+
+                    profileImagePreview.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+
+                if (
+                    profileImagePreviewInitials
+                ) {
+
+                    profileImagePreviewInitials.textContent =
+                        initials;
+
+                    profileImagePreviewInitials.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+            }
+
+        }
+
+
+
+        /* =====================================================
+           20. BALANCE
+        ===================================================== */
+
+        let balanceVisible =
+            true;
+
+
+        function renderBalance() {
+
+            if (
+                !profileBalance
+            ) {
+                return;
+            }
+
+
+            if (
+                balanceVisible
+            ) {
+
+                profileBalance.textContent =
+                    formatCurrency(
+                        currentUser.balance
+                    );
+
+
+                if (
+                    balanceToggleIcon
+                ) {
+
+                    balanceToggleIcon.className =
+                        "fa-regular fa-eye-slash text-[17px]";
+
+                }
+
+
+                if (
+                    balanceToggle
+                ) {
+
+                    balanceToggle.title =
+                        "Hide balance";
+
+                }
+
+            } else {
+
+                profileBalance.textContent =
+                    "₦ ••••••";
+
+
+                if (
+                    balanceToggleIcon
+                ) {
+
+                    balanceToggleIcon.className =
+                        "fa-regular fa-eye text-[17px]";
+
+                }
+
+
+                if (
+                    balanceToggle
+                ) {
+
+                    balanceToggle.title =
+                        "Show balance";
+
+                }
+
+            }
+
+        }
+
+
+        if (
+            balanceToggle
+        ) {
+
+            balanceToggle.addEventListener(
+                "click",
+                () => {
+
+                    balanceVisible =
+                        !balanceVisible;
+
+                    renderBalance();
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           21. TRANSACTIONS
+        ===================================================== */
+
+        function renderTransactions(
+            transactions
+        ) {
+
+            if (
+                !profileTransactionList
+            ) {
+                return;
+            }
+
+
+            profileTransactionList.innerHTML =
+                "";
+
+
+            if (
+                !Array.isArray(
+                    transactions
+                ) ||
+                transactions.length === 0
+            ) {
+
+                profileTransactionList.classList.add(
+                    "hidden"
+                );
+
+
+                if (
+                    transactionEmptyState
+                ) {
+
+                    transactionEmptyState.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+                return;
+
+            }
+
+
+            profileTransactionList.classList.remove(
+                "hidden"
+            );
+
+
+            if (
+                transactionEmptyState
+            ) {
+
+                transactionEmptyState.classList.add(
+                    "hidden"
+                );
+
+            }
+
+
+            const sortedTransactions =
+                [...transactions]
+                    .sort(
+                        (
+                            a,
+                            b
+                        ) => {
+
+                            const dateA =
+                                new Date(
+                                    a.createdAt ||
+                                    a.date ||
+                                    a.timestamp ||
+                                    0
+                                ).getTime();
+
+
+                            const dateB =
+                                new Date(
+                                    b.createdAt ||
+                                    b.date ||
+                                    b.timestamp ||
+                                    0
+                                ).getTime();
+
+
+                            return (
+                                dateB -
+                                dateA
+                            );
+
+                        }
+                    )
+                    .slice(
+                        0,
+                        7
+                    );
+
+
+            sortedTransactions.forEach(
+                transaction => {
+
+
+                    const credit =
+                        isCreditTransaction(
+                            transaction
+                        );
+
+
+                    const amount =
+                        getTransactionAmount(
+                            transaction
+                        );
+
+
+                    const name =
+                        getTransactionName(
+                            transaction
+                        );
+
+
+                    const date =
+                        formatTransactionDate(
+                            transaction
+                        );
+
+
+                    const row =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    row.className =
+                        "flex min-h-[43px] items-center justify-between gap-2 py-[7px]";
+
+
+                    row.dataset.search =
+                        `${name} ${date} ${amount}`
+                            .toLowerCase();
+
+
+                    row.innerHTML = `
+
+                        <div
+                            class="min-w-0 flex-1"
+                        >
+
+                            <p
+                                class="truncate text-[11px] font-medium text-[#777]"
+                                title="${escapeHTML(name)}"
+                            >
+                                ${escapeHTML(name)}
+                            </p>
+
+                        </div>
+
+
+                        <p
+                            class="w-[112px] shrink-0 text-[10px] text-[#858585]"
+                        >
+                            ${escapeHTML(date)}
+                        </p>
+
+
+                        <p
+                            class="w-[78px] shrink-0 text-right text-[11px] font-medium ${
+                                credit
+                                    ? "text-[#1cb782]"
+                                    : "text-[#f15467]"
+                            }"
+                        >
+                            ${credit ? "+" : "-"}${formatCurrency(amount)}
+                        </p>
+
+                    `;
+
+
+                    profileTransactionList.appendChild(
+                        row
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           22. SEARCH
+        ===================================================== */
+
+        if (
+            transactionSearch
+        ) {
+
+            transactionSearch.addEventListener(
+                "input",
+                event => {
+
+                    const query =
+                        event.target.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    const rows =
+                        profileTransactionList
+                            ?.querySelectorAll(
+                                "[data-search]"
+                            );
+
+
+                    if (
+                        !query
+                    ) {
+
+                        rows?.forEach(
+                            row =>
+                                row.classList.remove(
+                                    "hidden"
+                                )
+                        );
+
+
+                        searchResults?.classList.add(
+                            "hidden"
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    let matches =
+                        0;
+
+
+                    rows?.forEach(
+                        row => {
+
+                            const text =
+                                row.dataset.search ||
+                                "";
+
+
+                            if (
+                                text.includes(
+                                    query
+                                )
+                            ) {
+
+                                row.classList.remove(
+                                    "hidden"
+                                );
+
+                                matches++;
+
+                            } else {
+
+                                row.classList.add(
+                                    "hidden"
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    if (
+                        searchResults
+                    ) {
+
+                        searchResults.innerHTML = `
+
+                            <div class="px-4 py-3">
+
+                                <p class="text-[11px] font-semibold text-[#333]">
+                                    ${matches}
+                                    ${
+                                        matches === 1
+                                            ? "transaction"
+                                            : "transactions"
+                                    }
+                                    found
+                                </p>
+
+                            </div>
+
+                        `;
+
+
+                        searchResults.classList.remove(
+                            "hidden"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           23. CLOSE SEARCH
+        ===================================================== */
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    searchResults &&
+                    transactionSearch &&
+                    !transactionSearch.contains(
+                        event.target
+                    ) &&
+                    !searchResults.contains(
+                        event.target
+                    )
+                ) {
+
+                    searchResults.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           24. COPY ACCOUNT NUMBER
+        ===================================================== */
+
+        if (
+            headerAccountNumber
+        ) {
+
+            headerAccountNumber.addEventListener(
+                "click",
+                async () => {
+
+                    const accountNumber =
+                        currentUser.accountNumber;
+
+
+                    if (
+                        !accountNumber
+                    ) {
+
+                        showFeedback(
+                            "Account Number",
+                            "Your account number is not available yet.",
+                            "error"
+                        );
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        await navigator.clipboard.writeText(
+                            String(
+                                accountNumber
+                            )
+                        );
+
+                    } catch (error) {
+
+                        const textarea =
+                            document.createElement(
+                                "textarea"
+                            );
+
+
+                        textarea.value =
+                            String(
+                                accountNumber
+                            );
+
+
+                        document.body.appendChild(
+                            textarea
+                        );
+
+
+                        textarea.select();
+
+
+                        document.execCommand(
+                            "copy"
+                        );
+
+
+                        textarea.remove();
+
+                    }
+
+
+                    if (
+                        copiedAccountNumber
+                    ) {
+
+                        copiedAccountNumber.textContent =
+                            accountNumber;
+
+                    }
+
+
+                    openModal(
+                        "copyAccountModal"
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           25. PROFILE IMAGE MODAL
+        ===================================================== */
+
+        if (
+            editProfileImageButton
+        ) {
+
+            editProfileImageButton.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        profileImageInput
+                    ) {
+
+                        profileImageInput.value =
+                            "";
+
+                    }
+
+
+                    if (
+                        profileImageFileName
+                    ) {
+
+                        profileImageFileName.textContent =
+                            "Choose image";
+
+                    }
+
+
+                    renderProfileImages();
+
+
+                    openModal(
+                        "profileImageModal"
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           26. IMAGE PREVIEW
+        ===================================================== */
+
+        if (
+            profileImageInput
+        ) {
+
+            profileImageInput.addEventListener(
+                "change",
+                event => {
+
+                    const file =
+                        event.target.files?.[0];
+
+
+                    if (
+                        !file
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        file.size >
+                        5 *
+                        1024 *
+                        1024
+                    ) {
+
+                        profileImageInput.value =
+                            "";
+
+
+                        showFeedback(
+                            "Image Too Large",
+                            "Please choose an image smaller than 5 MB.",
+                            "error"
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    if (
+                        !file.type.startsWith(
+                            "image/"
+                        )
+                    ) {
+
+                        profileImageInput.value =
+                            "";
+
+
+                        showFeedback(
+                            "Invalid Image",
+                            "Please choose a JPG, PNG, or WEBP image.",
+                            "error"
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    if (
+                        profileImageFileName
+                    ) {
+
+                        profileImageFileName.textContent =
+                            file.name;
+
+                    }
+
+
+                    const reader =
+                        new FileReader();
+
+
+                    reader.onload =
+                        event => {
+
+                            if (
+                                profileImagePreview
+                            ) {
+
+                                profileImagePreview.src =
+                                    event.target.result;
+
+
+                                profileImagePreview.classList.remove(
+                                    "hidden"
+                                );
+
+                            }
+
+
+                            if (
+                                profileImagePreviewInitials
+                            ) {
+
+                                profileImagePreviewInitials.classList.add(
+                                    "hidden"
+                                );
+
+                            }
+
+                        };
+
+
+                    reader.readAsDataURL(
+                        file
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           27. SAVE PROFILE IMAGE
+        ===================================================== */
+
+        const profileImageForm =
+            document.getElementById(
+                "profileImageForm"
+            );
+
+
+        if (
+            profileImageForm
+        ) {
+
+            profileImageForm.addEventListener(
+                "submit",
+                event => {
+
+                    event.preventDefault();
+
+
+                    const file =
+                        profileImageInput
+                            ?.files?.[0];
+
+
+                    if (
+                        !file
+                    ) {
+
+                        showFeedback(
+                            "Choose an Image",
+                            "Please select a profile picture before saving.",
+                            "error"
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    const reader =
+                        new FileReader();
+
+
+                    reader.onload =
+                        event => {
+
+                            currentUser.profileImage =
+                                event.target.result;
+
+
+                            saveCurrentUser();
+
+
+                            renderProfileImages();
+
+
+                            closeModal(
+                                "profileImageModal"
+                            );
+
+
+                            showFeedback(
+                                "Profile Picture Updated",
+                                "Your profile picture has been updated successfully."
+                            );
+
+                        };
+
+
+                    reader.readAsDataURL(
+                        file
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           28. OPEN EDIT PROFILE
+        ===================================================== */
+
+        if (
+            editProfileButton
+        ) {
+
+            editProfileButton.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        editProfileName
+                    ) {
+
+                        editProfileName.value =
+                            currentUser.name ||
+                            "";
+
+                    }
+
+
+                    if (
+                        editProfileEmail
+                    ) {
+
+                        editProfileEmail.value =
+                            currentUser.email ||
+                            "";
+
+                    }
+
+
+                    if (
+                        editProfilePhone
+                    ) {
+
+                        editProfilePhone.value =
+                            currentUser.phone ||
+                            currentUser.phoneNumber ||
+                            "";
+
+                    }
+
+
+                    if (
+                        editProfileGender
+                    ) {
+
+                        editProfileGender.value =
+                            currentUser.gender ||
+                            "";
+
+                    }
+
+
+                    editProfileError?.classList.add(
+                        "hidden"
+                    );
+
+
+                    emailChangeHint?.classList.add(
+                        "hidden"
+                    );
+
+
+                    openModal(
+                        "editProfileModal"
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           29. EMAIL CHANGE HINT
+        ===================================================== */
+
+        if (
+            editProfileEmail
+        ) {
+
+            editProfileEmail.addEventListener(
+                "input",
+                () => {
+
+                    const oldEmail =
+                        String(
+                            currentUser.email ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    const newEmail =
+                        String(
+                            editProfileEmail.value ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    if (
+                        newEmail &&
+                        newEmail !== oldEmail
+                    ) {
+
+                        emailChangeHint?.classList.remove(
+                            "hidden"
+                        );
+
+                    } else {
+
+                        emailChangeHint?.classList.add(
+                            "hidden"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           30. SAVE PROFILE
+        ===================================================== */
+
+        if (
+            editProfileForm
+        ) {
+
+            editProfileForm.addEventListener(
+                "submit",
+                event => {
+
+                    event.preventDefault();
+
+
+                    editProfileError?.classList.add(
+                        "hidden"
+                    );
+
+
+                    const newName =
+                        editProfileName.value
+                            .trim();
+
+
+                    const newEmail =
+                        editProfileEmail.value
+                            .trim()
+                            .toLowerCase();
+
+
+                    const newPhone =
+                        editProfilePhone.value
+                            .trim();
+
+
+                    const newGender =
+                        editProfileGender.value;
+
+
+                    /*
+                        Name
+                    */
+
+                    if (
+                        !newName
+                    ) {
+
+                        showEditProfileError(
+                            "Please enter your full name."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Email
+                    */
+
+                    if (
+                        !newEmail
+                    ) {
+
+                        showEditProfileError(
+                            "Please enter your email address."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const emailPattern =
+                        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+                    if (
+                        !emailPattern.test(
+                            newEmail
+                        )
+                    ) {
+
+                        showEditProfileError(
+                            "Please enter a valid email address."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Old email
+                    */
+
+                    const oldEmail =
+                        String(
+                            currentUser.email ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    const emailChanged =
+                        newEmail !==
+                        oldEmail;
+
+
+                    /*
+                        Check duplicate
+                    */
+
+                    if (
+                        emailChanged
+                    ) {
+
+                        const duplicate =
+                            users.some(
+                                user => {
+
+                                    const userEmail =
+                                        String(
+                                            user.email ||
+                                            ""
+                                        )
+                                            .trim()
+                                            .toLowerCase();
+
+
+                                    return (
+                                        userEmail ===
+                                        newEmail
+                                    );
+
+                                }
+                            );
+
+
+                        if (
+                            duplicate
+                        ) {
+
+                            showEditProfileError(
+                                "This email address is already registered to another Reen Bank account."
+                            );
+
+                            return;
+
+                        }
+
+                    }
+
+
+                    /*
+                        Always save these.
+                    */
+
+                    currentUser.name =
+                        newName;
+
+
+                    currentUser.phone =
+                        newPhone;
+
+
+                    currentUser.phoneNumber =
+                        newPhone;
+
+
+                    currentUser.gender =
+                        newGender;
+
+
+                    /*
+                        Email changed?
+                    */
+
+                    if (
+                        emailChanged
+                    ) {
+
+                        /*
+                            Save phone/gender/name first,
+                            but don't change email.
+                        */
+
+                        saveCurrentUser();
+
+
+                        startEmailVerification(
+                            newEmail
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                        No email change.
+                    */
+
+                    saveCurrentUser();
+
+
+                    renderProfile();
+
+
+                    closeModal(
+                        "editProfileModal"
+                    );
+
+
+                    showFeedback(
+                        "Profile Updated",
+                        "Your profile information has been updated successfully."
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           31. PROFILE ERROR
+        ===================================================== */
+
+        function showEditProfileError(
+            message
+        ) {
+
+            if (
+                !editProfileError
+            ) {
+                return;
+            }
+
+
+            editProfileError.textContent =
+                message;
+
+
+            editProfileError.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+
+        /* =====================================================
+           32. EMAIL VERIFICATION STATE
+        ===================================================== */
+
+        let pendingEmailChange =
+            null;
+
+
+        /*
+            Recover pending request.
+        */
+
+        try {
+
+            const savedPending =
+                sessionStorage.getItem(
+                    "pendingEmailChange"
+                );
+
+
+            if (
+                savedPending
+            ) {
+
+                pendingEmailChange =
+                    JSON.parse(
+                        savedPending
+                    );
+
+            }
+
+        } catch (error) {
+
+            pendingEmailChange =
+                null;
+
+        }
+
+
+
+        /* =====================================================
+           33. GENERATE OTP
+        ===================================================== */
+
+        function generateEmailOTP() {
+
+            return String(
+                Math.floor(
+                    100000 +
+                    Math.random() *
+                    900000
+                )
+            );
+
+        }
+
+
+
+        /* =====================================================
+           34. START EMAIL VERIFICATION
+        ===================================================== */
+
+        function startEmailVerification(
+            newEmail
+        ) {
+
+            const code =
+                generateEmailOTP();
+
+
+            pendingEmailChange = {
+
+                email:
+                    newEmail,
+
+                code:
+                    code,
+
+                expiresAt:
+                    Date.now() +
+                    (
+                        10 *
+                        60 *
+                        1000
+                    )
+
+            };
+
+
+            sessionStorage.setItem(
+                "pendingEmailChange",
+                JSON.stringify(
+                    pendingEmailChange
+                )
+            );
+
+
+            if (
+                verificationEmailAddress
+            ) {
+
+                verificationEmailAddress.textContent =
+                    newEmail;
+
+            }
+
+
+            if (
+                emailVerificationCode
+            ) {
+
+                emailVerificationCode.value =
+                    "";
+
+            }
+
+
+            emailVerificationError?.classList.add(
+                "hidden"
+            );
+
+
+            closeModal(
+                "editProfileModal"
+            );
+
+
+            openModal(
+                "emailVerificationModal"
+            );
+
+
+            /*
+                DEVELOPMENT ONLY.
+
+                Replace this with your backend/email
+                provider when deploying a real application.
+            */
+
+            console.log(
+                "REEN BANK EMAIL VERIFICATION CODE:",
+                code
+            );
+
+        }
+
+
+
+        /* =====================================================
+           35. VERIFY EMAIL
+        ===================================================== */
+
+        if (
+            emailVerificationForm
+        ) {
+
+            emailVerificationForm.addEventListener(
+                "submit",
+                event => {
+
+                    event.preventDefault();
+
+
+                    emailVerificationError?.classList.add(
+                        "hidden"
+                    );
+
+
+                    const enteredCode =
+                        emailVerificationCode.value
+                            .trim();
+
+
+                    /*
+                        Reload pending request if needed.
+                    */
+
+                    if (
+                        !pendingEmailChange
+                    ) {
+
+                        try {
+
+                            const savedPending =
+                                sessionStorage.getItem(
+                                    "pendingEmailChange"
+                                );
+
+
+                            if (
+                                savedPending
+                            ) {
+
+                                pendingEmailChange =
+                                    JSON.parse(
+                                        savedPending
+                                    );
+
+                            }
+
+                        } catch (error) {
+
+                            pendingEmailChange =
+                                null;
+
+                        }
+
+                    }
+
+
+                    /*
+                        No request
+                    */
+
+                    if (
+                        !pendingEmailChange
+                    ) {
+
+                        showEmailVerificationError(
+                            "Your verification session has expired. Please start the email change again."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Expired
+                    */
+
+                    if (
+                        Date.now() >
+                        Number(
+                            pendingEmailChange.expiresAt
+                        )
+                    ) {
+
+                        showEmailVerificationError(
+                            "This verification code has expired. Please request a new code."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Invalid code
+                    */
+
+                    if (
+                        enteredCode !==
+                        String(
+                            pendingEmailChange.code
+                        )
+                    ) {
+
+                        showEmailVerificationError(
+                            "Invalid verification code. Please check the code and try again."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        VERIFIED
+                    */
+
+                    const newEmail =
+                        pendingEmailChange.email;
+
+
+                    /*
+                        Change email ONLY after
+                        successful verification.
+                    */
+
+                    currentUser.email =
+                        newEmail;
+
+
+                    currentUser.verified =
+                        true;
+
+
+                    currentUser.emailVerified =
+                        true;
+
+
+                    currentUser.emailVerifiedAt =
+                        new Date()
+                            .toISOString();
+
+
+                    /*
+                        Save.
+                    */
+
+                    saveCurrentUser();
+
+
+                    /*
+                        Clear verification.
+                    */
+
+                    pendingEmailChange =
+                        null;
+
+
+                    sessionStorage.removeItem(
+                        "pendingEmailChange"
+                    );
+
+
+                    /*
+                        Refresh UI.
+                    */
+
+                    renderProfile();
+
+
+                    closeModal(
+                        "emailVerificationModal"
+                    );
+
+
+                    showFeedback(
+                        "Email Verified",
+                        `Your email has been successfully changed to ${newEmail}.`
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           36. EMAIL VERIFICATION ERROR
+        ===================================================== */
+
+        function showEmailVerificationError(
+            message
+        ) {
+
+            if (
+                !emailVerificationError
+            ) {
+                return;
+            }
+
+
+            emailVerificationError.textContent =
+                message;
+
+
+            emailVerificationError.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+
+        /* =====================================================
+           37. RESEND OTP
+        ===================================================== */
+
+        if (
+            resendEmailVerificationButton
+        ) {
+
+            resendEmailVerificationButton.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        !pendingEmailChange
+                    ) {
+
+                        showEmailVerificationError(
+                            "There is no active email verification request."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const newCode =
+                        generateEmailOTP();
+
+
+                    pendingEmailChange.code =
+                        newCode;
+
+
+                    pendingEmailChange.expiresAt =
+                        Date.now() +
+                        (
+                            10 *
+                            60 *
+                            1000
+                        );
+
+
+                    sessionStorage.setItem(
+                        "pendingEmailChange",
+                        JSON.stringify(
+                            pendingEmailChange
+                        )
+                    );
+
+
+                    if (
+                        emailVerificationCode
+                    ) {
+
+                        emailVerificationCode.value =
+                            "";
+
+                    }
+
+
+                    emailVerificationError?.classList.add(
+                        "hidden"
+                    );
+
+
+                    /*
+                        Development only.
+                    */
+
+                    console.log(
+                        "REEN BANK NEW EMAIL VERIFICATION CODE:",
+                        newCode
+                    );
+
+
+                    showFeedback(
+                        "Verification Code Resent",
+                        "A new verification code has been generated."
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           38. OTP INPUT
+        ===================================================== */
+
+        if (
+            emailVerificationCode
+        ) {
+
+            emailVerificationCode.addEventListener(
+                "input",
+                () => {
+
+                    emailVerificationCode.value =
+                        emailVerificationCode.value
+                            .replace(
+                                /\D/g,
+                                ""
+                            )
+                            .slice(
+                                0,
+                                6
+                            );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           39. RESET PASSWORD
+        ===================================================== */
+
+        if (
+            resetPasswordButton
+        ) {
+
+            resetPasswordButton.addEventListener(
+                "click",
+                () => {
+
+                    resetPasswordForm?.reset();
+
+
+                    passwordFormError?.classList.add(
+                        "hidden"
+                    );
+
+
+                    openModal(
+                        "resetPasswordModal"
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           40. PASSWORD ERROR
+        ===================================================== */
+
+        function showPasswordError(
+            message
+        ) {
+
+            if (
+                !passwordFormError
+            ) {
+                return;
+            }
+
+
+            passwordFormError.textContent =
+                message;
+
+
+            passwordFormError.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+
+        /* =====================================================
+           41. RESET PASSWORD FORM
+        ===================================================== */
+
+        if (
+            resetPasswordForm
+        ) {
+
+            resetPasswordForm.addEventListener(
+                "submit",
+                event => {
+
+                    event.preventDefault();
+
+
+                    passwordFormError?.classList.add(
+                        "hidden"
+                    );
+
+
+                    const currentPassword =
+                        document.getElementById(
+                            "currentPassword"
+                        ).value;
+
+
+                    const newPassword =
+                        document.getElementById(
+                            "newPassword"
+                        ).value;
+
+
+                    const confirmPassword =
+                        document.getElementById(
+                            "confirmPassword"
+                        ).value;
+
+
+                    /*
+                        Current password
+                    */
+
+                    if (
+                        String(
+                            currentUser.password ||
+                            ""
+                        ) !==
+                        String(
+                            currentPassword
+                        )
+                    ) {
+
+                        showPasswordError(
+                            "Your current password is incorrect."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Minimum length
+                    */
+
+                    if (
+                        newPassword.length <
+                        8
+                    ) {
+
+                        showPasswordError(
+                            "Your new password must contain at least 8 characters."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Confirm
+                    */
+
+                    if (
+                        newPassword !==
+                        confirmPassword
+                    ) {
+
+                        showPasswordError(
+                            "The new passwords do not match."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Same password
+                    */
+
+                    if (
+                        newPassword ===
+                        currentPassword
+                    ) {
+
+                        showPasswordError(
+                            "Your new password must be different from your current password."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                        Save
+                    */
+
+                    currentUser.password =
+                        newPassword;
+
+
+                    saveCurrentUser();
+
+
+                    closeModal(
+                        "resetPasswordModal"
+                    );
+
+
+                    showFeedback(
+                        "Password Updated",
+                        "Your password has been changed successfully."
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           42. PASSWORD VISIBILITY
+        ===================================================== */
+
+        document
+            .querySelectorAll(
+                "[data-toggle-password]"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            const inputId =
+                                button.dataset
+                                    .togglePassword;
+
+
+                            const input =
+                                document.getElementById(
+                                    inputId
+                                );
+
+
+                            if (
+                                !input
+                            ) {
+                                return;
+                            }
+
+
+                            const icon =
+                                button.querySelector(
+                                    "i"
+                                );
+
+
+                            if (
+                                input.type ===
+                                "password"
+                            ) {
+
+                                input.type =
+                                    "text";
+
+
+                                icon.className =
+                                    "fa-regular fa-eye-slash";
+
+                            } else {
+
+                                input.type =
+                                    "password";
+
+
+                                icon.className =
+                                    "fa-regular fa-eye";
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+
+        /* =====================================================
+           43. LOGOUT
+        ===================================================== */
+
+        if (
+            logoutButton
+        ) {
+
+            logoutButton.addEventListener(
+                "click",
+                () => {
+
+                    openModal(
+                        "logoutModal"
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (
+            confirmLogoutButton
+        ) {
+
+            confirmLogoutButton.addEventListener(
+                "click",
+                () => {
+
+                    /*
+                        DO NOT delete reenUsers.
+
+                        reenUsers contains registered
+                        accounts.
+
+                        Only remove the session.
+                    */
+
+                    sessionStorage.removeItem(
+                        "currentUser"
+                    );
+
+
+                    localStorage.removeItem(
+                        "currentUser"
+                    );
+
+
+                    sessionStorage.removeItem(
+                        "pendingEmailChange"
+                    );
+
+
+                    window.location.href =
+                        "./login.html";
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           44. NOTIFICATIONS
+        ===================================================== */
+
+        if (
+            notificationButton
+        ) {
+
+            notificationButton.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        notificationDot
+                    ) {
+
+                        notificationDot.classList.add(
+                            "hidden"
+                        );
+
+                    }
+
+
+                    openModal(
+                        "notificationModal"
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           45. HEADER PROFILE BUTTON
+        ===================================================== */
+
+        const headerProfileButton =
+            document.getElementById(
+                "headerProfileButton"
+            );
+
+
+        if (
+            headerProfileButton
+        ) {
+
+            headerProfileButton.addEventListener(
+                "click",
+                () => {
+
+                    window.scrollTo(
+                        {
+                            top: 0,
+                            behavior: "smooth"
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+
+        /* =====================================================
+           46. MOBILE SIDEBAR
+        ===================================================== */
+
+        function openSidebar() {
+
+            sidebar?.classList.remove(
+                "-translate-x-full"
+            );
+
+
+            sidebarOverlay?.classList.remove(
+                "hidden"
+            );
+
+
+            document.body.classList.add(
+                "overflow-hidden"
+            );
+
+        }
+
+
+        function closeSidebar() {
+
+            sidebar?.classList.add(
+                "-translate-x-full"
+            );
+
+
+            sidebarOverlay?.classList.add(
+                "hidden"
+            );
+
+
+            document.body.classList.remove(
+                "overflow-hidden"
+            );
+
+        }
+
+
+        if (
+            mobileMenuButton
+        ) {
+
+            mobileMenuButton.addEventListener(
+                "click",
+                openSidebar
+            );
+
+        }
+
+
+        if (
+            sidebarOverlay
+        ) {
+
+            sidebarOverlay.addEventListener(
+                "click",
+                closeSidebar
+            );
+
+        }
+
+
+        sidebar
+            ?.querySelectorAll("a")
+            .forEach(
+                link => {
+
+                    link.addEventListener(
+                        "click",
+                        closeSidebar
+                    );
+
+                }
+            );
+
+
+
+        /* =====================================================
+           47. CLOSE MODALS
+        ===================================================== */
+
+        document
+            .querySelectorAll(
+                "[data-close-modal]"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            const modalId =
+                                button.dataset
+                                    .closeModal;
+
+
+                            closeModal(
+                                modalId
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+
+        /* =====================================================
+           48. CLICK OUTSIDE MODALS
+        ===================================================== */
+
+        document
+            .querySelectorAll(
+                '[id$="Modal"]'
+            )
+            .forEach(
+                modal => {
+
+                    modal.addEventListener(
+                        "click",
+                        event => {
+
+                            if (
+                                event.target ===
+                                modal
+                            ) {
+
+                                closeModal(
+                                    modal.id
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+
+        /* =====================================================
+           49. ESCAPE KEY
+        ===================================================== */
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key !==
+                    "Escape"
+                ) {
+                    return;
+                }
+
+
+                document
+                    .querySelectorAll(
+                        '[id$="Modal"]:not(.hidden)'
+                    )
+                    .forEach(
+                        modal => {
+
+                            closeModal(
+                                modal.id
+                            );
+
+                        }
+                    );
+
+
+                if (
+                    window.innerWidth <
+                    1024
+                ) {
+
+                    closeSidebar();
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           50. SAVE USER
+        ===================================================== */
+
+        function saveCurrentUser() {
+
+            /*
+                Find by the CURRENT email.
+
+                Important:
+                During email-change verification,
+                currentUser.email is still the old
+                verified email.
+
+                Therefore the old record is updated
+                until OTP verification succeeds.
+            */
+
+            const index =
+                users.findIndex(
+                    user => {
+
+                        return (
+                            String(
+                                user.email ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase()
+                            ===
+                            String(
+                                currentUser.email ||
+                                ""
+                            )
+                            .trim()
+                            .toLowerCase()
+                        );
+
+                    }
+                );
+
+
+            if (
+                index !== -1
+            ) {
+
+                users[index] = {
+                    ...users[index],
+                    ...currentUser
+                };
+
+            } else {
+
+                users.push(
+                    currentUser
+                );
+
+            }
+
+
+            /*
+                Save users.
+            */
+
+            localStorage.setItem(
+                "reenUsers",
+                JSON.stringify(
+                    users
+                )
+            );
+
+
+            /*
+                Save session.
+
+                Only safe session information is
+                needed here.
+            */
+
+            const sessionData = {
+
+                name:
+                    currentUser.name,
+
+                email:
+                    currentUser.email,
+
+                profileImage:
+                    currentUser.profileImage,
+
+                accountNumber:
+                    currentUser.accountNumber,
+
+                verified:
+                    currentUser.verified,
+
+                emailVerified:
+                    currentUser.emailVerified
+
+            };
+
+
+            sessionStorage.setItem(
+                "currentUser",
+                JSON.stringify(
+                    sessionData
+                )
+            );
+
+
+            /*
+                Legacy compatibility.
+            */
+
+            localStorage.setItem(
+                "currentUser",
+                JSON.stringify(
+                    sessionData
+                )
+            );
+
+
+            /*
+                Notify other Reen Bank pages.
+            */
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "reenBankDataUpdated"
+                )
+            );
+
+        }
+
+
+
+        /* =====================================================
+           51. LISTEN FOR REEN BANK UPDATES
+        ===================================================== */
+
+        window.addEventListener(
+            "reenBankDataUpdated",
+            () => {
+
+                users =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "reenUsers"
+                        )
+                    ) || [];
+
+
+                const updatedUser =
+                    users.find(
+                        user =>
+                            String(
+                                user.email ||
+                                ""
+                            )
+                            .toLowerCase()
+                            ===
+                            String(
+                                currentUser.email ||
+                                ""
+                            )
+                            .toLowerCase()
+                    );
+
+
+                if (
+                    updatedUser
+                ) {
+
+                    currentUser =
+                        updatedUser;
+
+
+                    currentUser.balance =
+                        Number(
+                            currentUser.balance
+                        ) || 0;
+
+
+                    currentUser.transactions =
+                        Array.isArray(
+                            currentUser.transactions
+                        )
+                            ? currentUser.transactions
+                            : [];
+
+
+                    renderProfile();
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           52. STORAGE EVENT
+        ===================================================== */
+
+        window.addEventListener(
+            "storage",
+            event => {
+
+                if (
+                    event.key !==
+                    "reenUsers"
+                ) {
+                    return;
+                }
+
+
+                try {
+
+                    users =
+                        JSON.parse(
+                            event.newValue
+                        ) || [];
+
+                } catch (error) {
+
+                    users = [];
+
+                }
+
+
+                const updatedUser =
+                    users.find(
+                        user =>
+                            String(
+                                user.email ||
+                                ""
+                            )
+                            .toLowerCase()
+                            ===
+                            String(
+                                currentUser.email ||
+                                ""
+                            )
+                            .toLowerCase()
+                    );
+
+
+                if (
+                    updatedUser
+                ) {
+
+                    currentUser =
+                        updatedUser;
+
+
+                    renderProfile();
+
+                }
+
+            }
+        );
+
+
+
+        /* =====================================================
+           53. INITIAL RENDER
+        ===================================================== */
+
+        renderProfile();
+
+    }
+);
