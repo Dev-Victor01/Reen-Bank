@@ -1,0 +1,141 @@
+/* =========================================================
+   REEN BANK — SHARED RESPONSIVE OVERRIDES
+   Loaded after output.css so every page shares the same
+   mobile/tablet behavior without changing the Figma desktop layout.
+========================================================= */
+
+html {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+img, svg, video, canvas {
+    max-width: 100%;
+}
+
+button, input, select, textarea {
+    max-width: 100%;
+}
+
+/* Fixed viewport modals must always center on every screen size. */
+[id$="Modal"] {
+    box-sizing: border-box;
+}
+
+@media (max-width: 1023px) {
+    main {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    #dashboardHeader {
+        width: 100%;
+        min-width: 0;
+        gap: 12px;
+    }
+
+    #pageTitle {
+        min-width: 0;
+    }
+
+    #headerUserInfo {
+        max-width: 180px;
+    }
+
+    #headerAccountNumber {
+        font-size: clamp(17px, 3vw, 25px) !important;
+    }
+
+    #globalSearchResults {
+        max-width: calc(100vw - 32px);
+    }
+
+    .account-card {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 767px) {
+    #dashboardHeader {
+        height: auto !important;
+        min-height: 82px;
+        padding: 18px 16px !important;
+        flex-wrap: wrap;
+    }
+
+    #pageTitle {
+        font-size: clamp(24px, 7vw, 32px) !important;
+        line-height: 1.1;
+    }
+
+    #headerUserInfo {
+        display: none !important;
+    }
+
+    #headerSearchWrapper {
+        display: none !important;
+    }
+
+    #accountsGrid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #accountsGrid > * {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .account-card {
+        width: 100%;
+    }
+
+    /* Prevent wide transaction rows from breaking the viewport. */
+    [id*="transaction"],
+    [class*="transaction"] {
+        max-width: 100%;
+    }
+
+    /* All fixed modals become safely scrollable on short phones. */
+    [id$="Modal"] {
+        padding: 16px !important;
+        overflow-y: auto;
+    }
+
+    [id$="Modal"] > div {
+        width: min(100%, 430px) !important;
+        max-height: calc(100vh - 32px);
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 479px) {
+    #dashboardHeader {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    section {
+        max-width: 100%;
+    }
+
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+
+    [id$="Modal"] {
+        padding: 10px !important;
+    }
+
+    [id$="Modal"] > div {
+        max-height: calc(100vh - 20px);
+        border-radius: 14px;
+    }
+}

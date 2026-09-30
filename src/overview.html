@@ -196,19 +196,51 @@
 
                 <!-- Search -->
 
-                <button
-                    id="searchButton"
-                    type="button"
-                    class="flex items-center gap-3 text-[#777]"
+                <div
+                    id="headerSearchWrapper"
+                    class="relative"
                 >
 
-                    <i class="fa-solid fa-magnifying-glass text-[18px] text-[#4f5553]"></i>
+                    <button
+                        id="searchButton"
+                        type="button"
+                        class="flex items-center gap-3 text-[#777]"
+                        aria-expanded="false"
+                    >
+                        <i class="fa-solid fa-magnifying-glass text-[18px] text-[#4f5553]"></i>
+                        <span class="hidden text-[13px] sm:block">Search</span>
+                    </button>
 
-                    <span class="hidden text-[13px] sm:block">
-                        Search
-                    </span>
+                    <div
+                        id="globalSearchBox"
+                        class="absolute right-0 top-[42px] z-[95] hidden w-[320px] max-w-[calc(100vw-2rem)] rounded-[14px] border border-[#edf1ef] bg-white p-3 shadow-xl"
+                    >
+                        <div class="flex items-center gap-2 rounded-[9px] border border-[#dfe7e3] bg-[#f8fbfa] px-3">
+                            <i class="fa-solid fa-magnifying-glass text-[11px] text-[#8b9591]"></i>
+                            <input
+                                id="globalSearchInput"
+                                type="search"
+                                autocomplete="off"
+                                placeholder="Search accounts or transactions..."
+                                class="h-[38px] min-w-0 flex-1 bg-transparent text-[12px] text-[#333] outline-none placeholder:text-[#a7afac]"
+                            >
+                            <button
+                                id="clearGlobalSearchButton"
+                                type="button"
+                                class="hidden h-7 w-7 items-center justify-center rounded-full text-[#8b9591] hover:bg-white hover:text-[#333]"
+                                aria-label="Clear search"
+                            >
+                                <i class="fa-solid fa-xmark text-[11px]"></i>
+                            </button>
+                        </div>
 
-                </button>
+                        <div
+                            id="globalSearchResults"
+                            class="mt-2 hidden max-h-[330px] overflow-y-auto"
+                        ></div>
+                    </div>
+
+                </div>
 
                 <!-- Notification -->
 
@@ -221,9 +253,11 @@
                     <i class="fa-regular fa-bell text-[18px]"></i>
 
                     <span
-                        id="notificationDot"
-                        class="absolute right-[5px] top-[6px] h-[6px] w-[6px] rounded-full bg-[#ef5260]"
-                    ></span>
+                        id="notificationCount"
+                        class="absolute -right-2 -top-2 hidden min-h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#ef5260] px-1 text-[9px] font-semibold text-white"
+                    >
+                        0
+                    </span>
 
                 </button>
 
@@ -968,6 +1002,42 @@
         </div>
 
     </div>
+    <!-- =====================================================
+         NOTIFICATION DROPDOWN
+    ====================================================== -->
+
+    <div
+        id="notificationDropdown"
+        class="fixed right-5 top-[92px] z-[90] hidden w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl lg:right-10"
+    >
+
+        <div class="flex items-center justify-between border-b border-gray-100 px-4 py-4">
+            <div>
+                <h3 class="font-semibold text-gray-800">Notifications</h3>
+                <p id="notificationSummary" class="text-xs text-gray-400">No unread notifications</p>
+            </div>
+
+            <button
+                id="markAllNotificationsReadButton"
+                type="button"
+                class="text-xs font-medium text-[#087f5b] transition hover:text-[#066b4c]"
+            >
+                Mark all as read
+            </button>
+        </div>
+
+        <div id="notificationsContainer" class="max-h-[420px] overflow-y-auto"></div>
+
+        <div id="notificationsEmptyState" class="hidden px-5 py-10 text-center">
+            <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[#edf9f4]">
+                <i class="fa-regular fa-bell text-[#1aaa78]"></i>
+            </div>
+            <p class="mt-3 text-[11px] font-medium text-[#626966]">No notifications</p>
+            <p class="mt-1 text-[9px] text-[#a0a6a3]">You're all caught up.</p>
+        </div>
+
+    </div>
+
     <!-- ADD ACCOUNT MODAL -->
     <div
         id="addAccountModal"
@@ -1276,6 +1346,8 @@
     </div>
     <!-- JAVASCRIPT -->
     <script src="./js/overview.js"></script>
+
+    <script src="./js/header-tools.js"></script>
 
 </body>
 </html>

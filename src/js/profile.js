@@ -11,7 +11,8 @@
 
    FEATURES
    ---------------------------------------------------------
-   ✓ Full registered name everywhere
+   ✓ Second name displayed across pages
+   ✓ Full registered name preserved in Edit Profile
    ✓ Same user across all pages
    ✓ Same account number across all pages
    ✓ Same profile image across all pages
@@ -37,9 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
        1. STORAGE
     ===================================================== */
 
-    const USERS_KEY = "reenUsers";
-    const SESSION_KEY = "currentUser";
-    const LOCAL_USER_KEY = "currentUser";
+    const USERS_KEY = ReenStorage.USERS_KEY;
 
     const EMAIL_OTP_KEY = "reenProfileEmailOTP";
     const EMAIL_OTP_EXPIRY_KEY = "reenProfileEmailOTPExpiry";
@@ -57,101 +56,28 @@ document.addEventListener("DOMContentLoaded", () => {
        3. LOAD USERS
     ===================================================== */
 
-    let users = [];
-
-    try {
-        users =
-            JSON.parse(
-                localStorage.getItem(USERS_KEY)
-            ) || [];
-    } catch (error) {
-        users = [];
-    }
-
-
-    /* =====================================================
-       4. LOAD CURRENT USER
-    ===================================================== */
-
-    let currentUser = null;
-
-    try {
-        currentUser =
-            JSON.parse(
-                sessionStorage.getItem(SESSION_KEY)
-            ) ||
-            JSON.parse(
-                localStorage.getItem(LOCAL_USER_KEY)
-            ) ||
-            null;
-    } catch (error) {
-        currentUser = null;
-    }
-
-
-    /* =====================================================
-       5. AUTH CHECK
-    ===================================================== */
+    let currentUser = ReenStorage.loadCurrentUser();
 
     if (!currentUser) {
-        window.location.href = "./login.html";
         return;
     }
 
+    let users = ReenStorage.getUsers();
 
     /* =====================================================
        6. FIND CANONICAL USER
     ===================================================== */
 
-    let userIndex = users.findIndex((user) => {
+    let userIndex = users.findIndex(
+        user => user && currentUser.id && String(user.id) === String(currentUser.id)
+    );
 
-        if (
-            currentUser.email &&
-            user.email &&
-            String(user.email).toLowerCase() ===
-            String(currentUser.email).toLowerCase()
-        ) {
-            return true;
-        }
-
-        if (
-            currentUser.accountNumber &&
-            user.accountNumber &&
-            String(user.accountNumber) ===
-            String(currentUser.accountNumber)
-        ) {
-            return true;
-        }
-
-        return false;
-    });
-
-
-    /*
-     * IMPORTANT:
-     * reenUsers is the canonical source of truth.
-     *
-     * The canonical user is spread LAST so an old
-     * sessionStorage object cannot overwrite the full
-     * registered name with an old/short name.
-     */
-
-    if (userIndex !== -1) {
-
-        currentUser = {
-            ...currentUser,
-            ...users[userIndex]
-        };
-
-    } else {
-
-        userIndex = users.length;
-
-        users.push({
-            ...currentUser
-        });
+    if (userIndex === -1) {
+        userIndex = users.findIndex(
+            user => String(user?.email || "").trim().toLowerCase() ===
+                String(currentUser.email || "").trim().toLowerCase()
+        );
     }
-
 
     /* =====================================================
        7. NORMALIZE USER
@@ -195,57 +121,37 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function saveUser() {
-
-        if (userIndex === -1) {
-
-            userIndex = users.length;
-
-            users.push({
-                ...currentUser
-            });
-
-        } else {
-
-            users[userIndex] = {
-                ...users[userIndex],
-                ...currentUser
-            };
+        const saved = ReenStorage.saveCurrentUser(currentUser);
+        if (saved) {
+            users = ReenStorage.getUsers();
+            userIndex = users.findIndex(
+                user => user?.id && currentUser.id && String(user.id) === String(currentUser.id)
+            );
         }
-
-        localStorage.setItem(
-            USERS_KEY,
-            JSON.stringify(users)
-        );
-
-        sessionStorage.setItem(
-            SESSION_KEY,
-            JSON.stringify(currentUser)
-        );
-
-        localStorage.setItem(
-            LOCAL_USER_KEY,
-            JSON.stringify(currentUser)
-        );
+        return saved;
     }
 
 
     /*  DISPLAY NAME */
 
     function getDisplayName() {
-    const fullName = String(currentUser?.name || "User")
-        .trim()
-        .replace(/\s+/g, " ");
 
-    if (!fullName) {
-        return "User";
+        const fullName = String(
+            currentUser?.name || "User"
+        )
+            .trim()
+            .replace(/\s+/g, " ");
+
+        if (!fullName) {
+            return "User";
+        }
+
+        const nameParts = fullName.split(" ");
+
+        return nameParts.length === 1
+            ? nameParts[0]
+            : nameParts[1];
     }
-
-    const nameParts = fullName.split(" ");
-
-    return nameParts.length === 1
-        ? nameParts[0]
-        : nameParts[1];
-}
 
     /* =====================================================
        10. INITIALS
@@ -316,13 +222,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderUserInformation() {
 
         /*
-         * THIS IS THE IMPORTANT PART.
-         *
-         * We use the complete registered name.
-         * No first-name/second-name splitting.
+         * Page username uses the second name.
+         * The full registered name remains stored in
+         * currentUser.name and is used by Edit Profile.
          */
 
-        const name = getDisplayName();
+        const name = currentUser?.username || "User";
 
         const email =
             currentUser.email ||
@@ -493,9 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if ($("editProfileName")) {
             $("editProfileName").value =
-                name === "User"
-                    ? ""
-                    : name;
+                currentUser.name || "";
         }
 
         if ($("editPhoneNumber")) {
@@ -1221,6 +1124,17 @@ document.addEventListener("DOMContentLoaded", () => {
             "hidden"
         );
 
+        modal.classList.add(
+            "flex"
+        );
+
+        /* Every profile modal is a fixed viewport overlay.
+           Re-adding flex guarantees items-center/justify-center
+           are active every time the modal is opened. */
+        modal.style.display = "flex";
+        modal.style.alignItems = "center";
+        modal.style.justifyContent = "center";
+
         document.body.classList.add(
             "overflow-hidden"
         );
@@ -1236,6 +1150,13 @@ document.addEventListener("DOMContentLoaded", () => {
         modal.classList.add(
             "hidden"
         );
+
+        modal.classList.remove(
+            "flex"
+        );
+        modal.style.display = "";
+        modal.style.alignItems = "";
+        modal.style.justifyContent = "";
 
         document.body.classList.remove(
             "overflow-hidden"
@@ -1265,44 +1186,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-   21. EDIT PROFILE
-===================================================== */
+       21. EDIT PROFILE
+    ===================================================== */
 
-if ($("editProfileButton")) {
+    function populateEditProfileForm() {
 
-    $("editProfileButton")
-        .addEventListener(
-            "click",
-            () => {
+        if ($("editProfileName")) {
+            $("editProfileName").value =
+                currentUser.name || "";
+        }
 
-                if ($("editProfileName")) {
-                    $("editProfileName").value =
-                        currentUser.name || "";
-                }
+        if ($("editPhoneNumber")) {
+            $("editPhoneNumber").value =
+                currentUser.phone ||
+                currentUser.phoneNumber ||
+                "";
+        }
 
-                if ($("editPhoneNumber")) {
-                    $("editPhoneNumber").value =
-                        currentUser.phone ||
-                        currentUser.phoneNumber ||
-                        "";
-                }
+        if ($("editGender")) {
+            $("editGender").value =
+                currentUser.gender || "";
+        }
 
-                if ($("editGender")) {
-                    $("editGender").value =
-                        currentUser.gender ||
-                        "";
-                }
+        if ($("editEmail")) {
+            $("editEmail").value =
+                currentUser.email || "";
+        }
 
-                if ($("editEmail")) {
-                    $("editEmail").value =
-                        currentUser.email ||
-                        "";
-                }
+        if ($("editProfileError")) {
+            $("editProfileError").textContent = "";
+            $("editProfileError").classList.add("hidden");
+        }
+    }
 
-                // ...keep the rest of your existing code
-            }
-        );
-}
+    /*
+     * Use event delegation so the button still works even if the
+     * surrounding page markup is changed or another component rerenders.
+     */
+    document.addEventListener("click", (event) => {
+
+        const button = event.target.closest("#editProfileButton");
+
+        if (!button) {
+            return;
+        }
+
+        event.preventDefault();
+        populateEditProfileForm();
+        openModal($("editProfileModal"));
+    });
 
 
     /* =====================================================
@@ -1311,132 +1243,89 @@ if ($("editProfileButton")) {
 
     if ($("editProfileForm")) {
 
-        $("editProfileForm")
-            .addEventListener(
-                "submit",
-                (event) => {
+        $("editProfileForm").addEventListener("submit", (event) => {
 
-                    event.preventDefault();
+            event.preventDefault();
 
+            const name = $("editProfileName")?.value.trim() || "";
+            const phone = $("editPhoneNumber")?.value.trim() || "";
+            const gender = $("editGender")?.value.trim() || "";
+            const email = $("editEmail")?.value.trim().toLowerCase() || "";
+            const errorBox = $("editProfileError");
 
-                    const name =
-                        $("editProfileName")
-                            ?.value
-                            .trim() || "";
-
-                    const phone =
-                        $("editPhoneNumber")
-                            ?.value
-                            .trim() || "";
-
-                    const gender =
-                        $("editGender")
-                            ?.value
-                            .trim() || "";
-
-                    const email =
-                        $("editEmail")
-                            ?.value
-                            .trim()
-                            .toLowerCase() || "";
-
-
-                    const errorBox =
-                        $("editProfileError");
-
-
-                    if (!name) {
-
-                        if (errorBox) {
-                            errorBox.textContent =
-                                "Please enter your full name.";
-                        }
-
-                        return;
-                    }
-
-
-                    if (
-                        email &&
-                        email !==
-                        String(
-                            currentUser.email || ""
-                        ).toLowerCase()
-                    ) {
-
-                        const emailExists =
-                            users.some(
-                                (user, index) =>
-                                    index !== userIndex &&
-                                    user.email &&
-                                    String(
-                                        user.email
-                                    ).toLowerCase() ===
-                                    email
-                            );
-
-
-                        if (emailExists) {
-
-                            if (errorBox) {
-                                errorBox.textContent =
-                                    "This email is already registered.";
-                            }
-
-                            return;
-                        }
-
-
-                        currentUser.name =
-                            name;
-
-                        currentUser.phone =
-                            phone;
-
-                        currentUser.gender =
-                            gender;
-
-
-                        saveUser();
-
-                        sendEmailVerification(
-                            email
-                        );
-
-                        closeModal(
-                            $("editProfileModal")
-                        );
-
-                        return;
-                    }
-
-
-                    currentUser.name =
-                        name;
-
-                    currentUser.phone =
-                        phone;
-
-                    currentUser.gender =
-                        gender;
-
-
-                    saveUser();
-
-                    renderUserInformation();
-
-
-                    closeModal(
-                        $("editProfileModal")
-                    );
-
-
-                    showSuccess(
-                        "Profile Updated",
-                        "Your profile information has been updated successfully."
-                    );
+            const showError = (message) => {
+                if (errorBox) {
+                    errorBox.textContent = message;
+                    errorBox.classList.remove("hidden");
                 }
+            };
+
+            if (!name) {
+                showError("Please enter your full name.");
+                return;
+            }
+
+            const normalizedName = ReenStorage.normalizeUsername(name);
+            const normalizedUsername = ReenStorage.normalizeUsername(
+                currentUser.username || ""
             );
+
+            if (normalizedUsername && normalizedName === normalizedUsername) {
+                showError("Your profile name must be different from your username.");
+                return;
+            }
+
+            if (
+                email &&
+                email !== String(currentUser.email || "").trim().toLowerCase()
+            ) {
+                const emailExists = users.some((user, index) =>
+                    index !== userIndex &&
+                    String(user?.email || "").trim().toLowerCase() === email
+                );
+
+                if (emailExists) {
+                    showError("This email is already registered.");
+                    return;
+                }
+
+                currentUser.name = name;
+                currentUser.phone = phone;
+                currentUser.gender = gender;
+
+                if (!currentUser.username) {
+                    currentUser.username = ReenStorage.getCurrentUsername();
+                }
+
+                saveUser();
+                sendEmailVerification(email);
+                closeModal($("editProfileModal"));
+                return;
+            }
+
+            currentUser.name = name;
+            currentUser.phone = phone;
+            currentUser.gender = gender;
+
+            if (!currentUser.username) {
+                currentUser.username = ReenStorage.getCurrentUsername();
+            }
+
+            const saved = saveUser();
+
+            if (!saved) {
+                showError("Could not save your profile changes.");
+                return;
+            }
+
+            renderUserInformation();
+            closeModal($("editProfileModal"));
+
+            showSuccess(
+                "Profile Updated",
+                "Your profile information has been updated successfully."
+            );
+        });
     }
 
 
@@ -2354,13 +2243,7 @@ if ($("editProfileButton")) {
                 "click",
                 () => {
 
-                    sessionStorage.removeItem(
-                        SESSION_KEY
-                    );
-
-                    localStorage.removeItem(
-                        LOCAL_USER_KEY
-                    );
+                    ReenStorage.clearCurrentUser();
 
                     window.location.href =
                         "./login.html";
@@ -2938,8 +2821,7 @@ if ($("profileSearchInput")) {
         (event) => {
 
             if (
-                event.key !== USERS_KEY &&
-                event.key !== LOCAL_USER_KEY
+                event.key !== USERS_KEY
             ) {
                 return;
             }
@@ -2947,12 +2829,7 @@ if ($("profileSearchInput")) {
 
             try {
 
-                const latestUsers =
-                    JSON.parse(
-                        localStorage.getItem(
-                            USERS_KEY
-                        )
-                    ) || [];
+                const latestUsers = ReenStorage.getUsers();
 
 
                 let latestUser = null;
@@ -3052,12 +2929,7 @@ if ($("profileSearchInput")) {
 
             try {
 
-                const latestUsers =
-                    JSON.parse(
-                        localStorage.getItem(
-                            USERS_KEY
-                        )
-                    ) || [];
+                const latestUsers = ReenStorage.getUsers();
 
 
                 users =
@@ -3168,13 +3040,6 @@ if ($("profileSearchInput")) {
     renderTransactions();
 
     renderNotifications();
-
-
-    /* =====================================================
-       46. FINAL SAVE
-    ===================================================== */
-
-    saveUser();
 
 
     console.log(

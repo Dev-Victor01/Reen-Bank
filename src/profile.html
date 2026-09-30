@@ -8,22 +8,19 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
-
-    <title>Reen Bank | Profile</title>
-
-    <!-- Tailwind CSS -->
     <link
         href="./output.css"
         rel="stylesheet"
     >
-
-    <!-- Font Awesome -->
+    <link rel="stylesheet" href="./reen-responsive.css">
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
     >
+    <link rel="shortcut icon" href="./asset/images/image 32.png" type="image/x-icon">
+    <title>Reen Bank | Profile</title>
 </head>
-<body class="min-h-screen bg-[#f4fbf8] text-[#292929]">
+<body class="min-h-screen bg-[url('./asset/images/accounts.png')] bg-cover bg-center text-[#292929]">
     <!-- =========================================================
          MOBILE SIDEBAR OVERLAY
     ========================================================== -->
@@ -47,7 +44,6 @@
             flex-col
             border-r
             border-[#edf2f0]
-            bg-[#f4fbf8]
             px-[40px]
             py-[38px]
             transition-transform
@@ -234,7 +230,6 @@
                 items-center
                 border-b
                 border-[#edf2f0]
-                bg-[#f4fbf8]
                 px-5
                 py-5
                 sm:px-8
@@ -2494,6 +2489,7 @@
          JAVASCRIPT
     ========================================================== -->
 
+    <script src="./js/storage.js"></script>
     <script src="./js/profile.js"></script>
 
 </body>

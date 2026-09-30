@@ -37,72 +37,13 @@ document.addEventListener("DOMContentLoaded", () => {
        1. STORAGE
     ===================================================== */
 
-    let users = JSON.parse(
-        localStorage.getItem("reenUsers") || "[]"
-    );
+    let currentUser = ReenStorage.loadCurrentUser();
 
-    let sessionUser = null;
-
-    try {
-        sessionUser = JSON.parse(
-            sessionStorage.getItem("currentUser") || "null"
-        );
-    } catch (error) {
-        sessionUser = null;
-    }
-
-    if (!sessionUser) {
-        try {
-            sessionUser = JSON.parse(
-                localStorage.getItem("currentUser") || "null"
-            );
-        } catch (error) {
-            sessionUser = null;
-        }
-    }
-
-    if (!sessionUser) {
-        window.location.href = "./register.html";
+    if (!currentUser) {
         return;
     }
 
-
-    /* =====================================================
-       2. FIND CURRENT USER
-    ===================================================== */
-
-    let currentUser = users.find(user => {
-
-        if (
-            sessionUser.id &&
-            user.id &&
-            String(user.id) === String(sessionUser.id)
-        ) {
-            return true;
-        }
-
-        if (
-            sessionUser.email &&
-            user.email &&
-            user.email.toLowerCase() ===
-            sessionUser.email.toLowerCase()
-        ) {
-            return true;
-        }
-
-        return false;
-    });
-
-
-    if (!currentUser) {
-
-        currentUser = {
-            ...sessionUser
-        };
-
-        users.push(currentUser);
-    }
-
+    let users = ReenStorage.getUsers();
 
     /* =====================================================
        3. NORMALIZE USER DATA
@@ -170,8 +111,51 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
+       3B. ENSURE STANDARD ACCOUNTS
+       -----------------------------------------------------
+       All account balances use accounts[] as the canonical
+       source. Legacy fields remain synchronized for older
+       code and existing saved users.
+    ===================================================== */
+
+    function ensureStandardAccounts() {
+        const definitions = [
+            { id: "main", type: "main", name: "Main Account", description: "Primary Reen Bank account", legacy: "balance" },
+            { id: "schoolSavings", type: "school", name: "School Savings", description: "Savings for school expenses", legacy: "schoolSavings" },
+            { id: "holidaySavings", type: "holiday", name: "Holiday Plan", description: "Savings for holidays and trips", legacy: "holidayBalance" }
+        ];
+
+        definitions.forEach((definition) => {
+            let account = currentUser.accounts.find(
+                item => String(item.id) === definition.id ||
+                    String(item.type || "").toLowerCase() === definition.type
+            );
+
+            if (!account) {
+                account = {
+                    id: definition.id,
+                    type: definition.type,
+                    name: definition.name,
+                    description: definition.description,
+                    balance: Number(currentUser[definition.legacy]) || 0,
+                    createdAt: new Date().toISOString()
+                };
+                currentUser.accounts.push(account);
+            }
+
+            account.balance = Number(account.balance) || 0;
+            currentUser[definition.legacy] = account.balance;
+        });
+    }
+
+    ensureStandardAccounts();
+
+
+    /* =====================================================
        4. DEFAULT ACCOUNT DATA
     ===================================================== */
+
+    let accountNumberWasGenerated = false;
 
     if (
         !currentUser.accountNumber &&
@@ -179,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
         currentUser.accountNumber =
             generateAccountNumber();
+        accountNumberWasGenerated = true;
     }
 
 
@@ -187,66 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ===================================================== */
 
     function saveUser() {
-
-        const index = users.findIndex(user => {
-
-            if (
-                currentUser.id &&
-                user.id &&
-                String(user.id) ===
-                String(currentUser.id)
-            ) {
-                return true;
-            }
-
-            if (
-                currentUser.email &&
-                user.email &&
-                user.email.toLowerCase() ===
-                currentUser.email.toLowerCase()
-            ) {
-                return true;
-            }
-
-            return false;
-        });
-
-
-        if (index !== -1) {
-            users[index] = currentUser;
-        } else {
-            users.push(currentUser);
-        }
-
-
-        localStorage.setItem(
-            "reenUsers",
-            JSON.stringify(users)
-        );
-
-
-        const sessionIdentity = {
-            id: currentUser.id,
-            email: currentUser.email,
-            name: currentUser.name,
-            firstName: currentUser.firstName,
-            lastName: currentUser.lastName,
-            accountNumber:
-                currentUser.accountNumber ||
-                currentUser.accountNo
-        };
-
-
-        sessionStorage.setItem(
-            "currentUser",
-            JSON.stringify(sessionIdentity)
-        );
-
-
-        localStorage.setItem(
-            "currentUser",
-            JSON.stringify(sessionIdentity)
-        );
+        return ReenStorage.saveCurrentUser(currentUser);
     }
 
 
@@ -338,18 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function getUserName() {
-
-        return (
-            currentUser.name ||
-            [
-                currentUser.firstName,
-                currentUser.lastName
-            ]
-                .filter(Boolean)
-                .join(" ") ||
-            currentUser.email ||
-            "User"
-        );
+        return currentUser?.username || "User";
     }
 
 
@@ -398,155 +313,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function getAccountBalance(accountId) {
+        const account = currentUser.accounts.find(
+            item => String(item.id) === String(accountId)
+        );
 
-        switch (accountId) {
-
-            case "main":
-                return Number(
-                    currentUser.balance
-                ) || 0;
-
-            case "schoolSavings":
-                return Number(
-                    currentUser.schoolSavings
-                ) || 0;
-
-            case "holidaySavings":
-                return Number(
-                    currentUser.holidayBalance
-                ) || 0;
-
-            default: {
-
-                const account =
-                    currentUser.accounts.find(
-                        item =>
-                            String(item.id) ===
-                            String(accountId)
-                    );
-
-                return account
-                    ? Number(account.balance) || 0
-                    : 0;
-            }
+        if (account) {
+            return Number(account.balance) || 0;
         }
+
+        /* Legacy fallback for older accounts created before the unified model. */
+        if (accountId === "main") return Number(currentUser.balance) || 0;
+        if (accountId === "schoolSavings") return Number(currentUser.schoolSavings) || 0;
+        if (accountId === "holidaySavings") return Number(currentUser.holidayBalance) || 0;
+
+        return 0;
     }
 
 
-    function setAccountBalance(
-        accountId,
-        newBalance
-    ) {
+    function setAccountBalance(accountId, newBalance) {
+        const balance = Math.max(0, Number(newBalance) || 0);
+        let account = currentUser.accounts.find(
+            item => String(item.id) === String(accountId)
+        );
 
-        const balance =
-            Math.max(
-                0,
-                Number(newBalance) || 0
-            );
+        if (!account) {
+            const definitions = {
+                main: { type: "main", name: "Main Account", description: "Primary Reen Bank account" },
+                schoolSavings: { type: "school", name: "School Savings", description: "Savings for school expenses" },
+                holidaySavings: { type: "holiday", name: "Holiday Plan", description: "Savings for holidays and trips" }
+            };
 
-
-        switch (accountId) {
-
-            case "main":
-
-                /*
-                   IMPORTANT:
-                   currentUser.balance is ONLY
-                   the Main Account balance.
-                */
-
-                currentUser.balance =
-                    balance;
-
-                break;
-
-
-            case "schoolSavings":
-
-                currentUser.schoolSavings =
-                    balance;
-
-                break;
-
-
-            case "holidaySavings":
-
-                currentUser.holidayBalance =
-                    balance;
-
-                break;
-
-
-            default: {
-
-                const account =
-                    currentUser.accounts.find(
-                        item =>
-                            String(item.id) ===
-                            String(accountId)
-                    );
-
-                if (account) {
-                    account.balance =
-                        balance;
-                }
-
-                break;
+            const definition = definitions[accountId];
+            if (definition) {
+                account = {
+                    id: accountId,
+                    ...definition,
+                    balance: 0,
+                    createdAt: new Date().toISOString()
+                };
+                currentUser.accounts.push(account);
             }
         }
+
+        if (account) account.balance = balance;
+
+        /* Keep old fields synchronized for compatibility with older code. */
+        if (accountId === "main") currentUser.balance = balance;
+        if (accountId === "schoolSavings") currentUser.schoolSavings = balance;
+        if (accountId === "holidaySavings") currentUser.holidayBalance = balance;
     }
 
 
     /* =====================================================
        8. IMPORTANT CURRENT BALANCE CALCULATION
        -----------------------------------------------------
-       Current Balance is the TOTAL of every account.
-
-       Main Account
-       + School Savings
-       + Holiday Plan
-       + Custom Accounts
+       Current Balance is the TOTAL of every account in the
+       canonical accounts array. This prevents the same money
+       from being counted twice when legacy balance fields exist.
     ===================================================== */
 
     function calculateCurrentBalance() {
-
-        const mainAccount =
-            Number(currentUser.balance) || 0;
-
-
-        const schoolSavings =
-            Number(currentUser.schoolSavings) || 0;
-
-
-        const holidayBalance =
-            Number(currentUser.holidayBalance) || 0;
-
-
-        const customAccountsTotal =
-            Array.isArray(currentUser.accounts)
-                ? currentUser.accounts.reduce(
-                    (total, account) => {
-
-                        return (
-                            total +
-                            (
-                                Number(
-                                    account.balance
-                                ) || 0
-                            )
-                        );
-
-                    },
-                    0
-                )
-                : 0;
-
-
-        return (
-            mainAccount +
-            schoolSavings +
-            holidayBalance +
-            customAccountsTotal
+        return currentUser.accounts.reduce(
+            (total, account) => total + (Number(account.balance) || 0),
+            0
         );
     }
 
@@ -607,14 +436,54 @@ document.addEventListener("DOMContentLoaded", () => {
                 "headerProfileImage"
             );
 
+        const profileInitials =
+            document.getElementById(
+                "headerProfileInitials"
+            );
 
-        if (
-            profileImage &&
-            currentUser.profileImage
-        ) {
+        const image = String(
+            currentUser?.profileImage ||
+            currentUser?.avatar ||
+            ""
+        ).trim();
 
-            profileImage.src =
-                currentUser.profileImage;
+        const name = String(
+            currentUser?.name ||
+            currentUser?.username ||
+            "User"
+        ).trim();
+
+        const initials = name
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(part => part.charAt(0).toUpperCase())
+            .join("") || "U";
+
+        if (profileInitials) {
+            profileInitials.textContent = initials;
+        }
+
+        if (profileImage) {
+            if (image) {
+                profileImage.src = image;
+                profileImage.classList.remove("hidden");
+                profileImage.style.display = "block";
+
+                if (profileInitials) {
+                    profileInitials.classList.add("hidden");
+                    profileInitials.classList.remove("flex");
+                }
+            } else {
+                profileImage.removeAttribute("src");
+                profileImage.classList.add("hidden");
+                profileImage.style.display = "none";
+
+                if (profileInitials) {
+                    profileInitials.classList.remove("hidden");
+                    profileInitials.classList.add("flex");
+                }
+            }
         }
     }
 
@@ -1221,8 +1090,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        currentUser.accounts.forEach(
-            account => {
+        const standardAccountIds = new Set([
+            "main",
+            "schoolSavings",
+            "holidaySavings"
+        ]);
+
+        currentUser.accounts
+            .filter(account => !standardAccountIds.has(String(account?.id || "")))
+            .forEach(account => {
 
                 const card =
                     document.createElement(
@@ -1966,6 +1842,11 @@ document.addEventListener("DOMContentLoaded", () => {
             date: now
         });
 
+
+        /*
+           Keep the aggregate balance synchronized before saving.
+        */
+        currentUser.currentBalance = calculateCurrentBalance();
 
         /*
            Save everything BEFORE rendering.
@@ -3969,7 +3850,7 @@ document.addEventListener("DOMContentLoaded", () => {
         () => {
 
             window.location.href =
-                "./transactions.html";
+                "./transaction.html";
         }
     );
 

@@ -10,6 +10,7 @@
         href="./output.css"
         rel="stylesheet"
     >
+    <link rel="stylesheet" href="./reen-responsive.css">
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
@@ -137,7 +138,7 @@
 
 
             <a
-                href="./accounts.html"
+                href="./account.html"
                 id="mobileAccountsLink"
                 class="sidebar-link active flex h-12 items-center gap-5 rounded-xl px-3 text-[15px] text-[#33B786]"
             >
@@ -540,14 +541,15 @@
 
                         <img
                             id="headerProfileImage"
-                            src="./asset/images/profile.jpg"
+                            src=""
                             alt="Profile"
-                            class="h-full w-full object-cover"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                            class="hidden h-full w-full object-cover"
+                            onerror="this.style.display='none'; this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden'); this.nextElementSibling.classList.add('flex');"
                         >
 
                         <span
-                            class="hidden h-full w-full items-center justify-center bg-[#25b989] text-[14px] font-bold text-white"
+                            id="headerProfileInitials"
+                            class="flex h-full w-full items-center justify-center bg-[#25b989] text-[14px] font-bold text-white"
                         >
                             U
                         </span>
@@ -636,15 +638,6 @@
 
                         <div class="mt-[16px] flex gap-3">
 
-                            <button
-                                id="mainAccountFundButton"
-                                type="button"
-                                data-account-id="main"
-                                class="fundAccountButton h-[23px] min-w-[57px] rounded-[4px] bg-[#2ebd8d] px-4 text-[10px] font-semibold text-white transition hover:bg-[#24ab7d]"
-                            >
-                                Fund
-                            </button>
-
 
                             <button
                                 id="mainAccountWithdrawButton"
@@ -710,15 +703,6 @@
 
                         <div class="mt-[16px] flex gap-3">
 
-                            <button
-                                id="schoolSavingsFundButton"
-                                type="button"
-                                data-account-id="schoolSavings"
-                                class="fundAccountButton h-[23px] min-w-[57px] rounded-[4px] bg-[#2ebd8d] px-4 text-[10px] font-semibold text-white transition hover:bg-[#24ab7d]"
-                            >
-                                Fund
-                            </button>
-
 
                             <button
                                 id="schoolSavingsWithdrawButton"
@@ -783,15 +767,6 @@
 
 
                         <div class="mt-[16px] flex gap-3">
-
-                            <button
-                                id="holidayPlanFundButton"
-                                type="button"
-                                data-account-id="holidaySavings"
-                                class="fundAccountButton h-[23px] min-w-[57px] rounded-[4px] bg-[#2ebd8d] px-4 text-[10px] font-semibold text-white transition hover:bg-[#24ab7d]"
-                            >
-                                Fund
-                            </button>
 
 
                             <button
@@ -1464,15 +1439,6 @@
                     class="h-[46px] flex-1 rounded-[7px] bg-[#eeeeee] text-[12px] font-semibold text-[#555]"
                 >
                     Go Back
-                </button>
-
-
-                <button
-                    id="createdAccountFundButton"
-                    type="button"
-                    class="h-[46px] flex-1 rounded-[7px] bg-[#2dbd8d] text-[12px] font-semibold text-white"
-                >
-                    Fund Account
                 </button>
 
             </div>
@@ -2503,6 +2469,7 @@
 
     </div>
     <!-- JAVASCRIPT -->
+    <script src="./js/storage.js"></script>
     <script src="./js/account.js"></script>
 
 </body>

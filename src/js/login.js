@@ -11,8 +11,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const loginButton = document.getElementById("loginButton");
     const togglePassword = document.getElementById("togglePassword");
 
-    const USERS_KEY = "reenUsers";
-    const CURRENT_USER_KEY = "currentUser";
 
 
     // =========================================================
@@ -145,19 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             try {
 
-                const storedUsers =
-                    localStorage.getItem(
-                        USERS_KEY
-                    );
-
-                if (storedUsers) {
-
-                    users =
-                        JSON.parse(
-                            storedUsers
-                        );
-
-                }
+                users = ReenStorage.getUsers();
 
             } catch (error) {
 
@@ -282,50 +268,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             // =====================================================
-            // SAVE USER
+            // SAVE USER + CREATE SESSION
             // =====================================================
 
-            users[userIndex] = user;
+            if (!ReenStorage.saveCurrentUser(user)) {
 
-            localStorage.setItem(
-                USERS_KEY,
-                JSON.stringify(users)
-            );
+                showMessage(
+                    "Login session could not be created. Please try again."
+                );
 
-
-            // =====================================================
-            // CREATE LOGIN SESSION
-            // =====================================================
-
-            const session = {
-
-                name:
-                    user.name || "User",
-
-                email:
-                    user.email
-                        .trim()
-                        .toLowerCase(),
-
-                accountNumber:
-                    user.accountNumber
-
-            };
-
-
-            sessionStorage.setItem(
-                CURRENT_USER_KEY,
-                JSON.stringify(session)
-            );
+                return;
+            }
 
 
             // =====================================================
             // VERIFY SESSION WAS CREATED
             // =====================================================
+            // =====================================================
 
             const savedSession =
                 sessionStorage.getItem(
-                    CURRENT_USER_KEY
+                    ReenStorage.SESSION_KEY
                 );
 
 
