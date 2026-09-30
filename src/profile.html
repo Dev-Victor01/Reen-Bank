@@ -1,802 +1,1221 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+
+    <title>Reen Bank | Profile</title>
+
+    <!-- Tailwind CSS -->
     <link
         href="./output.css"
         rel="stylesheet"
     >
+
+    <!-- Font Awesome -->
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css"
     >
-    <link rel="shortcut icon" href="./asset/images/image 32.png" type="image/x-icon">
-    <title>Reen Bank | Profile</title>
-
 </head>
-
-
-<body class="min-h-screen bg-[#f4fcfa] text-[#282828] antialiased">
-
+<body class="min-h-screen bg-[#f4fbf8] text-[#292929]">
     <!-- =========================================================
-         APPLICATION
+         MOBILE SIDEBAR OVERLAY
     ========================================================== -->
+    <div
+        id="sidebarOverlay"
+        class="fixed inset-0 z-40 hidden bg-black/30 backdrop-blur-[2px] lg:hidden"
+    ></div>
+    <!-- =========================================================
+         SIDEBAR
+    ========================================================== -->
+    <aside
+        id="sidebar"
+        class="
+            fixed
+            left-0
+            top-0
+            z-50
+            flex
+            h-screen
+            w-[270px]
+            flex-col
+            border-r
+            border-[#edf2f0]
+            bg-[#f4fbf8]
+            px-[40px]
+            py-[38px]
+            transition-transform
+            duration-300
+            lg:translate-x-0
+        "
+    >
 
-    <div class="relative min-h-screen overflow-hidden">
+        <!-- Logo -->
+        <div>
+            <a
+                href="./overview.html"
+                class="flex items-center gap-3">
 
-
-        <!-- =====================================================
-             BACKGROUND DECORATION
-        ====================================================== -->
-
-        <div class="pointer-events-none absolute inset-0 overflow-hidden">
-
-            <div
-                class="absolute -left-[150px] top-[120px] h-[350px] w-[350px] rounded-full border border-[#dcefe9]"
-            ></div>
-
-            <div
-                class="absolute -right-[150px] top-[40px] h-[420px] w-[420px] rounded-full border border-[#e4f3ef]"
-            ></div>
-
-            <div
-                class="absolute left-[20%] bottom-[-250px] h-[500px] w-[500px] rounded-full border border-[#e4f3ef]"
-            ></div>
+                <div>
+                    <img
+                        src="./asset/images/logo.png"
+                        alt="Reen Bank"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=&quot;text-[23px] font-bold text-[#2fb88b]&quot;>rb</span>';"
+                    >
+                </div>
+            </a>
 
         </div>
 
 
+        <!-- Navigation -->
+        <nav class="flex flex-1 flex-col">
 
-        <!-- =====================================================
-             MOBILE SIDEBAR OVERLAY
-        ====================================================== -->
+            <!-- Overview -->
+            <a
+                id="overviewNav"
+                href="./overview.html"
+                class="dashboard-nav mt-4 flex w-full items-center gap-6 rounded-lg px-0 py-3 text-left text-[15px] font-medium text-[#626262] transition hover:text-[#20b486]">
 
-        <div
-            id="sidebarOverlay"
-            class="fixed inset-0 z-[40] hidden bg-black/30 backdrop-blur-[2px] lg:hidden"
-        ></div>
+                <span
+                    class="
+                        flex
+                        w-[23px]
+                        justify-center
+                        text-[21px]
+                    "
+                >
+                    <i class="fa-solid fa-grip"></i>
+                </span>
+
+                <span class="text-[15px] font-medium">
+                    Overview
+                </span>
+
+            </a>
 
 
+            <!-- Accounts -->
+            <a
+                id="accountsNav"
+                href="./account.html"
+                class="dashboard-nav mt-4 flex w-full items-center gap-6 rounded-lg px-0 py-3 text-left text-[15px] font-medium text-[#626262] transition hover:text-[#20b486]">
 
-        <!-- =====================================================
-             APPLICATION LAYOUT
-        ====================================================== -->
+                <span
+                    class="
+                        flex
+                        w-[23px]
+                        justify-center
+                        text-[20px]
+                    "
+                >
+                    <i class="fa-regular fa-credit-card"></i>
+                </span>
 
-        <div class="relative z-10 flex min-h-screen">
+                <span class="text-[15px] font-medium">
+                    Accounts
+                </span>
+
+            </a>
 
 
-            <!-- =================================================
-                 SIDEBAR
-            ================================================== -->
+            <!-- Transactions -->
+            <a
+                id="transactionsNav"
+                href="./transaction.html"
+                class="dashboard-nav mt-4 flex w-full items-center gap-6 rounded-lg px-0 py-3 text-left text-[15px] font-medium text-[#626262] transition hover:text-[#20b486]">
 
-            <aside
-                id="sidebar"
-                class="fixed inset-y-0 left-0 z-[50] flex w-[250px] -translate-x-full flex-col bg-[#f4fcfa] px-[35px] py-[46px] transition-transform duration-300 lg:relative lg:translate-x-0 lg:bg-transparent"
+                <span
+                    class="
+                        flex
+                        w-[23px]
+                        justify-center
+                        text-[19px]
+                    "
+                >
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                </span>
+
+                <span class="text-[15px] font-medium">
+                    Transactions
+                </span>
+
+            </a>
+
+
+            <!-- Profile -->
+            <a
+                id="profileNav"
+                href="./profile.html"
+                class="dashboard-nav mt-4 flex w-full items-center gap-6 rounded-lg px-0 py-3 text-left text-[15px] font-medium text-[#20b486] transition">
+
+                <span
+                    class="
+                        flex
+                        w-[23px]
+                        justify-center
+                        text-[20px]
+                    "
+                >
+                    <i class="fa-solid fa-user"></i>
+                </span>
+
+                <span class="text-[15px] font-semibold">
+                    Profile
+                </span>
+
+            </a>
+
+        </nav>
+
+
+        <!-- Logout -->
+        <button
+            id="logoutButton"
+            type="button"
+            class="
+                flex
+                h-[30px]
+                items-center
+                gap-[28px]
+                text-left
+                text-[#565b59]
+                transition
+                hover:text-[#e05252]
+            "
+        >
+
+            <span
+                class="
+                    flex
+                    w-[23px]
+                    justify-center
+                    text-[20px]
+                "
             >
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </span>
+
+            <span class="text-[15px] font-medium">
+                Logout
+            </span>
+
+        </button>
+
+    </aside>
 
 
-                <!-- =============================================
-                     LOGO
-                ============================================== -->
+    <!-- =========================================================
+         MAIN CONTENT
+    ========================================================== -->
 
-                <a
-                    href="./overview.html"
-                    class="flex items-center gap-[14px]"
+    <main
+        class="
+            min-h-screen
+            lg:ml-[270px]
+        "
+    >
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+
+        <header
+            class="
+                relative
+                flex
+                min-h-[115px]
+                items-center
+                border-b
+                border-[#edf2f0]
+                bg-[#f4fbf8]
+                px-5
+                py-5
+                sm:px-8
+                lg:px-[70px]
+                lg:py-0
+            "
+        >
+
+            <!-- Mobile menu -->
+            <button
+                id="mobileMenuButton"
+                type="button"
+                class="
+                    mr-4
+                    flex
+                    h-10
+                    w-10
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-lg
+                    text-[#292929]
+                    hover:bg-white
+                    lg:hidden
+                "
+                aria-label="Open menu"
+            >
+                <i class="fa-solid fa-bars text-[20px]"></i>
+            </button>
+
+            <div class="flex justify-center gap-[24rem]">
+                 <!-- Page title -->
+            <h1
+                class="
+                    text-[30px]
+                    font-bold
+                    tracking-[-0.8px]
+                    text-[#292929]
+                    sm:text-[38px]
+                    lg:text-[45px]
+                "
+            >
+                Profile
+            </h1>
+            <!-- User name / account number -->
+                <div
+                    class="
+                        hidden
+                        text-right
+                        md:block
+                    "
                 >
 
-                    <div
-                        class="flex h-[45px] w-[45px] items-center justify-center rounded-[7px] border-[2px] border-[#292929] bg-white"
+                    <p
+                        id="headerUserName"
+                        class="
+                            text-[12px]
+                            font-medium
+                            text-[#2fb88b]
+                        "
                     >
+                        User Name
+                    </p>
 
-                        <span
-                            class="text-[23px] font-black tracking-[-3px]"
-                        >
-                            <span class="text-[#2db88a]">r</span><span class="text-[#f25368]">b</span>
-                        </span>
-
-                    </div>
-
-
-                    <span
-                        class="text-[25px] font-bold tracking-[-1px]"
+                    <p
+                        id="headerAccountNumber"
+                        class="
+                            mt-[2px]
+                            text-[23px]
+                            font-bold
+                            leading-none
+                            tracking-[-0.7px]
+                            text-[#292929]
+                        "
                     >
-                        Reen Bank
-                    </span>
+                        0000000000
+                    </p>
 
-                </a>
-
-
-
-                <!-- =============================================
-                     NAVIGATION
-                ============================================== -->
-
-                <nav class="mt-[88px] flex flex-1 flex-col">
-
-
-                    <div class="space-y-[20px]">
-
-
-                        <!-- Overview -->
-
-                        <a
-                            id="overviewNav"
-                            href="./overview.html"
-                            class="group flex items-center gap-[27px] px-[1px] py-[4px] text-[14px] font-medium text-[#555]"
-                        >
-
-                            <span class="flex w-[24px] justify-center">
-
-                                <i
-                                    class="fa-solid fa-grip text-[20px]"
-                                ></i>
-
-                            </span>
-
-                            <span>
-                                Overview
-                            </span>
-
-                        </a>
+                </div>
+            </div>
+           
 
 
 
-                        <!-- Accounts -->
+            <!-- Header right -->
+            <div
+                class="
+                    ml-auto
+                    flex
+                    items-center
+                    gap-4
+                    sm:gap-7
+                "
+            >
+                <!-- Search -->
+                <div class="relative flex items-center">
 
-                        <a
-                            id="accountsNav"
-                            href="./accounts.html"
-                            class="group flex items-center gap-[27px] px-[1px] py-[4px] text-[14px] font-medium text-[#555]"
-                        >
-
-                            <span class="flex w-[24px] justify-center">
-
-                                <i
-                                    class="fa-regular fa-credit-card text-[20px]"
-                                ></i>
-
-                            </span>
-
-                            <span>
-                                Accounts
-                            </span>
-
-                        </a>
-
-
-
-                        <!-- Transactions -->
-
-                        <a
-                            id="transactionsNav"
-                            href="./transactions.html"
-                            class="group flex items-center gap-[27px] px-[1px] py-[4px] text-[14px] font-medium text-[#555]"
-                        >
-
-                            <span class="flex w-[24px] justify-center">
-
-                                <i
-                                    class="fa-solid fa-arrow-right-arrow-left text-[19px]"
-                                ></i>
-
-                            </span>
-
-                            <span>
-                                Transactions
-                            </span>
-
-                        </a>
-
-
-
-                        <!-- Profile -->
-
-                        <a
-                            id="profileNav"
-                            href="./profile.html"
-                            class="group flex items-center gap-[27px] px-[1px] py-[4px] text-[14px] font-semibold text-[#2db88a]"
-                        >
-
-                            <span class="flex w-[24px] justify-center">
-
-                                <i
-                                    class="fa-solid fa-user text-[20px]"
-                                ></i>
-
-                            </span>
-
-                            <span>
-                                Profile
-                            </span>
-
-                        </a>
-
-                    </div>
-
-
-
-                    <!-- =========================================
-                         LOGOUT
-                    ========================================== -->
+                    <input
+                            id="profileSearchInput"
+                            type="text"
+                            placeholder="Search..."
+                            autocomplete="off"
+                            class="
+                                hidden
+                                w-48
+                                rounded-lg
+                                border
+                                border-gray-200
+                                bg-white
+                                px-3
+                                py-2
+                                text-sm
+                                text-gray-700
+                                outline-none
+                                transition
+                                focus:border-[#33B786]
+                                focus:ring-2
+                                focus:ring-[#33B786]/10
+                                sm:w-56
+                            "
+                    >
 
                     <button
-                        id="logoutButton"
+                        id="searchButton"
                         type="button"
-                        class="mt-auto flex items-center gap-[27px] px-[1px] py-[4px] text-left text-[14px] font-medium text-[#555] transition hover:text-[#f25368]"
+                        class="
+                            flex
+                            h-10
+                            w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-full
+                            text-gray-500
+                            transition
+                            hover:bg-gray-100
+                            hover:text-[#33B786]
+                        "
+                        title="Search"
+                    >
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+
+                </div>
+                <!-- Notification -->
+                <div class="relative">
+
+                    <button
+                        id="notificationButton"
+                        type="button"
+                        class="
+                            relative
+                            flex
+                            h-10
+                            w-10
+                            items-center
+                            justify-center
+                            rounded-full
+                            text-[#404644]
+                            transition
+                            hover:bg-white
+                        "
+                        aria-label="Notifications"
                     >
 
-                        <span class="flex w-[24px] justify-center">
+                        <i
+                            class="
+                                fa-regular
+                                fa-bell
+                                text-[20px]
+                            "
+                        ></i>
 
-                            <i
-                                class="fa-solid fa-arrow-left text-[21px]"
-                            ></i>
+                        <!-- Notification dot -->
+                        <span
+                            id="notificationDot"
+                            class="
+                                absolute
+                                right-[7px]
+                                top-[7px]
+                                hidden
+                                h-[7px]
+                                w-[7px]
+                                rounded-full
+                                bg-[#f05252]
+                            "
+                        ></span>
 
-                        </span>
-
-                        <span>
-                            Logout
-                        </span>
 
                     </button>
 
-                </nav>
 
-            </aside>
-
-
-
-            <!-- =================================================
-                 MAIN
-            ================================================== -->
-
-            <main class="min-w-0 flex-1">
-
-
-                <!-- =================================================
-                     HEADER
-                ================================================== -->
-
-                <header
-                    class="flex h-[125px] items-center justify-between px-6 sm:px-8 lg:px-10 xl:px-[48px]"
-                >
-
-
-                    <!-- =============================================
-                         HEADER LEFT
-                    ============================================== -->
-
-                    <div class="flex items-center gap-5">
-
-
-                        <!-- Mobile menu -->
-
-                        <button
-                            id="mobileMenuButton"
-                            type="button"
-                            class="flex h-[40px] w-[40px] items-center justify-center rounded-lg text-[#333] lg:hidden"
-                        >
-
-                            <i
-                                class="fa-solid fa-bars text-[20px]"
-                            ></i>
-
-                        </button>
-
-
-                        <h1
-                            class="text-[28px] font-bold tracking-[-1px] sm:text-[30px]"
-                        >
-                            Profile
-                        </h1>
-
-                    </div>
-
-
-
-                    <!-- =============================================
-                         HEADER RIGHT
-                    ============================================== -->
-
+                    <!-- Notification dropdown -->
                     <div
-                        class="flex items-center gap-4 sm:gap-7"
+                        id="notificationDropdown"
+                        class="
+                            absolute
+                            right-0
+                            top-[52px]
+                            z-[80]
+                            hidden
+                            w-[320px]
+                            overflow-hidden
+                            rounded-[16px]
+                            border
+                            border-[#e6ece9]
+                            bg-white
+                            shadow-[0_20px_60px_rgba(0,0,0,0.12)]
+                        "
                     >
 
-
-                        <!-- User -->
-
                         <div
-                            class="hidden text-right sm:block"
+                            class="
+                                flex
+                                items-center
+                                justify-between
+                                border-b
+                                border-[#edf0ef]
+                                px-5
+                                py-4
+                            "
                         >
 
-                            <p
-                                id="headerUserName"
-                                class="text-[12px] font-medium text-[#1daf82]"
-                            >
-                                User Name
-                            </p>
+                            <div>
+                                <h3
+                                    class="
+                                        text-[15px]
+                                        font-bold
+                                        text-[#292929]
+                                    "
+                                >
+                                    Notifications
+                                </h3>
+
+                                <p
+                                    class="
+                                        mt-1
+                                        text-[11px]
+                                        text-[#8b918e]
+                                    "
+                                >
+                                    Your latest updates
+                                </p>
+                            </div>
 
                             <button
-                                id="headerAccountNumber"
+                                id="markAllNotificationsRead"
                                 type="button"
-                                class="mt-[5px] block text-[24px] font-bold leading-none tracking-[-1px] transition hover:text-[#2db88a]"
-                                title="Copy account number"
+                                class="
+                                    text-[11px]
+                                    font-semibold
+                                    text-[#2fb88b]
+                                    hover:underline
+                                "
                             >
-                                0000000000
+                                Mark all as read
                             </button>
 
                         </div>
 
 
+                        <div
+                            id="notificationList"
+                            class="max-h-[350px] overflow-y-auto"
+                        >
+                            <!-- Notifications inserted by JS -->
+                        </div>
 
-                        <!-- Search -->
+                    </div>
 
-                        <div class="relative hidden md:block">
+                </div>
+
+
+                <!-- Header profile -->
+                <button
+                    id="headerProfileButton"
+                    type="button"
+                    class="
+                        flex
+                        h-[42px]
+                        w-[42px]
+                        shrink-0
+                        items-center
+                        justify-center
+                        overflow-hidden
+                        rounded-full
+                        bg-[#d7eee6]
+                    "
+                >
+
+                    <img
+                        id="headerProfileImage"
+                        src=""
+                        alt="Profile"
+                        class="hidden h-full w-full object-cover"
+                    >
+
+                    <span
+                        id="headerProfileInitials"
+                        class="
+                            text-[13px]
+                            font-bold
+                            text-[#238566]
+                        "
+                    >
+                        U
+                    </span>
+
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- =====================================================
+             PAGE CONTENT
+        ====================================================== -->
+
+        <section
+            class="
+                px-5
+                py-7
+                sm:px-8
+                lg:px-[70px]
+                lg:py-[22px]
+            "
+        >
+
+            <!-- Mobile user information -->
+            <div
+                class="
+                    mb-6
+                    flex
+                    items-center
+                    justify-between
+                    md:hidden
+                "
+            >
+
+                <div>
+
+                    <p
+                        id="mobileHeaderUserName"
+                        class="
+                            text-[12px]
+                            font-medium
+                            text-[#2fb88b]
+                        "
+                    >
+                        User Name
+                    </p>
+
+                    <p
+                        id="mobileHeaderAccountNumber"
+                        class="
+                            mt-1
+                            text-[18px]
+                            font-bold
+                            text-[#292929]
+                        "
+                    >
+                        0000000000
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Main responsive layout -->
+            <div
+                class="
+                    grid
+                    grid-cols-1
+                    gap-6
+                    xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.85fr)]
+                    xl:gap-[70px]
+                "
+            >
+
+                <!-- =================================================
+                     PROFILE CARD
+                ================================================== -->
+
+                <section
+                    class="
+                        min-w-0
+                        rounded-[10px]
+                        bg-white
+                        px-6
+                        py-8
+                        shadow-[0_4px_18px_rgba(24,67,55,0.02)]
+                        sm:px-10
+                        sm:py-9
+                        lg:px-[100px]
+                        lg:py-[28px]
+                    "
+                >
+
+                    <!-- Profile image -->
+                    <div
+                        class="
+                            flex
+                            flex-col
+                            items-center
+                        "
+                    >
+
+                        <div
+                            class="
+                                relative
+                                h-[112px]
+                                w-[112px]
+                                sm:h-[116px]
+                                sm:w-[116px]
+                            "
+                        >
 
                             <div
-                                class="flex items-center gap-[12px]"
+                                class="
+                                    h-full
+                                    w-full
+                                    overflow-hidden
+                                    rounded-full
+                                    bg-[#dcefe9]
+                                "
                             >
 
-                                <i
-                                    class="fa-solid fa-magnifying-glass text-[17px] text-[#414141]"
-                                ></i>
-
-                                <input
-                                    id="transactionSearch"
-                                    type="text"
-                                    autocomplete="off"
-                                    placeholder="Search"
-                                    class="w-[85px] border-0 bg-transparent p-0 text-[12px] outline-none placeholder:text-[#777] transition-all duration-200 focus:w-[140px]"
+                                <img
+                                    id="profileImage"
+                                    src=""
+                                    alt="Profile image"
+                                    class="
+                                        hidden
+                                        h-full
+                                        w-full
+                                        object-cover
+                                    "
                                 >
+
+                                <div
+                                    id="profileInitials"
+                                    class="
+                                        flex
+                                        h-full
+                                        w-full
+                                        items-center
+                                        justify-center
+                                        text-[30px]
+                                        font-bold
+                                        text-[#2fb88b]
+                                    "
+                                >
+                                    U
+                                </div>
 
                             </div>
 
 
-                            <!-- Search feedback -->
+                            <!-- Edit image button -->
+                            <button
+                                id="editProfileImageButton"
+                                type="button"
+                                class="
+                                    absolute
+                                    bottom-0
+                                    right-[-1px]
+                                    flex
+                                    h-[25px]
+                                    w-[25px]
+                                    items-center
+                                    justify-center
+                                    rounded-full
+                                    border
+                                    border-[#d8d8d8]
+                                    bg-[#e7e7e7]
+                                    text-[#565656]
+                                    shadow-sm
+                                    transition
+                                    hover:bg-white
+                                "
+                                aria-label="Change profile picture"
+                            >
 
-                            <div
-                                id="searchResults"
-                                class="absolute right-0 top-[35px] z-[60] hidden w-[260px] overflow-hidden rounded-xl border border-[#e5ece9] bg-white shadow-[0_15px_40px_rgba(0,0,0,0.08)]"
-                            ></div>
+                                <i
+                                    class="
+                                        fa-solid
+                                        fa-pencil
+                                        text-[11px]
+                                    "
+                                ></i>
+
+                            </button>
 
                         </div>
 
 
-
-                        <!-- Notification -->
-
-                        <button
-                            id="notificationButton"
-                            type="button"
-                            title="Notifications"
-                            class="relative flex h-[40px] w-[40px] items-center justify-center"
+                        <!-- Name -->
+                        <h2
+                            id="profileName"
+                            class="
+                                mt-[18px]
+                                text-center
+                                text-[24px]
+                                font-bold
+                                tracking-[-0.6px]
+                                text-[#292929]
+                            "
                         >
-
-                            <i
-                                class="fa-regular fa-bell text-[19px]"
-                            ></i>
-
-                            <span
-                                id="notificationDot"
-                                class="absolute right-[7px] top-[5px] h-[6px] w-[6px] rounded-full bg-[#f25368]"
-                            ></span>
-
-                        </button>
+                            User Name
+                        </h2>
 
 
-
-                        <!-- Header profile -->
-
-                        <button
-                            id="headerProfileButton"
-                            type="button"
-                            class="h-[40px] w-[40px] overflow-hidden rounded-full bg-[#dff3ec]"
+                        <!-- User badge -->
+                        <span
+                            id="profileUserBadge"
+                            class="
+                                mt-[9px]
+                                rounded-[6px]
+                                bg-[#e1c9ff]
+                                px-[18px]
+                                py-[6px]
+                                text-[11px]
+                                font-semibold
+                                text-[#6339a4]
+                            "
                         >
-
-                            <img
-                                id="headerProfileImage"
-                                src=""
-                                alt="Profile"
-                                class="hidden h-full w-full object-cover"
-                            >
-
-                            <span
-                                id="headerProfileInitials"
-                                class="flex h-full w-full items-center justify-center text-[12px] font-bold text-[#238b6b]"
-                            >
-                                RB
-                            </span>
-
-                        </button>
+                            Pro User
+                        </span>
 
                     </div>
 
-                </header>
 
-
-
-                <!-- =================================================
-                     CONTENT
-                ================================================== -->
-
-                <section
-                    class="px-6 pb-12 sm:px-8 lg:px-10 xl:px-[48px]"
-                >
-
+                    <!-- Profile information -->
                     <div
-                        class="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(500px,1fr)_340px]"
+                        class="
+                            mx-auto
+                            mt-[38px]
+                            max-w-[500px]
+                        "
                     >
 
-
-                        <!-- =================================================
-                             PROFILE CARD
-                        ================================================== -->
-
-                        <section
-                            class="rounded-[9px] bg-white px-7 py-8 shadow-[0_5px_25px_rgba(24,73,57,0.025)] sm:px-12 lg:px-[120px] lg:py-7"
+                        <!-- Email -->
+                        <div
+                            class="
+                                border-b
+                                border-[#dedede]
+                                pb-[17px]
+                            "
                         >
 
+                            <p
+                                class="
+                                    text-[11px]
+                                    font-medium
+                                    text-[#2fb88b]
+                                "
+                            >
+                                Email
+                            </p>
 
-                            <!-- =============================================
-                                 PROFILE IMAGE
-                            ============================================== -->
+                            <p
+                                id="profileEmail"
+                                class="
+                                    mt-[5px]
+                                    break-all
+                                    text-[16px]
+                                    font-semibold
+                                    text-[#292929]
+                                "
+                            >
+                                user@email.com
+                            </p>
 
-                            <div class="flex flex-col items-center">
-
-                                <div class="relative">
-
-
-                                    <!-- Image -->
-
-                                    <div
-                                        class="h-[112px] w-[112px] overflow-hidden rounded-full bg-[#e1f3ed]"
-                                    >
-
-                                        <img
-                                            id="profileImage"
-                                            src=""
-                                            alt="Profile picture"
-                                            class="hidden h-full w-full object-cover"
-                                        >
-
-
-                                        <span
-                                            id="profileInitials"
-                                            class="flex h-full w-full items-center justify-center text-[32px] font-bold text-[#2fb589]"
-                                        >
-                                            RB
-                                        </span>
-
-                                    </div>
+                        </div>
 
 
+                        <!-- Phone -->
+                        <div
+                            class="
+                                border-b
+                                border-[#dedede]
+                                py-[21px]
+                            "
+                        >
 
-                                    <!-- Edit picture -->
+                            <div class="flex items-start justify-between gap-4">
 
-                                    <button
-                                        id="editProfileImageButton"
-                                        type="button"
-                                        title="Change profile picture"
-                                        class="absolute bottom-0 right-0 flex h-[27px] w-[27px] items-center justify-center rounded-full bg-[#dedede] text-[#333] shadow-sm transition hover:bg-[#cfcfcf]"
-                                    >
-
-                                        <i
-                                            class="fa-solid fa-pen text-[11px]"
-                                        ></i>
-
-                                    </button>
-
-                                </div>
-
-
-
-                                <!-- Name -->
-
-                                <h2
-                                    id="profileName"
-                                    class="mt-5 text-center text-[23px] font-bold tracking-[-0.5px]"
-                                >
-                                    User Name
-                                </h2>
-
-
-
-                                <!-- Plan -->
-
-                                <span
-                                    id="profilePlan"
-                                    class="mt-2 rounded-[5px] bg-[#e3ceff] px-5 py-[6px] text-[11px] font-semibold text-[#6737a4]"
-                                >
-                                    Pro User
-                                </span>
-
-                            </div>
-
-
-
-                            <!-- =============================================
-                                 INFORMATION
-                            ============================================== -->
-
-                            <div class="mt-10">
-
-
-                                <!-- Email -->
-
-                                <div
-                                    class="border-b border-[#dedede] pb-5"
-                                >
-
-                                    <div
-                                        class="flex items-center justify-between gap-3"
-                                    >
-
-                                        <p
-                                            class="text-[11px] font-medium text-[#1eae80]"
-                                        >
-                                            Email
-                                        </p>
-
-                                        <span
-                                            id="emailVerifiedStatus"
-                                            class="hidden items-center gap-1 text-[10px] font-medium text-[#2db88a]"
-                                        >
-
-                                            <i
-                                                class="fa-solid fa-circle-check"
-                                            ></i>
-
-                                            Verified
-
-                                        </span>
-
-                                    </div>
-
+                                <div>
 
                                     <p
-                                        id="profileEmail"
-                                        class="mt-1 break-all text-[17px] font-semibold tracking-[-0.2px]"
-                                    >
-                                        user@example.com
-                                    </p>
-
-                                </div>
-
-
-
-                                <!-- Phone -->
-
-                                <div
-                                    class="border-b border-[#dedede] py-5"
-                                >
-
-                                    <p
-                                        class="text-[11px] font-medium text-[#1eae80]"
+                                        class="
+                                            text-[11px]
+                                            font-medium
+                                            text-[#2fb88b]
+                                        "
                                     >
                                         Phone Number
                                     </p>
 
                                     <p
                                         id="profilePhone"
-                                        class="mt-1 text-[17px] font-semibold tracking-[-0.2px]"
+                                        class="
+                                            mt-[5px]
+                                            text-[16px]
+                                            font-semibold
+                                            text-[#292929]
+                                        "
                                     >
-                                        Not provided
+                                        Not added
                                     </p>
 
                                 </div>
 
-
-
-                                <!-- Gender -->
-
-                                <div
-                                    class="pt-5"
+                                <button
+                                    id="editPhoneButton"
+                                    type="button"
+                                    class="
+                                        hidden
+                                        text-[11px]
+                                        font-semibold
+                                        text-[#2fb88b]
+                                        hover:underline
+                                    "
                                 >
+                                    Edit
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- Gender -->
+                        <div
+                            class="
+                                py-[21px]
+                            "
+                        >
+
+                            <div class="flex items-start justify-between gap-4">
+
+                                <div>
 
                                     <p
-                                        class="text-[11px] font-medium text-[#1eae80]"
+                                        class="
+                                            text-[11px]
+                                            font-medium
+                                            text-[#2fb88b]
+                                        "
                                     >
                                         Gender
                                     </p>
 
                                     <p
                                         id="profileGender"
-                                        class="mt-1 text-[17px] font-semibold tracking-[-0.2px]"
+                                        class="
+                                            mt-[5px]
+                                            text-[16px]
+                                            font-semibold
+                                            text-[#292929]
+                                        "
                                     >
-                                        Not provided
+                                        Not added
                                     </p>
 
                                 </div>
+
+                                <button
+                                    id="editGenderButton"
+                                    type="button"
+                                    class="
+                                        hidden
+                                        text-[11px]
+                                        font-semibold
+                                        text-[#2fb88b]
+                                        hover:underline
+                                    "
+                                >
+                                    Edit
+                                </button>
 
                             </div>
 
+                        </div>
+
+                    </div>
 
 
-                            <!-- =============================================
-                                 EDIT PROFILE
-                            ============================================== -->
+                    <!-- Edit profile button -->
+                    <div
+                        class="
+                            mx-auto
+                            mt-[18px]
+                            max-w-[500px]
+                        "
+                    >
 
-                            <button
-                                id="editProfileButton"
-                                type="button"
-                                class="mt-8 h-[46px] w-full rounded-[8px] border border-[#34b88a] bg-white text-[14px] font-bold text-[#2cae83] transition hover:bg-[#effaf6]"
-                            >
-                                Edit Profile
-                            </button>
-
-
-
-                            <!-- =============================================
-                                 RESET PASSWORD
-                            ============================================== -->
-
-                            <button
-                                id="resetPasswordButton"
-                                type="button"
-                                class="mt-3 h-[46px] w-full rounded-[8px] bg-[#34b88a] text-[15px] font-bold text-white shadow-[0_8px_20px_rgba(52,184,138,0.12)] transition hover:bg-[#29aa7d] active:scale-[0.99]"
-                            >
-                                Reset Password
-                            </button>
-
-                        </section>
-
-
-
-                        <!-- =================================================
-                             RIGHT COLUMN
-                        ================================================== -->
-
-                        <aside>
+                        <button
+                            id="editProfileButton"
+                            type="button"
+                            class="
+                                flex
+                                h-[48px]
+                                w-full
+                                items-center
+                                justify-center
+                                rounded-[7px]
+                                bg-[#31b98b]
+                                text-[15px]
+                                font-semibold
+                                text-white
+                                shadow-[0_8px_20px_rgba(49,185,139,0.12)]
+                                transition
+                                hover:bg-[#28a97e]
+                            "
+                        >
+                            Edit Profile
+                        </button>
 
 
-                            <!-- =============================================
-                                 BALANCE
-                            ============================================== -->
-
-                            <section
-                                class="rounded-[8px] bg-[#d1f1e6] px-7 py-6"
-                            >
-
-                                <div
-                                    class="flex items-start justify-between"
-                                >
-
-                                    <div>
-
-                                        <p
-                                            class="text-[11px] font-medium text-[#4a3794]"
-                                        >
-                                            Main Account
-                                        </p>
-
-                                        <p
-                                            id="profileBalance"
-                                            class="mt-1 text-[24px] font-bold tracking-[-0.7px]"
-                                        >
-                                            ₦ 0.00
-                                        </p>
-
-                                    </div>
-
-
-                                    <!-- Balance toggle -->
-
-                                    <button
-                                        id="balanceToggle"
-                                        type="button"
-                                        title="Hide balance"
-                                        class="mt-1 text-[#313b38] transition hover:opacity-60"
-                                    >
-
-                                        <i
-                                            id="balanceToggleIcon"
-                                            class="fa-regular fa-eye-slash text-[17px]"
-                                        ></i>
-
-                                    </button>
-
-                                </div>
-
-                            </section>
-
-
-
-                            <!-- =============================================
-                                 TRANSACTIONS
-                            ============================================== -->
-
-                            <section class="mt-[69px]">
-
-
-                                <!-- Heading -->
-
-                                <div
-                                    class="flex items-center justify-between"
-                                >
-
-                                    <h2
-                                        class="text-[17px] font-bold"
-                                    >
-                                        Transactions
-                                    </h2>
-
-
-                                    <a
-                                        id="viewTransactionsButton"
-                                        href="./transactions.html"
-                                        class="flex h-8 w-8 items-center justify-center text-[#2db88a] transition hover:translate-x-1"
-                                        title="View all transactions"
-                                    >
-
-                                        <i
-                                            class="fa-solid fa-arrow-right text-[18px]"
-                                        ></i>
-
-                                    </a>
-
-                                </div>
-
-
-
-                                <!-- Transaction list -->
-
-                                <div
-                                    id="profileTransactionList"
-                                    class="mt-4 divide-y divide-[#e2e7e5]"
-                                ></div>
-
-
-
-                                <!-- Empty -->
-
-                                <div
-                                    id="transactionEmptyState"
-                                    class="hidden py-10 text-center"
-                                >
-
-                                    <div
-                                        class="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#e8f6f1] text-[#2eb88a]"
-                                    >
-
-                                        <i
-                                            class="fa-solid fa-receipt"
-                                        ></i>
-
-                                    </div>
-
-
-                                    <p
-                                        class="mt-3 text-[13px] font-semibold"
-                                    >
-                                        No transactions yet
-                                    </p>
-
-
-                                    <p
-                                        class="mt-1 text-[11px] text-[#888]"
-                                    >
-                                        Your recent transactions will appear here.
-                                    </p>
-
-                                </div>
-
-                            </section>
-
-                        </aside>
+                        <!-- Reset password -->
+                        <button
+                            id="resetPasswordButton"
+                            type="button"
+                            class="
+                                mt-3
+                                flex
+                                h-[48px]
+                                w-full
+                                items-center
+                                justify-center
+                                rounded-[7px]
+                                border
+                                border-[#31b98b]
+                                bg-white
+                                text-[15px]
+                                font-semibold
+                                text-[#2fb88b]
+                                transition
+                                hover:bg-[#f2fbf7]
+                            "
+                        >
+                            Reset Password
+                        </button>
 
                     </div>
 
                 </section>
 
-            </main>
 
-        </div>
+                <!-- =================================================
+                     RIGHT COLUMN
+                ================================================== -->
 
-    </div>
+                <section
+                    class="
+                        flex
+                        min-w-0
+                        flex-col
+                        gap-[58px]
+                    "
+                >
 
+                    <!-- Main Account Balance -->
+                    <div
+                        class="
+                            relative
+                            min-h-[100px]
+                            overflow-hidden
+                            rounded-[9px]
+                            bg-[#d4f2e7]
+                            px-7
+                            py-6
+                            sm:px-[28px]
+                        "
+                    >
+
+                        <!-- Purple side indicator -->
+                        <div
+                            class="
+                                absolute
+                                bottom-0
+                                left-0
+                                top-0
+                                w-[5px]
+                                bg-[#6a22ad]
+                            "
+                        ></div>
+
+                        <div
+                            class="
+                                flex
+                                items-start
+                                justify-between
+                                gap-5
+                            "
+                        >
+
+                            <div>
+
+                                <p
+                                    class="
+                                        text-[11px]
+                                        font-medium
+                                        text-[#46237a]
+                                    "
+                                >
+                                    Main Account
+                                </p>
+
+                                <p
+                                    id="profileMainAccountBalance"
+                                    class="
+                                        mt-[3px]
+                                        text-[23px]
+                                        font-bold
+                                        tracking-[-0.6px]
+                                        text-[#292929]
+                                    "
+                                >
+                                    ₦0.00
+                                </p>
+
+                            </div>
+
+
+                            <button
+                                id="profileBalanceToggle"
+                                type="button"
+                                class="
+                                    mt-1
+                                    text-[#4e5653]
+                                "
+                                aria-label="Hide balance"
+                            >
+
+                                <i
+                                    id="profileBalanceEye"
+                                    class="fa-regular fa-eye-slash text-[16px]"
+                                ></i>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         TRANSACTIONS
+                    ================================================== -->
+
+                    <div class="min-w-0">
+
+                        <!-- Header -->
+                        <div
+                            class="
+                                mb-[8px]
+                                flex
+                                items-center
+                                justify-between
+                            "
+                        >
+
+                            <h2
+                                class="
+                                    text-[18px]
+                                    font-bold
+                                    text-[#292929]
+                                "
+                            >
+                                Transactions
+                            </h2>
+
+                            <a
+                                id="viewAllTransactions"
+                                href="./transaction.html"
+                                class="
+                                    flex
+                                    h-[35px]
+                                    w-[35px]
+                                    items-center
+                                    justify-center
+                                    rounded-full
+                                    text-[#2fb88b]
+                                    transition
+                                    hover:bg-white
+                                "
+                                aria-label="View all transactions"
+                            >
+
+                                <i
+                                    class="
+                                        fa-solid
+                                        fa-arrow-right
+                                        text-[18px]
+                                    "
+                                ></i>
+
+                            </a>
+
+                        </div>
+
+
+                        <!-- Transaction list -->
+                        <div
+                            id="profileTransactionsList"
+                            class="
+                                min-w-0
+                                overflow-hidden
+                            "
+                        >
+
+                            <!--
+                                profile.js will insert the latest
+                                10 transactions here.
+                            -->
+
+                            <div
+                                id="profileTransactionsEmpty"
+                                class="
+                                    hidden
+                                    py-10
+                                    text-center
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        mx-auto
+                                        flex
+                                        h-12
+                                        w-12
+                                        items-center
+                                        justify-center
+                                        rounded-full
+                                        bg-[#e7f7f1]
+                                        text-[#2fb88b]
+                                    "
+                                >
+                                    <i
+                                        class="fa-solid fa-receipt"
+                                    ></i>
+                                </div>
+
+                                <p
+                                    class="
+                                        mt-3
+                                        text-[14px]
+                                        font-semibold
+                                        text-[#444]
+                                    "
+                                >
+                                    No transactions yet
+                                </p>
+
+                                <p
+                                    class="
+                                        mt-1
+                                        text-[11px]
+                                        text-[#929292]
+                                    "
+                                >
+                                    Your latest transactions will appear here.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </section>
+
+    </main>
 
 
     <!-- =========================================================
@@ -805,223 +1224,327 @@
 
     <div
         id="editProfileModal"
-        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-[3px]"
+        class="
+            fixed
+            inset-0
+            z-[100]
+            hidden
+            items-center
+            justify-center
+            bg-black/40
+            px-4
+            py-6
+            backdrop-blur-[2px]
+        "
     >
 
         <div
-            class="relative max-h-[90vh] w-full max-w-[470px] overflow-y-auto rounded-2xl bg-white p-7 shadow-2xl"
+            id="editProfilePanel"
+            class="
+                max-h-[90vh]
+                w-full
+                max-w-[520px]
+                overflow-y-auto
+                rounded-[16px]
+                bg-white
+                p-6
+                shadow-[0_25px_80px_rgba(0,0,0,0.18)]
+                sm:p-8
+            "
         >
 
-            <button
-                type="button"
-                data-close-modal="editProfileModal"
-                class="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-[#f4f4f4] text-[#555] transition hover:bg-[#e8e8e8]"
+            <!-- Modal header -->
+            <div
+                class="
+                    flex
+                    items-center
+                    justify-between
+                "
             >
-
-                <i class="fa-solid fa-xmark"></i>
-
-            </button>
-
-
-            <h3
-                class="text-[21px] font-bold"
-            >
-                Edit Profile
-            </h3>
-
-
-            <p
-                class="mt-1 pr-8 text-[13px] leading-5 text-[#777]"
-            >
-                Update your personal information.
-            </p>
-
-
-
-            <form
-                id="editProfileForm"
-                class="mt-7 space-y-5"
-            >
-
-
-                <!-- Full name -->
 
                 <div>
 
+                    <h2
+                        class="
+                            text-[21px]
+                            font-bold
+                            text-[#292929]
+                        "
+                    >
+                        Edit Profile
+                    </h2>
+
+                    <p
+                        class="
+                            mt-1
+                            text-[12px]
+                            text-[#858585]
+                        "
+                    >
+                        Update your personal information.
+                    </p>
+
+                </div>
+
+                <button
+                    id="closeEditProfileModal"
+                    type="button"
+                    class="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-[#f4f7f6]
+                        text-[#666]
+                        hover:bg-[#eaf1ee]
+                    "
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+
+            <!-- Form -->
+            <form
+                id="editProfileForm"
+                class="mt-7"
+            >
+
+                <!-- Name -->
+                <div class="mb-5">
+
                     <label
                         for="editProfileName"
-                        class="mb-2 block text-[12px] font-semibold text-[#444]"
+                        class="
+                            mb-2
+                            block
+                            text-[12px]
+                            font-semibold
+                            text-[#454545]
+                        "
                     >
                         Full Name
                     </label>
 
                     <input
                         id="editProfileName"
+                        name="name"
                         type="text"
-                        required
-                        class="h-[47px] w-full rounded-lg border border-[#ddd] px-4 text-[13px] outline-none transition focus:border-[#34b88a]"
+                        autocomplete="name"
+                        class="
+                            h-[48px]
+                            w-full
+                            rounded-[7px]
+                            border
+                            border-[#dce4e1]
+                            bg-white
+                            px-4
+                            text-[14px]
+                            outline-none
+                            transition
+                            focus:border-[#2fb88b]
+                            focus:ring-2
+                            focus:ring-[#2fb88b]/10
+                        "
                         placeholder="Enter your full name"
                     >
 
                 </div>
 
 
-
-                <!-- Email -->
-
-                <div>
-
-                    <label
-                        for="editProfileEmail"
-                        class="mb-2 block text-[12px] font-semibold text-[#444]"
-                    >
-                        Email Address
-                    </label>
-
-
-                    <div class="relative">
-
-                        <input
-                            id="editProfileEmail"
-                            type="email"
-                            required
-                            class="h-[47px] w-full rounded-lg border border-[#ddd] px-4 pr-12 text-[13px] outline-none transition focus:border-[#34b88a]"
-                            placeholder="Enter your email"
-                        >
-
-
-                        <span
-                            id="currentEmailVerifiedBadge"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 hidden text-[#2eb88a]"
-                        >
-
-                            <i
-                                class="fa-solid fa-circle-check"
-                            ></i>
-
-                        </span>
-
-                    </div>
-
-
-                    <p
-                        id="emailChangeHint"
-                        class="mt-2 hidden text-[11px] leading-4 text-[#e58b2a]"
-                    >
-                        Changing your email requires verification of the new email address.
-                    </p>
-
-                </div>
-
-
-
                 <!-- Phone -->
-
-                <div>
+                <div class="mb-5">
 
                     <label
-                        for="editProfilePhone"
-                        class="mb-2 block text-[12px] font-semibold text-[#444]"
+                        for="editPhoneNumber"
+                        class="
+                            mb-2
+                            block
+                            text-[12px]
+                            font-semibold
+                            text-[#454545]
+                        "
                     >
                         Phone Number
                     </label>
 
+                    <input
+                        id="editPhoneNumber"
+                        name="phone"
+                        type="tel"
+                        autocomplete="tel"
+                        class="
+                            h-[48px]
+                            w-full
+                            rounded-[7px]
+                            border
+                            border-[#dce4e1]
+                            bg-white
+                            px-4
+                            text-[14px]
+                            outline-none
+                            transition
+                            focus:border-[#2fb88b]
+                            focus:ring-2
+                            focus:ring-[#2fb88b]/10
+                        "
+                        placeholder="+234 800 000 0000"
+                    >
+
+                </div>
+
+
+                <!-- Gender -->
+                <div class="mb-5">
+
+                    <label
+                        for="editGender"
+                        class="
+                            mb-2
+                            block
+                            text-[12px]
+                            font-semibold
+                            text-[#454545]
+                        "
+                    >
+                        Gender
+                    </label>
+
+                    <select
+                        id="editGender"
+                        name="gender"
+                        class="
+                            h-[48px]
+                            w-full
+                            rounded-[7px]
+                            border
+                            border-[#dce4e1]
+                            bg-white
+                            px-4
+                            text-[14px]
+                            outline-none
+                            transition
+                            focus:border-[#2fb88b]
+                            focus:ring-2
+                            focus:ring-[#2fb88b]/10
+                        "
+                    >
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+
+                </div>
+
+
+                <!-- Email -->
+                <div class="mb-5">
+
+                    <label
+                        for="editEmail"
+                        class="
+                            mb-2
+                            block
+                            text-[12px]
+                            font-semibold
+                            text-[#454545]
+                        "
+                    >
+                        Email Address
+                    </label>
 
                     <input
-                        id="editProfilePhone"
-                        type="tel"
-                        inputmode="tel"
-                        class="h-[47px] w-full rounded-lg border border-[#ddd] px-4 text-[13px] outline-none transition focus:border-[#34b88a]"
-                        placeholder="+234 803 041 1314"
+                        id="editEmail"
+                        name="email"
+                        type="email"
+                        autocomplete="email"
+                        class="
+                            h-[48px]
+                            w-full
+                            rounded-[7px]
+                            border
+                            border-[#dce4e1]
+                            bg-white
+                            px-4
+                            text-[14px]
+                            outline-none
+                            transition
+                            focus:border-[#2fb88b]
+                            focus:ring-2
+                            focus:ring-[#2fb88b]/10
+                        "
+                        placeholder="Enter your email"
                     >
-
 
                     <p
-                        class="mt-1.5 text-[10px] text-[#999]"
+                        class="
+                            mt-2
+                            text-[10px]
+                            leading-4
+                            text-[#8b918e]
+                        "
                     >
-                        Example: +234 803 041 1314
+                        Changing your email requires verification with an OTP.
                     </p>
 
                 </div>
 
 
-
-                <!-- Gender -->
-
-                <div>
-
-                    <label
-                        for="editProfileGender"
-                        class="mb-2 block text-[12px] font-semibold text-[#444]"
-                    >
-                        Gender
-                    </label>
-
-
-                    <div class="relative">
-
-                        <select
-                            id="editProfileGender"
-                            class="h-[47px] w-full appearance-none rounded-lg border border-[#ddd] bg-white px-4 pr-10 text-[13px] outline-none transition focus:border-[#34b88a]"
-                        >
-
-                            <option value="">
-                                Select gender
-                            </option>
-
-                            <option value="Female">
-                                Female
-                            </option>
-
-                            <option value="Male">
-                                Male
-                            </option>
-
-                            <option value="Prefer not to say">
-                                Prefer not to say
-                            </option>
-
-                        </select>
-
-
-                        <i
-                            class="fa-solid fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[11px] text-[#777]"
-                        ></i>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Error -->
-
-                <div
+                <p
                     id="editProfileError"
-                    class="hidden rounded-lg bg-[#fff0f2] px-4 py-3 text-[12px] font-medium leading-5 text-[#e5485d]"
-                ></div>
+                    class="
+                        mb-4
+                        hidden
+                        rounded-[7px]
+                        bg-[#fff0f0]
+                        px-3
+                        py-2
+                        text-[11px]
+                        font-medium
+                        text-[#d94b4b]
+                    "
+                ></p>
 
 
-
-                <!-- Buttons -->
-
-                <div
-                    class="flex gap-3 pt-2"
-                >
+                <div class="flex gap-3">
 
                     <button
+                        id="cancelEditProfile"
                         type="button"
-                        data-close-modal="editProfileModal"
-                        class="h-[46px] flex-1 rounded-lg border border-[#ddd] text-[14px] font-semibold text-[#555]"
+                        class="
+                            h-[48px]
+                            flex-1
+                            rounded-[7px]
+                            border
+                            border-[#dce4e1]
+                            bg-white
+                            text-[13px]
+                            font-semibold
+                            text-[#555]
+                            hover:bg-[#f7f9f8]
+                        "
                     >
                         Cancel
                     </button>
 
-
                     <button
                         id="saveProfileButton"
                         type="submit"
-                        class="h-[46px] flex-1 rounded-lg bg-[#34b88a] text-[14px] font-bold text-white transition hover:bg-[#29aa7d]"
+                        class="
+                            h-[48px]
+                            flex-1
+                            rounded-[7px]
+                            bg-[#31b98b]
+                            text-[13px]
+                            font-semibold
+                            text-white
+                            hover:bg-[#28a97e]
+                        "
                     >
                         Save Changes
                     </button>
@@ -1035,264 +1558,428 @@
     </div>
 
 
-
     <!-- =========================================================
          PROFILE IMAGE MODAL
     ========================================================== -->
 
     <div
         id="profileImageModal"
-        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-[3px]"
+        class="
+            fixed
+            inset-0
+            z-[100]
+            hidden
+            items-center
+            justify-center
+            bg-black/40
+            px-4
+            backdrop-blur-[2px]
+        "
     >
 
         <div
-            class="relative w-full max-w-[430px] rounded-2xl bg-white p-7 shadow-2xl"
+            class="
+                w-full
+                max-w-[430px]
+                rounded-[16px]
+                bg-white
+                p-6
+                shadow-[0_25px_80px_rgba(0,0,0,0.18)]
+                sm:p-8
+            "
         >
 
-            <button
-                type="button"
-                data-close-modal="profileImageModal"
-                class="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-[#f4f4f4] text-[#555]"
-            >
+            <div class="flex items-center justify-between">
 
-                <i class="fa-solid fa-xmark"></i>
+                <div>
 
-            </button>
+                    <h2
+                        class="
+                            text-[20px]
+                            font-bold
+                            text-[#292929]
+                        "
+                    >
+                        Profile Picture
+                    </h2>
+
+                    <p
+                        class="
+                            mt-1
+                            text-[12px]
+                            text-[#888]
+                        "
+                    >
+                        Choose a new profile picture.
+                    </p>
+
+                </div>
+
+                <button
+                    id="closeProfileImageModal"
+                    type="button"
+                    class="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-[#f4f7f6]
+                        text-[#666]
+                    "
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
 
 
-            <h3
-                class="text-[20px] font-bold"
-            >
-                Profile Picture
-            </h3>
-
-
-            <p
-                class="mt-1 text-[13px] text-[#777]"
-            >
-                Upload a new profile picture.
-            </p>
-
-
-            <!-- Preview -->
-
+            <!-- Image preview -->
             <div
-                class="mt-7 flex justify-center"
+                class="
+                    mt-7
+                    flex
+                    justify-center
+                "
             >
 
                 <div
-                    class="h-[120px] w-[120px] overflow-hidden rounded-full bg-[#e3f5ef]"
+                    class="
+                        h-[120px]
+                        w-[120px]
+                        overflow-hidden
+                        rounded-full
+                        bg-[#e3f3ed]
+                    "
                 >
 
                     <img
                         id="profileImagePreview"
                         src=""
-                        alt="Preview"
-                        class="hidden h-full w-full object-cover"
+                        alt="Profile preview"
+                        class="
+                            hidden
+                            h-full
+                            w-full
+                            object-cover
+                        "
                     >
 
-
-                    <span
+                    <div
                         id="profileImagePreviewInitials"
-                        class="flex h-full w-full items-center justify-center text-[30px] font-bold text-[#2eb88a]"
+                        class="
+                            flex
+                            h-full
+                            w-full
+                            items-center
+                            justify-center
+                            text-[30px]
+                            font-bold
+                            text-[#2fb88b]
+                        "
                     >
-                        RB
-                    </span>
+                        U
+                    </div>
 
                 </div>
 
             </div>
 
 
+            <!-- File -->
+            <label
+                for="profileImageInput"
+                class="
+                    mt-6
+                    flex
+                    h-[48px]
+                    cursor-pointer
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-[7px]
+                    border
+                    border-dashed
+                    border-[#b9c9c4]
+                    bg-[#f8fbfa]
+                    text-[13px]
+                    font-semibold
+                    text-[#555]
+                    hover:bg-[#f1f8f5]
+                "
+            >
 
-            <form
-                id="profileImageForm"
-                class="mt-7"
+                <i class="fa-solid fa-upload text-[#2fb88b]"></i>
+
+                Choose Image
+
+            </label>
+
+            <input
+                id="profileImageInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
             >
 
 
-                <label
-                    for="profileImageInput"
-                    class="flex cursor-pointer items-center justify-center gap-3 rounded-lg border border-dashed border-[#b7cfc7] bg-[#f7fcfa] px-5 py-5 text-[13px] font-medium text-[#444] transition hover:border-[#32b88a] hover:bg-[#f0faf6]"
+            <p
+                id="profileImageError"
+                class="
+                    mt-3
+                    hidden
+                    rounded-[7px]
+                    bg-[#fff0f0]
+                    px-3
+                    py-2
+                    text-[11px]
+                    text-[#d94b4b]
+                "
+            ></p>
+
+
+            <div class="mt-5 flex gap-3">
+
+                <button
+                    id="cancelProfileImage"
+                    type="button"
+                    class="
+                        h-[48px]
+                        flex-1
+                        rounded-[7px]
+                        border
+                        border-[#dce4e1]
+                        text-[13px]
+                        font-semibold
+                        text-[#555]
+                    "
                 >
+                    Cancel
+                </button>
 
-                    <i
-                        class="fa-solid fa-cloud-arrow-up text-[#2db88a]"
-                    ></i>
-
-                    <span id="profileImageFileName">
-                        Choose image
-                    </span>
-
-                </label>
-
-
-                <input
-                    id="profileImageInput"
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    class="hidden"
+                <button
+                    id="saveProfileImage"
+                    type="button"
+                    class="
+                        h-[48px]
+                        flex-1
+                        rounded-[7px]
+                        bg-[#31b98b]
+                        text-[13px]
+                        font-semibold
+                        text-white
+                        hover:bg-[#28a97e]
+                    "
                 >
+                    Save Picture
+                </button>
 
-
-
-                <div
-                    class="mt-6 flex gap-3"
-                >
-
-                    <button
-                        type="button"
-                        data-close-modal="profileImageModal"
-                        class="h-[45px] flex-1 rounded-lg border border-[#ddd] text-[14px] font-semibold text-[#555]"
-                    >
-                        Cancel
-                    </button>
-
-
-                    <button
-                        id="saveProfileImageButton"
-                        type="submit"
-                        class="h-[45px] flex-1 rounded-lg bg-[#34b88a] text-[14px] font-bold text-white transition hover:bg-[#29aa7d]"
-                    >
-                        Save Picture
-                    </button>
-
-                </div>
-
-            </form>
+            </div>
 
         </div>
 
     </div>
 
 
-
     <!-- =========================================================
-         EMAIL VERIFICATION MODAL
+         CHANGE EMAIL OTP MODAL
     ========================================================== -->
 
     <div
         id="emailVerificationModal"
-        class="fixed inset-0 z-[110] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-[3px]"
+        class="
+            fixed
+            inset-0
+            z-[110]
+            hidden
+            items-center
+            justify-center
+            bg-black/40
+            px-4
+            backdrop-blur-[2px]
+        "
     >
 
         <div
-            class="relative w-full max-w-[430px] rounded-2xl bg-white p-7 shadow-2xl"
+            class="
+                w-full
+                max-w-[430px]
+                rounded-[16px]
+                bg-white
+                p-6
+                shadow-[0_25px_80px_rgba(0,0,0,0.18)]
+                sm:p-8
+            "
         >
 
-            <button
-                type="button"
-                data-close-modal="emailVerificationModal"
-                class="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-[#f4f4f4] text-[#555]"
-            >
+            <div class="flex items-center justify-between">
 
-                <i class="fa-solid fa-xmark"></i>
+                <div>
 
-            </button>
+                    <h2
+                        class="
+                            text-[20px]
+                            font-bold
+                            text-[#292929]
+                        "
+                    >
+                        Verify Email
+                    </h2>
 
+                    <p
+                        class="
+                            mt-1
+                            text-[12px]
+                            leading-5
+                            text-[#888]
+                        "
+                    >
+                        Enter the verification code sent to your new email.
+                    </p>
 
-            <div
-                class="flex h-12 w-12 items-center justify-center rounded-full bg-[#e4f7f0] text-[#2eb88a]"
-            >
+                </div>
 
-                <i
-                    class="fa-regular fa-envelope text-[18px]"
-                ></i>
+                <button
+                    id="closeEmailVerificationModal"
+                    type="button"
+                    class="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-[#f4f7f6]
+                        text-[#666]
+                    "
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
 
             </div>
 
 
-            <h3
-                class="mt-5 text-[21px] font-bold"
-            >
-                Verify New Email
-            </h3>
-
-
-            <p
-                class="mt-2 text-[13px] leading-5 text-[#777]"
-            >
-                Enter the 6-digit verification code sent to:
-            </p>
-
-
-            <p
-                id="verificationEmailAddress"
-                class="mt-2 break-all text-[14px] font-bold text-[#2eb88a]"
-            >
-                newemail@example.com
-            </p>
-
-
-
-            <form
-                id="emailVerificationForm"
-                class="mt-7"
-            >
-
-                <label
-                    for="emailVerificationCode"
-                    class="mb-2 block text-[12px] font-semibold text-[#444]"
-                >
-                    Verification Code
-                </label>
-
-
-                <input
-                    id="emailVerificationCode"
-                    type="text"
-                    inputmode="numeric"
-                    autocomplete="one-time-code"
-                    maxlength="6"
-                    required
-                    class="h-[52px] w-full rounded-lg border border-[#ddd] text-center text-[22px] font-bold tracking-[8px] outline-none transition focus:border-[#34b88a]"
-                    placeholder="000000"
-                >
-
-
-                <div
-                    id="emailVerificationError"
-                    class="mt-3 hidden rounded-lg bg-[#fff0f2] px-4 py-3 text-[12px] font-medium leading-5 text-[#e5485d]"
-                ></div>
-
-
-                <button
-                    id="verifyNewEmailButton"
-                    type="submit"
-                    class="mt-5 h-[47px] w-full rounded-lg bg-[#34b88a] text-[14px] font-bold text-white transition hover:bg-[#29aa7d]"
-                >
-                    Verify Email
-                </button>
-
-            </form>
-
-
-
             <div
-                class="mt-5 text-center"
+                class="
+                    mt-7
+                    rounded-[8px]
+                    bg-[#f1faf6]
+                    px-4
+                    py-3
+                "
             >
 
                 <p
-                    class="text-[11px] text-[#888]"
+                    id="verificationEmailText"
+                    class="
+                        break-all
+                        text-center
+                        text-[12px]
+                        font-semibold
+                        text-[#2fb88b]
+                    "
                 >
-                    Didn't receive the code?
+                    user@email.com
                 </p>
 
-
-                <button
-                    id="resendEmailVerificationButton"
-                    type="button"
-                    class="mt-1 text-[12px] font-semibold text-[#2eb88a] hover:underline"
-                >
-                    Resend Code
-                </button>
-
             </div>
+
+
+            <label
+                for="emailOtpInput"
+                class="
+                    mt-6
+                    block
+                    text-[12px]
+                    font-semibold
+                    text-[#454545]
+                "
+            >
+                Verification Code
+            </label>
+
+            <input
+                id="emailOtpInput"
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                autocomplete="one-time-code"
+                class="
+                    mt-2
+                    h-[52px]
+                    w-full
+                    rounded-[7px]
+                    border
+                    border-[#dce4e1]
+                    px-4
+                    text-center
+                    text-[22px]
+                    font-bold
+                    tracking-[8px]
+                    outline-none
+                    focus:border-[#2fb88b]
+                    focus:ring-2
+                    focus:ring-[#2fb88b]/10
+                "
+                placeholder="000000"
+            >
+
+
+            <p
+                id="emailOtpError"
+                class="
+                    mt-3
+                    hidden
+                    rounded-[7px]
+                    bg-[#fff0f0]
+                    px-3
+                    py-2
+                    text-[11px]
+                    text-[#d94b4b]
+                "
+            ></p>
+
+
+            <button
+                id="verifyEmailButton"
+                type="button"
+                class="
+                    mt-5
+                    h-[48px]
+                    w-full
+                    rounded-[7px]
+                    bg-[#31b98b]
+                    text-[13px]
+                    font-semibold
+                    text-white
+                    hover:bg-[#28a97e]
+                "
+            >
+                Verify Email
+            </button>
+
+
+            <button
+                id="resendEmailOtp"
+                type="button"
+                class="
+                    mt-4
+                    block
+                    w-full
+                    text-center
+                    text-[12px]
+                    font-semibold
+                    text-[#2fb88b]
+                    hover:underline
+                "
+            >
+                Resend Code
+            </button>
 
         </div>
 
     </div>
-
 
 
     <!-- =========================================================
@@ -1301,109 +1988,97 @@
 
     <div
         id="resetPasswordModal"
-        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-[3px]"
+        class="
+            fixed
+            inset-0
+            z-[100]
+            hidden
+            items-center
+            justify-center
+            bg-black/40
+            px-4
+            backdrop-blur-[2px]
+        "
     >
 
         <div
-            class="relative w-full max-w-[440px] rounded-2xl bg-white p-7 shadow-2xl"
+            class="
+                w-full
+                max-w-[470px]
+                rounded-[16px]
+                bg-white
+                p-6
+                shadow-[0_25px_80px_rgba(0,0,0,0.18)]
+                sm:p-8
+            "
         >
 
-            <button
-                type="button"
-                data-close-modal="resetPasswordModal"
-                class="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-[#f4f4f4] text-[#555]"
-            >
+            <div class="flex items-center justify-between">
 
-                <i class="fa-solid fa-xmark"></i>
+                <div>
 
-            </button>
+                    <h2
+                        class="
+                            text-[20px]
+                            font-bold
+                            text-[#292929]
+                        "
+                    >
+                        Reset Password
+                    </h2>
 
+                    <p
+                        class="
+                            mt-1
+                            text-[12px]
+                            text-[#888]
+                        "
+                    >
+                        Create a new secure password.
+                    </p>
 
-            <div
-                class="flex h-12 w-12 items-center justify-center rounded-full bg-[#e4f7f0] text-[#2eb88a]"
-            >
+                </div>
 
-                <i
-                    class="fa-solid fa-lock"
-                ></i>
+                <button
+                    id="closeResetPasswordModal"
+                    type="button"
+                    class="
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-full
+                        bg-[#f4f7f6]
+                        text-[#666]
+                    "
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
 
             </div>
 
 
-            <h3
-                class="mt-5 text-[21px] font-bold"
-            >
-                Reset Password
-            </h3>
-
-
-            <p
-                class="mt-1 text-[13px] leading-5 text-[#777]"
-            >
-                Enter your current password and create a new password.
-            </p>
-
-
-
             <form
                 id="resetPasswordForm"
-                class="mt-6 space-y-4"
+                class="mt-7"
             >
 
-
-                <!-- Current -->
-
-                <div>
-
-                    <label
-                        for="currentPassword"
-                        class="mb-2 block text-[12px] font-semibold text-[#444]"
-                    >
-                        Current Password
-                    </label>
-
-
-                    <div class="relative">
-
-                        <input
-                            id="currentPassword"
-                            type="password"
-                            autocomplete="current-password"
-                            required
-                            class="h-[47px] w-full rounded-lg border border-[#ddd] bg-white px-4 pr-12 text-[13px] outline-none transition focus:border-[#34b88a]"
-                            placeholder="Enter current password"
-                        >
-
-
-                        <button
-                            type="button"
-                            data-toggle-password="currentPassword"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 text-[#888]"
-                        >
-
-                            <i
-                                class="fa-regular fa-eye"
-                            ></i>
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- New -->
-
+                <!-- New password -->
                 <div>
 
                     <label
                         for="newPassword"
-                        class="mb-2 block text-[12px] font-semibold text-[#444]"
+                        class="
+                            mb-2
+                            block
+                            text-[12px]
+                            font-semibold
+                            text-[#454545]
+                        "
                     >
                         New Password
                     </label>
-
 
                     <div class="relative">
 
@@ -1411,23 +2086,40 @@
                             id="newPassword"
                             type="password"
                             autocomplete="new-password"
-                            minlength="8"
-                            required
-                            class="h-[47px] w-full rounded-lg border border-[#ddd] bg-white px-4 pr-12 text-[13px] outline-none transition focus:border-[#34b88a]"
-                            placeholder="Minimum 8 characters"
+                            class="
+                                h-[48px]
+                                w-full
+                                rounded-[7px]
+                                border
+                                border-[#dce4e1]
+                                bg-white
+                                px-4
+                                pr-12
+                                text-[14px]
+                                outline-none
+                                focus:border-[#2fb88b]
+                                focus:ring-2
+                                focus:ring-[#2fb88b]/10
+                            "
+                            placeholder="Enter new password"
                         >
-
 
                         <button
+                            id="toggleNewPassword"
                             type="button"
-                            data-toggle-password="newPassword"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 text-[#888]"
+                            class="
+                                absolute
+                                right-0
+                                top-0
+                                flex
+                                h-[48px]
+                                w-[48px]
+                                items-center
+                                justify-center
+                                text-[#777]
+                            "
                         >
-
-                            <i
-                                class="fa-regular fa-eye"
-                            ></i>
-
+                            <i class="fa-regular fa-eye"></i>
                         </button>
 
                     </div>
@@ -1435,42 +2127,62 @@
                 </div>
 
 
-
-                <!-- Confirm -->
-
-                <div>
+                <!-- Confirm password -->
+                <div class="mt-5">
 
                     <label
-                        for="confirmPassword"
-                        class="mb-2 block text-[12px] font-semibold text-[#444]"
+                        for="confirmNewPassword"
+                        class="
+                            mb-2
+                            block
+                            text-[12px]
+                            font-semibold
+                            text-[#454545]
+                        "
                     >
                         Confirm New Password
                     </label>
 
-
                     <div class="relative">
 
                         <input
-                            id="confirmPassword"
+                            id="confirmNewPassword"
                             type="password"
                             autocomplete="new-password"
-                            minlength="8"
-                            required
-                            class="h-[47px] w-full rounded-lg border border-[#ddd] bg-white px-4 pr-12 text-[13px] outline-none transition focus:border-[#34b88a]"
-                            placeholder="Repeat new password"
+                            class="
+                                h-[48px]
+                                w-full
+                                rounded-[7px]
+                                border
+                                border-[#dce4e1]
+                                bg-white
+                                px-4
+                                pr-12
+                                text-[14px]
+                                outline-none
+                                focus:border-[#2fb88b]
+                                focus:ring-2
+                                focus:ring-[#2fb88b]/10
+                            "
+                            placeholder="Confirm new password"
                         >
-
 
                         <button
+                            id="toggleConfirmPassword"
                             type="button"
-                            data-toggle-password="confirmPassword"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 text-[#888]"
+                            class="
+                                absolute
+                                right-0
+                                top-0
+                                flex
+                                h-[48px]
+                                w-[48px]
+                                items-center
+                                justify-center
+                                text-[#777]
+                            "
                         >
-
-                            <i
-                                class="fa-regular fa-eye"
-                            ></i>
-
+                            <i class="fa-regular fa-eye"></i>
                         </button>
 
                     </div>
@@ -1478,35 +2190,66 @@
                 </div>
 
 
-
-                <!-- Error -->
-
-                <div
-                    id="passwordFormError"
-                    class="hidden rounded-lg bg-[#fff0f2] px-4 py-3 text-[12px] font-medium text-[#e5485d]"
-                ></div>
-
-
-
-                <!-- Buttons -->
-
-                <div
-                    class="flex gap-3 pt-2"
+                <p
+                    class="
+                        mt-4
+                        text-[10px]
+                        leading-5
+                        text-[#8a8f8d]
+                    "
                 >
+                    Password should contain at least 8 characters.
+                </p>
+
+
+                <p
+                    id="resetPasswordError"
+                    class="
+                        mt-3
+                        hidden
+                        rounded-[7px]
+                        bg-[#fff0f0]
+                        px-3
+                        py-2
+                        text-[11px]
+                        text-[#d94b4b]
+                    "
+                ></p>
+
+
+                <div class="mt-6 flex gap-3">
 
                     <button
+                        id="cancelResetPassword"
                         type="button"
-                        data-close-modal="resetPasswordModal"
-                        class="h-[46px] flex-1 rounded-lg border border-[#ddd] text-[14px] font-semibold text-[#555]"
+                        class="
+                            h-[48px]
+                            flex-1
+                            rounded-[7px]
+                            border
+                            border-[#dce4e1]
+                            bg-white
+                            text-[13px]
+                            font-semibold
+                            text-[#555]
+                        "
                     >
                         Cancel
                     </button>
 
-
                     <button
-                        id="savePasswordButton"
+                        id="saveNewPassword"
                         type="submit"
-                        class="h-[46px] flex-1 rounded-lg bg-[#34b88a] text-[14px] font-bold text-white transition hover:bg-[#29aa7d]"
+                        class="
+                            h-[48px]
+                            flex-1
+                            rounded-[7px]
+                            bg-[#31b98b]
+                            text-[13px]
+                            font-semibold
+                            text-white
+                            hover:bg-[#28a97e]
+                        "
                     >
                         Update Password
                     </button>
@@ -1520,6 +2263,110 @@
     </div>
 
 
+    <!-- =========================================================
+         SUCCESS MODAL
+    ========================================================== -->
+
+    <div
+        id="profileSuccessModal"
+        class="
+            fixed
+            inset-0
+            z-[120]
+            hidden
+            items-center
+            justify-center
+            bg-black/40
+            px-4
+            backdrop-blur-[2px]
+        "
+    >
+
+        <div
+            class="
+                w-full
+                max-w-[390px]
+                rounded-[16px]
+                bg-white
+                p-7
+                text-center
+                shadow-[0_25px_80px_rgba(0,0,0,0.18)]
+            "
+        >
+
+            <div
+                class="
+                    mx-auto
+                    flex
+                    h-[62px]
+                    w-[62px]
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-[#dcf7ed]
+                "
+            >
+
+                <i
+                    class="
+                        fa-solid
+                        fa-check
+                        text-[25px]
+                        text-[#2fb88b]
+                    "
+                ></i>
+
+            </div>
+
+
+            <h2
+                id="profileSuccessTitle"
+                class="
+                    mt-5
+                    text-[20px]
+                    font-bold
+                    text-[#292929]
+                "
+            >
+                Profile Updated
+            </h2>
+
+
+            <p
+                id="profileSuccessMessage"
+                class="
+                    mt-2
+                    text-[12px]
+                    leading-5
+                    text-[#858585]
+                "
+            >
+                Your profile has been updated successfully.
+            </p>
+
+
+            <button
+                id="closeProfileSuccess"
+                type="button"
+                class="
+                    mt-6
+                    h-[46px]
+                    w-full
+                    rounded-[7px]
+                    bg-[#31b98b]
+                    text-[13px]
+                    font-semibold
+                    text-white
+                    hover:bg-[#28a97e]
+                "
+            >
+                Done
+            </button>
+
+        </div>
+
+    </div>
+
 
     <!-- =========================================================
          LOGOUT MODAL
@@ -1527,55 +2374,111 @@
 
     <div
         id="logoutModal"
-        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-[3px]"
+        class="
+            fixed
+            inset-0
+            z-[120]
+            hidden
+            items-center
+            justify-center
+            bg-black/40
+            px-4
+            backdrop-blur-[2px]
+        "
     >
 
         <div
-            class="relative w-full max-w-[390px] rounded-2xl bg-white p-7 text-center shadow-2xl"
+            class="
+                w-full
+                max-w-[390px]
+                rounded-[16px]
+                bg-white
+                p-7
+                shadow-[0_25px_80px_rgba(0,0,0,0.18)]
+            "
         >
 
             <div
-                class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#fff0f2] text-[#ef4f64]"
+                class="
+                    flex
+                    h-[54px]
+                    w-[54px]
+                    items-center
+                    justify-center
+                    rounded-full
+                    bg-[#fff1f1]
+                    text-[#e05252]
+                "
             >
 
                 <i
-                    class="fa-solid fa-arrow-right-from-bracket text-[20px]"
+                    class="
+                        fa-solid
+                        fa-arrow-right-from-bracket
+                        text-[20px]
+                    "
                 ></i>
 
             </div>
 
 
-            <h3
-                class="mt-5 text-[20px] font-bold"
+            <h2
+                class="
+                    mt-5
+                    text-[20px]
+                    font-bold
+                    text-[#292929]
+                "
             >
-                Logout?
-            </h3>
+                Logout
+            </h2>
 
 
             <p
-                class="mt-2 text-[13px] leading-5 text-[#777]"
+                class="
+                    mt-2
+                    text-[12px]
+                    leading-5
+                    text-[#858585]
+                "
             >
-                Are you sure you want to log out of your Reen Bank account?
+                Are you sure you want to logout from your Reen Bank account?
             </p>
 
 
-            <div
-                class="mt-7 flex gap-3"
-            >
+            <div class="mt-6 flex gap-3">
 
                 <button
+                    id="cancelLogoutBtn"
                     type="button"
-                    data-close-modal="logoutModal"
-                    class="h-[46px] flex-1 rounded-lg border border-[#ddd] text-[14px] font-semibold text-[#555]"
+                    class="
+                        h-[46px]
+                        flex-1
+                        rounded-[7px]
+                        border
+                        border-[#dce4e1]
+                        bg-white
+                        text-[13px]
+                        font-semibold
+                        text-[#555]
+                    "
                 >
                     Cancel
                 </button>
 
-
                 <button
-                    id="confirmLogoutButton"
+                    id="confirmLogoutBtn"
                     type="button"
-                    class="h-[46px] flex-1 rounded-lg bg-[#ef5368] text-[14px] font-bold text-white transition hover:bg-[#e8475c]"
+                    class="
+                        h-[46px]
+                        flex-1
+                        rounded-[7px]
+                        bg-[#e05252]
+                        text-[13px]
+                        font-semibold
+                        text-white
+                        hover:bg-[#d74646]
+                    "
                 >
                     Logout
                 </button>
@@ -1585,201 +2488,6 @@
         </div>
 
     </div>
-
-
-
-    <!-- =========================================================
-         NOTIFICATION MODAL
-    ========================================================== -->
-
-    <div
-        id="notificationModal"
-        class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-[3px]"
-    >
-
-        <div
-            class="relative w-full max-w-[420px] rounded-2xl bg-white p-7 shadow-2xl"
-        >
-
-            <button
-                type="button"
-                data-close-modal="notificationModal"
-                class="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full bg-[#f4f4f4] text-[#555]"
-            >
-
-                <i class="fa-solid fa-xmark"></i>
-
-            </button>
-
-
-            <div
-                class="flex items-center gap-3"
-            >
-
-                <div
-                    class="flex h-11 w-11 items-center justify-center rounded-full bg-[#e3f7f0] text-[#2db88a]"
-                >
-
-                    <i
-                        class="fa-regular fa-bell"
-                    ></i>
-
-                </div>
-
-
-                <div>
-
-                    <h3
-                        class="text-[18px] font-bold"
-                    >
-                        Notifications
-                    </h3>
-
-                    <p
-                        class="text-[11px] text-[#888]"
-                    >
-                        Reen Bank updates
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="notificationContent"
-                class="mt-6"
-            >
-
-                <div
-                    class="rounded-xl bg-[#f7fbfa] p-4"
-                >
-
-                    <p
-                        class="text-[13px] font-semibold"
-                    >
-                        You're all caught up
-                    </p>
-
-
-                    <p
-                        class="mt-1 text-[11px] leading-5 text-[#888]"
-                    >
-                        There are no new notifications on your account.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =========================================================
-         FEEDBACK MODAL
-    ========================================================== -->
-
-    <div
-        id="feedbackModal"
-        class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/30 px-5 backdrop-blur-[2px]"
-    >
-
-        <div
-            class="w-full max-w-[380px] rounded-2xl bg-white p-7 text-center shadow-2xl"
-        >
-
-            <div
-                id="feedbackIcon"
-                class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e3f7f0] text-[#2db88a]"
-            >
-
-                <i class="fa-solid fa-check"></i>
-
-            </div>
-
-
-            <h3
-                id="feedbackTitle"
-                class="mt-5 text-[19px] font-bold"
-            >
-                Success
-            </h3>
-
-
-            <p
-                id="feedbackMessage"
-                class="mt-2 text-[13px] leading-5 text-[#777]"
-            >
-                Your changes have been saved.
-            </p>
-
-
-            <button
-                id="feedbackCloseButton"
-                type="button"
-                class="mt-6 h-[44px] w-full rounded-lg bg-[#34b88a] text-[14px] font-bold text-white"
-            >
-                Continue
-            </button>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =========================================================
-         COPY ACCOUNT NUMBER MODAL
-    ========================================================== -->
-
-    <div
-        id="copyAccountModal"
-        class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/30 px-5 backdrop-blur-[2px]"
-    >
-
-        <div
-            class="w-full max-w-[350px] rounded-2xl bg-white p-7 text-center shadow-2xl"
-        >
-
-            <div
-                class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e3f7f0] text-[#2db88a]"
-            >
-
-                <i class="fa-solid fa-copy"></i>
-
-            </div>
-
-
-            <h3
-                class="mt-5 text-[19px] font-bold"
-            >
-                Account Number Copied
-            </h3>
-
-
-            <p
-                id="copiedAccountNumber"
-                class="mt-2 text-[18px] font-bold tracking-[1px]"
-            >
-                0000000000
-            </p>
-
-
-            <button
-                type="button"
-                data-close-modal="copyAccountModal"
-                class="mt-6 h-[44px] w-full rounded-lg bg-[#34b88a] text-[14px] font-bold text-white"
-            >
-                Done
-            </button>
-
-        </div>
-
-    </div>
-
 
 
     <!-- =========================================================

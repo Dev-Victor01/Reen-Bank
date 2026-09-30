@@ -1,19 +1,29 @@
 /* =========================================================
-   REEN BANK — COMPLETE OVERVIEW.JS
+   REEN BANK — COMPLETE OVERVIEW DASHBOARD JAVASCRIPT
    ---------------------------------------------------------
-   Works with:
+   Compatible with:
    - overview.html
    - reenUsers -> localStorage
    - currentUser -> sessionStorage / localStorage
-   - Custom accounts
-   - Transactions
-   - Funding
-   - Notifications
-   - Search
-   - Modals
 
-   IMPORTANT:
-   This script is designed for the HTML structure provided.
+   FEATURES
+   ---------------------------------------------------------
+   ✓ Main Account
+   ✓ School Savings
+   ✓ Holiday Plan
+   ✓ Custom Accounts
+   ✓ Aggregate Current Balance
+   ✓ Income / Expense
+   ✓ Latest 5 Transactions on Overview
+   ✓ All Transactions remain stored
+   ✓ Notifications
+   ✓ Search
+   ✓ Add Account
+   ✓ Fund Account
+   ✓ Transaction Details
+   ✓ Upgrade Modal
+   ✓ Logout Modal
+   ✓ Mobile Sidebar
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -22,60 +32,39 @@ document.addEventListener("DOMContentLoaded", () => {
        1. STORAGE
     ===================================================== */
 
-    let users = JSON.parse(localStorage.getItem("reenUsers")) || [];
+    let users =
+        JSON.parse(localStorage.getItem("reenUsers")) || [];
 
-    let sessionUser = null;
-
-    try {
-        sessionUser = JSON.parse(
-            sessionStorage.getItem("currentUser") ||
-            localStorage.getItem("currentUser") ||
-            "null"
-        );
-    } catch (error) {
-        sessionUser = null;
-    }
+    let sessionUser =
+        JSON.parse(sessionStorage.getItem("currentUser")) ||
+        JSON.parse(localStorage.getItem("currentUser"));
 
     if (!sessionUser || !sessionUser.email) {
         window.location.href = "./register.html";
         return;
     }
 
-    /* =====================================================
-       2. FIND FULL USER
-    ===================================================== */
-
     let currentUser = users.find(
         user =>
-            String(user.email || "").toLowerCase() ===
-            String(sessionUser.email || "").toLowerCase()
+            user.email === sessionUser.email
     );
 
-    /*
-       If user does not exist in reenUsers yet,
-       use the session user.
-    */
-
     if (!currentUser) {
-        currentUser = {
-            ...sessionUser
-        };
-
-        users.push(currentUser);
-
-        localStorage.setItem(
-            "reenUsers",
-            JSON.stringify(users)
-        );
+        currentUser = sessionUser;
     }
 
     /* =====================================================
-       3. NORMALIZE USER DATA
+       2. NORMALIZE USER DATA
     ===================================================== */
 
-    currentUser.balance = Number(currentUser.balance) || 0;
-    currentUser.income = Number(currentUser.income) || 0;
-    currentUser.expense = Number(currentUser.expense) || 0;
+    currentUser.balance =
+        Number(currentUser.balance) || 0;
+
+    currentUser.income =
+        Number(currentUser.income) || 0;
+
+    currentUser.expense =
+        Number(currentUser.expense) || 0;
 
     currentUser.schoolSavings =
         Number(currentUser.schoolSavings) || 0;
@@ -103,18 +92,46 @@ document.addEventListener("DOMContentLoaded", () => {
             ? currentUser.cards
             : [];
 
+    /*
+       IMPORTANT:
+       Normalize custom accounts WITHOUT replacing
+       or deleting them.
+    */
+
+    currentUser.accounts.forEach(account => {
+
+        account.balance =
+            Number(account.balance) || 0;
+
+        account.transactions =
+            Array.isArray(account.transactions)
+                ? account.transactions
+                : [];
+
+        account.name =
+            account.name || "Savings Account";
+
+        account.description =
+            account.description || "";
+
+        if (!account.id) {
+            account.id =
+                generateId("account");
+        }
+    });
 
     /* =====================================================
-       4. SAVE USER
+       3. SAVE USER
     ===================================================== */
 
     function saveUser() {
 
-        const index = users.findIndex(
-            user =>
-                String(user.email || "").toLowerCase() ===
-                String(currentUser.email || "").toLowerCase()
-        );
+        const index =
+            users.findIndex(
+                user =>
+                    user.email ===
+                    currentUser.email
+            );
 
         if (index !== -1) {
             users[index] = currentUser;
@@ -127,14 +144,11 @@ document.addEventListener("DOMContentLoaded", () => {
             JSON.stringify(users)
         );
 
-        /*
-           Keep session identity synchronized.
-        */
-
         const sessionData = {
-            name: currentUser.name || "",
-            email: currentUser.email || "",
-            accountNumber: currentUser.accountNumber || ""
+            name: currentUser.name,
+            email: currentUser.email,
+            accountNumber:
+                currentUser.accountNumber
         };
 
         sessionStorage.setItem(
@@ -148,69 +162,82 @@ document.addEventListener("DOMContentLoaded", () => {
         );
     }
 
-
     /* =====================================================
-       5. HELPERS
+       4. HELPERS
     ===================================================== */
 
     function formatMoney(amount) {
 
-        amount = Number(amount) || 0;
-
-        return `₦ ${amount.toLocaleString("en-NG", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}`;
-    }
-
-
-    function generateId(prefix = "id") {
-
-        return (
-            prefix +
-            "_" +
-            Date.now() +
-            "_" +
-            Math.random()
-                .toString(36)
-                .substring(2, 9)
+        return new Intl.NumberFormat(
+            "en-NG",
+            {
+                style: "currency",
+                currency: "NGN",
+                minimumFractionDigits: 2
+            }
+        ).format(
+            Number(amount) || 0
         );
     }
 
+    function generateId(prefix = "id") {
 
-    function formatDate(dateValue) {
-
-        const date = new Date(dateValue);
-
-        if (Number.isNaN(date.getTime())) {
-            return "-";
-        }
-
-        return date.toLocaleDateString("en-NG", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        });
+        return `${prefix}_${Date.now()}_${Math.random()
+            .toString(36)
+            .slice(2, 8)}`;
     }
 
+    function formatDate(date) {
 
-    function formatDateTime(dateValue) {
+        if (!date) return "—";
 
-        const date = new Date(dateValue);
+        const parsedDate =
+            new Date(date);
 
-        if (Number.isNaN(date.getTime())) {
-            return "-";
+        if (
+            Number.isNaN(
+                parsedDate.getTime()
+            )
+        ) {
+            return "—";
         }
 
-        return date.toLocaleString("en-NG", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
+        return parsedDate.toLocaleDateString(
+            "en-NG",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            }
+        );
     }
 
+    function formatDateTime(date) {
+
+        if (!date) return "—";
+
+        const parsedDate =
+            new Date(date);
+
+        if (
+            Number.isNaN(
+                parsedDate.getTime()
+            )
+        ) {
+            return "—";
+        }
+
+        return parsedDate.toLocaleString(
+            "en-NG",
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
+    }
 
     function escapeHTML(value) {
 
@@ -222,244 +249,344 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/'/g, "&#039;");
     }
 
+    /* =====================================================
+       5. CALCULATE CURRENT BALANCE
+       -----------------------------------------------------
+       Current Balance =
+       Main Account
+       + School Savings
+       + Holiday Plan
+       + Custom Accounts
+    ===================================================== */
+
+    function calculateCurrentBalance() {
+
+        const mainAccount =
+            Number(currentUser.balance) || 0;
+
+        const schoolSavings =
+            Number(
+                currentUser.schoolSavings
+            ) || 0;
+
+        const holidayBalance =
+            Number(
+                currentUser.holidayBalance
+            ) || 0;
+
+        const customAccountsTotal =
+            Array.isArray(
+                currentUser.accounts
+            )
+                ? currentUser.accounts.reduce(
+                    (total, account) => {
+
+                        return (
+                            total +
+                            (
+                                Number(
+                                    account.balance
+                                ) || 0
+                            )
+                        );
+                    },
+                    0
+                )
+                : 0;
+
+        return (
+            mainAccount +
+            schoolSavings +
+            holidayBalance +
+            customAccountsTotal
+        );
+    }
 
     /* =====================================================
-       6. HEADER USER INFORMATION
+       6. ELEMENT REFERENCES
     ===================================================== */
 
     const headerUserName =
-        document.getElementById("headerUserName");
+        document.getElementById(
+            "headerUserName"
+        );
 
     const headerAccountNumber =
-        document.getElementById("headerAccountNumber");
+        document.getElementById(
+            "headerAccountNumber"
+        );
 
     const headerProfileImage =
-        document.getElementById("headerProfileImage");
+        document.getElementById(
+            "headerProfileImage"
+        );
 
     const headerProfileInitials =
-        document.getElementById("headerProfileInitials");
+        document.getElementById(
+            "headerProfileInitials"
+        );
 
+    const currentBalance =
+        document.getElementById(
+            "currentBalance"
+        );
 
-    if (headerUserName) {
+    const totalIncome =
+        document.getElementById(
+            "totalIncome"
+        );
 
-        headerUserName.textContent =
-            currentUser.name ||
-            currentUser.email?.split("@")[0] ||
-            "User";
-    }
+    const totalExpense =
+        document.getElementById(
+            "totalExpense"
+        );
 
+    const mainAccountBalance =
+        document.getElementById(
+            "mainAccountBalance"
+        );
 
-    if (headerAccountNumber) {
+    const schoolAccountBalance =
+        document.getElementById(
+            "schoolAccountBalance"
+        );
 
-        headerAccountNumber.textContent =
-            currentUser.accountNumber ||
-            "0000000000";
-    }
-
-
-    function getInitials(name) {
-
-        if (!name) return "U";
-
-        const parts =
-            String(name)
-                .trim()
-                .split(/\s+/);
-
-        if (parts.length === 1) {
-            return parts[0]
-                .substring(0, 2)
-                .toUpperCase();
-        }
-
-        return (
-            parts[0][0] +
-            parts[parts.length - 1][0]
-        ).toUpperCase();
-    }
-
-
-    if (headerProfileInitials) {
-
-        headerProfileInitials.textContent =
-            getInitials(currentUser.name);
-    }
-
-
-    if (
-        headerProfileImage &&
-        currentUser.profileImage
-    ) {
-
-        headerProfileImage.src =
-            currentUser.profileImage;
-
-        headerProfileImage.classList.remove("hidden");
-
-        if (headerProfileInitials) {
-            headerProfileInitials.classList.add("hidden");
-        }
-    }
-
+    const holidayAccountBalance =
+        document.getElementById(
+            "holidayAccountBalance"
+        );
 
     /* =====================================================
-       7. BALANCE DISPLAY
+       7. HEADER
+    ===================================================== */
+
+    function renderHeader() {
+
+        if (headerUserName) {
+
+            const nameParts =
+                String(
+                    currentUser.name || ""
+                )
+                    .trim()
+                    .split(/\s+/);
+
+            headerUserName.textContent =
+                nameParts.length > 1
+                    ? nameParts[1]
+                    : nameParts[0] ||
+                      "User";
+        }
+
+        if (headerAccountNumber) {
+
+            headerAccountNumber.textContent =
+                currentUser.accountNumber ||
+                "—";
+        }
+
+        if (headerProfileImage) {
+
+            if (currentUser.profileImage) {
+
+                headerProfileImage.src =
+                    currentUser.profileImage;
+
+                headerProfileImage.classList.remove(
+                    "hidden"
+                );
+
+                if (headerProfileInitials) {
+
+                    headerProfileInitials.classList.add(
+                        "hidden"
+                    );
+                }
+
+            } else {
+
+                headerProfileImage.classList.add(
+                    "hidden"
+                );
+
+                if (headerProfileInitials) {
+
+                    const initials =
+                        String(
+                            currentUser.name ||
+                            "U"
+                        )
+                            .trim()
+                            .split(/\s+/)
+                            .map(
+                                word =>
+                                    word[0]
+                            )
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase();
+
+                    headerProfileInitials.textContent =
+                        initials || "U";
+
+                    headerProfileInitials.classList.remove(
+                        "hidden"
+                    );
+                }
+            }
+        }
+    }
+
+    renderHeader();
+
+    /* =====================================================
+       8. BALANCE VISIBILITY
     ===================================================== */
 
     let balanceVisible = true;
 
-    const currentBalance =
-        document.getElementById("currentBalance");
-
-    const totalIncome =
-        document.getElementById("totalIncome");
-
-    const totalExpense =
-        document.getElementById("totalExpense");
-
-    const mainAccountBalance =
-        document.getElementById("mainAccountBalance");
-
-    const schoolAccountBalance =
-        document.getElementById("schoolAccountBalance");
-
-    const holidayAccountBalance =
-        document.getElementById("holidayAccountBalance");
-
+    const balanceToggle =
+        document.getElementById(
+            "balanceToggle"
+        );
 
     function renderBalances() {
 
-        if (currentBalance) {
-            currentBalance.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.balance)
-                    : "₦ ••••••";
-        }
-
-
-        if (totalIncome) {
-            totalIncome.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.income)
-                    : "₦ ••••••";
-        }
-
-
-        if (totalExpense) {
-            totalExpense.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.expense)
-                    : "₦ ••••••";
-        }
-
-
-        if (mainAccountBalance) {
-            mainAccountBalance.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.balance)
-                    : "₦ ••••••";
-        }
-
-
-        if (schoolAccountBalance) {
-            schoolAccountBalance.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.schoolSavings)
-                    : "₦ ••••••";
-        }
-
-
-        if (holidayAccountBalance) {
-            holidayAccountBalance.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.holidayBalance)
-                    : "₦ ••••••";
-        }
-
-
         /*
-           Update custom accounts.
+           CURRENT BALANCE
+           Uses aggregate balance.
         */
 
-        currentUser.accounts.forEach(account => {
+        if (currentBalance) {
 
-            const element =
-                document.querySelector(
-                    `[data-account-id="${account.id}"]`
-                );
+            currentBalance.textContent =
+                balanceVisible
+                    ? formatMoney(
+                        calculateCurrentBalance()
+                    )
+                    : "₦ ••••••";
+        }
 
-            if (!element) return;
+        /*
+           MAIN ACCOUNT
+        */
 
-            const balanceElement =
-                element.querySelector(
-                    ".custom-account-balance"
-                );
+        if (mainAccountBalance) {
 
-            if (balanceElement) {
+            mainAccountBalance.textContent =
+                balanceVisible
+                    ? formatMoney(
+                        currentUser.balance
+                    )
+                    : "₦ ••••••";
+        }
 
-                balanceElement.textContent =
+        /*
+           SCHOOL SAVINGS
+        */
+
+        if (schoolAccountBalance) {
+
+            schoolAccountBalance.textContent =
+                balanceVisible
+                    ? formatMoney(
+                        currentUser.schoolSavings
+                    )
+                    : "₦ ••••••";
+        }
+
+        /*
+           HOLIDAY PLAN
+        */
+
+        if (holidayAccountBalance) {
+
+            holidayAccountBalance.textContent =
+                balanceVisible
+                    ? formatMoney(
+                        currentUser.holidayBalance
+                    )
+                    : "₦ ••••••";
+        }
+
+        /*
+           CUSTOM ACCOUNTS
+
+           This does NOT remove custom accounts.
+           It only updates their balance elements.
+        */
+
+        document
+            .querySelectorAll(
+                "[data-account-balance]"
+            )
+            .forEach(element => {
+
+                const accountId =
+                    element.dataset.accountBalance;
+
+                const account =
+                    currentUser.accounts.find(
+                        item =>
+                            String(item.id) ===
+                            String(accountId)
+                    );
+
+                if (!account) return;
+
+                element.textContent =
                     balanceVisible
-                        ? formatMoney(account.balance)
+                        ? formatMoney(
+                            account.balance
+                        )
                         : "₦ ••••••";
-            }
-        });
+            });
     }
 
+    if (balanceToggle) {
 
-    const balanceVisibilityButton =
-        document.getElementById(
-            "balanceVisibilityButton"
-        );
-
-    const balanceVisibilityIcon =
-        document.getElementById(
-            "balanceVisibilityIcon"
-        );
-
-
-    if (balanceVisibilityButton) {
-
-        balanceVisibilityButton.addEventListener(
+        balanceToggle.addEventListener(
             "click",
             () => {
 
                 balanceVisible =
                     !balanceVisible;
 
-                if (balanceVisibilityIcon) {
-
-                    balanceVisibilityIcon.className =
-                        balanceVisible
-                            ? "fa-regular fa-eye-slash text-[13px]"
-                            : "fa-regular fa-eye text-[13px]";
-                }
-
-                balanceVisibilityButton.title =
+                balanceToggle.innerHTML =
                     balanceVisible
-                        ? "Hide balance"
-                        : "Show balance";
+                        ? `<i class="fa-regular fa-eye"></i>`
+                        : `<i class="fa-regular fa-eye-slash"></i>`;
 
                 renderBalances();
             }
         );
     }
 
-
     /* =====================================================
-       8. STATISTICS
+       9. INCOME / EXPENSE
     ===================================================== */
 
     function renderStatistics() {
 
-        const statisticsIncome =
-            document.getElementById(
-                "statisticsIncome"
-            );
+        if (totalIncome) {
 
-        const statisticsExpense =
-            document.getElementById(
-                "statisticsExpense"
-            );
+            totalIncome.textContent =
+                formatMoney(
+                    currentUser.income
+                );
+        }
+
+        if (totalExpense) {
+
+            totalExpense.textContent =
+                formatMoney(
+                    currentUser.expense
+                );
+        }
+
+        const total =
+            currentUser.income +
+            currentUser.expense;
 
         const incomeProgress =
             document.getElementById(
@@ -471,643 +598,428 @@ document.addEventListener("DOMContentLoaded", () => {
                 "expenseProgress"
             );
 
-
-        if (statisticsIncome) {
-
-            statisticsIncome.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.income)
-                    : "₦ ••••••";
-        }
-
-
-        if (statisticsExpense) {
-
-            statisticsExpense.textContent =
-                balanceVisible
-                    ? formatMoney(currentUser.expense)
-                    : "₦ ••••••";
-        }
-
-
-        const total =
-            currentUser.income +
-            currentUser.expense;
-
-
-        let incomePercentage = 0;
-        let expensePercentage = 0;
-
-
-        if (total > 0) {
-
-            incomePercentage =
-                (currentUser.income / total) * 100;
-
-            expensePercentage =
-                (currentUser.expense / total) * 100;
-        }
-
-
         if (incomeProgress) {
 
             incomeProgress.style.width =
-                `${Math.min(incomePercentage, 100)}%`;
+                total > 0
+                    ? `${
+                        (
+                            currentUser.income /
+                            total
+                        ) * 100
+                    }%`
+                    : "0%";
         }
-
 
         if (expenseProgress) {
 
             expenseProgress.style.width =
-                `${Math.min(expensePercentage, 100)}%`;
+                total > 0
+                    ? `${
+                        (
+                            currentUser.expense /
+                            total
+                        ) * 100
+                    }%`
+                    : "0%";
         }
     }
 
-
     /* =====================================================
-       9. CUSTOM ACCOUNT SUCCESS MODAL
+       10. CUSTOM ACCOUNTS
+       -----------------------------------------------------
+       IMPORTANT:
+       Custom accounts are preserved.
+
+       We only remove the custom-account cards that THIS
+       script created previously, then rebuild them from
+       currentUser.accounts.
+
+       Main Account / School Savings / Holiday Plan are
+       NOT touched.
     ===================================================== */
 
-    function createAccountSuccessModal() {
-
-        if (
-            document.getElementById(
-                "accountCreatedSuccessModal"
-            )
-        ) {
-            return;
-        }
-
-
-        const modal =
-            document.createElement("div");
-
-        modal.id =
-            "accountCreatedSuccessModal";
-
-        modal.className =
-            "fixed inset-0 z-[200] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-sm";
-
-
-        modal.innerHTML = `
-
-            <div class="w-full max-w-[420px] rounded-[24px] bg-white p-7 text-center shadow-2xl">
-
-                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e6f8f1] text-[#20b486]">
-
-                    <i class="fa-solid fa-check text-2xl"></i>
-
-                </div>
-
-                <h3 class="mt-5 text-2xl font-bold text-[#292929]">
-                    Account Created Successfully
-                </h3>
-
-                <p
-                    id="createdAccountSuccessText"
-                    class="mt-2 text-sm leading-6 text-[#777]"
-                >
-                    Your account has been created successfully.
-                </p>
-
-                <div class="mt-7 grid grid-cols-2 gap-3">
-
-                    <button
-                        type="button"
-                        id="createdAccountGoBack"
-                        class="h-11 rounded-lg bg-[#edf1ef] text-sm font-semibold text-[#555]"
-                    >
-                        Go Back
-                    </button>
-
-                    <button
-                        type="button"
-                        id="createdAccountFundButton"
-                        class="h-11 rounded-lg bg-[#20b486] text-sm font-semibold text-white"
-                    >
-                        Fund Account
-                    </button>
-
-                </div>
-
-            </div>
-        `;
-
-
-        document.body.appendChild(modal);
-
-
-        modal.addEventListener(
-            "click",
-            event => {
-
-                if (event.target === modal) {
-                    closeModal(modal.id);
-                }
-            }
-        );
-    }
-
-
-    createAccountSuccessModal();
-
-
-    /* =====================================================
-       10. DEPOSIT SUCCESS MODAL
-    ===================================================== */
-
-    function createDepositSuccessModal() {
-
-        if (
-            document.getElementById(
-                "depositSuccessModal"
-            )
-        ) {
-            return;
-        }
-
-
-        const modal =
-            document.createElement("div");
-
-        modal.id =
-            "depositSuccessModal";
-
-        modal.className =
-            "fixed inset-0 z-[220] hidden items-center justify-center bg-black/40 px-5 backdrop-blur-sm";
-
-
-        modal.innerHTML = `
-
-            <div class="w-full max-w-[400px] rounded-[24px] bg-white p-8 text-center shadow-2xl">
-
-                <div class="mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[#e4f8ef]">
-
-                    <div class="flex h-[54px] w-[54px] items-center justify-center rounded-full bg-[#20b486] text-white">
-
-                        <i class="fa-solid fa-check text-2xl"></i>
-
-                    </div>
-
-                </div>
-
-                <h3 class="mt-6 text-[25px] font-bold text-[#292929]">
-                    Deposit Successful
-                </h3>
-
-                <p
-                    id="depositSuccessMessage"
-                    class="mt-2 text-sm leading-6 text-[#777]"
-                >
-                    Your deposit was successful.
-                </p>
-
-                <div class="mt-5 rounded-xl bg-[#f5faf8] p-4">
-
-                    <p class="text-xs text-[#777]">
-                        Amount Deposited
-                    </p>
-
-                    <p
-                        id="depositSuccessAmount"
-                        class="mt-1 text-xl font-bold text-[#20b486]"
-                    >
-                        ₦ 0.00
-                    </p>
-
-                </div>
-
-                <button
-                    type="button"
-                    id="closeDepositSuccessButton"
-                    class="mt-6 h-11 w-full rounded-lg bg-[#20b486] text-sm font-semibold text-white"
-                >
-                    Done
-                </button>
-
-            </div>
-        `;
-
-
-        document.body.appendChild(modal);
-
-
-        document
-            .getElementById(
-                "closeDepositSuccessButton"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-                    closeModal(
-                        "depositSuccessModal"
-                    );
-                }
-            );
-
-
-        modal.addEventListener(
-            "click",
-            event => {
-
-                if (event.target === modal) {
-
-                    closeModal(
-                        "depositSuccessModal"
-                    );
-                }
-            }
-        );
-    }
-
-
-    createDepositSuccessModal();
-
-
-    /* =====================================================
-       11. GENERIC MODAL FUNCTIONS
-    ===================================================== */
-
-    function openModal(id) {
-
-        const modal =
-            document.getElementById(id);
-
-        if (!modal) return;
-
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-
-        document.body.classList.add(
-            "overflow-hidden"
-        );
-    }
-
-
-    function closeModal(id) {
-
-        const modal =
-            document.getElementById(id);
-
-        if (!modal) return;
-
-        modal.classList.add("hidden");
-        modal.classList.remove("flex");
-
-        document.body.classList.remove(
-            "overflow-hidden"
-        );
-    }
-
-
-    document
-        .querySelectorAll("[data-close-modal]")
-        .forEach(button => {
-
-            button.addEventListener(
-                "click",
-                () => {
-
-                    closeModal(
-                        button.dataset.closeModal
-                    );
-                }
-            );
-        });
-
-
-    document
-        .querySelectorAll(".modal")
-        .forEach(modal => {
-
-            modal.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target === modal
-                    ) {
-                        closeModal(modal.id);
-                    }
-                }
-            );
-        });
-
-/* =====================================================
-   ADD ACCOUNT
-===================================================== */
-
-const addAccountButton =
-    document.getElementById("addAccountButton");
-
-const addAccountForm =
-    document.getElementById("addAccountForm");
-
-const cancelAddAccountBtn =
-    document.getElementById("cancelAddAccountBtn");
-
-
-addAccountButton?.addEventListener("click", () => {
-
-    addAccountForm?.reset();
-
-    openModal("addAccountModal");
-});
-
-
-cancelAddAccountBtn?.addEventListener("click", () => {
-
-    closeModal("addAccountModal");
-});
-
-
-let newlyCreatedAccount = null;
-
-
-addAccountForm?.addEventListener("submit", (event) => {
-
-    event.preventDefault();
-
-
-    /* =================================================
-       GET VALUES
-    ================================================= */
-
-    const name =
-        document
-            .getElementById("accountName")
-            ?.value
-            .trim();
-
-
-    /*
-       Description is OPTIONAL.
-       If empty, save an empty string.
-    */
-
-    const description =
-        document
-            .getElementById("accountDescription")
-            ?.value
-            .trim() || "";
-
-
-    /* =================================================
-       ACCOUNT NAME IS THE ONLY REQUIRED FIELD
-    ================================================= */
-
-    if (!name) {
-
-        const accountNameInput =
-            document.getElementById("accountName");
-
-        accountNameInput?.focus();
-
-        return;
-    }
-
-
-    /* =================================================
-       CREATE ACCOUNT
-    ================================================= */
-
-    const newAccount = {
-
-        id: generateId("account"),
-
-        name: name,
-
-        description: description,
-
-        balance: 0,
-
-        transactions: [],
-
-        createdAt: new Date().toISOString()
-    };
-
-
-    /* =================================================
-       SAVE ACCOUNT TO CURRENT USER
-    ================================================= */
-
-    if (!Array.isArray(currentUser.accounts)) {
-
-        currentUser.accounts = [];
-    }
-
-
-    currentUser.accounts.push(newAccount);
-
-
-    newlyCreatedAccount = newAccount;
-
-
-    /* =================================================
-       SAVE TO LOCAL STORAGE
-    ================================================= */
-
-    saveUser();
-
-
-    /* =================================================
-       RENDER ACCOUNT IMMEDIATELY
-    ================================================= */
-
-    renderCustomAccounts();
-
-
-    /* =================================================
-       CLOSE ADD ACCOUNT MODAL
-    ================================================= */
-
-    closeModal("addAccountModal");
-
-
-    /* =================================================
-       SHOW SUCCESS MODAL
-    ================================================= */
-
-    const successText =
+    const accountsContainer =
         document.getElementById(
-            "createdAccountSuccessText"
+            "accountsContainer"
         );
-
-
-    if (successText) {
-
-        successText.textContent =
-            `${name} has been created successfully.`;
-    }
-
-
-    openModal(
-        "accountCreatedSuccessModal"
-    );
-
-
-    /* =================================================
-       RESET FORM
-    ================================================= */
-
-    addAccountForm.reset();
-});
-
-   
-
-    /* =====================================================
-       13. RENDER CUSTOM ACCOUNTS
-    ===================================================== */
 
     function renderCustomAccounts() {
 
-        const container =
-            document.getElementById(
-                "accountsContainer"
-            );
-
-        if (!container) return;
-
+        if (!accountsContainer) return;
 
         /*
-           Keep the three default accounts.
+           Remove ONLY cards generated by this script.
+           Do not clear accountsContainer.innerHTML.
         */
 
-        const customCards =
-            container.querySelectorAll(
-                ".custom-account-card"
+        accountsContainer
+            .querySelectorAll(
+                "[data-overview-custom-account]"
+            )
+            .forEach(
+                element =>
+                    element.remove()
             );
 
-        customCards.forEach(card => {
-            card.remove();
-        });
-
+        /*
+           Render every custom account.
+        */
 
         currentUser.accounts.forEach(
             account => {
 
                 const card =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
-                card.className =
-                    "custom-account-card group rounded-[10px] bg-[#d2f2e7] p-7 text-left transition hover:-translate-y-1 hover:shadow-md";
-
-                card.dataset.accountId =
+                card.dataset.overviewCustomAccount =
                     account.id;
 
+                card.className =
+                    "bg-[#D4F3E7] rounded-2xl p-5 border border-gray-100 shadow-sm";
 
                 card.innerHTML = `
-
-                    <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center justify-between gap-4">
 
                         <div class="min-w-0">
 
-                            <p class="truncate text-[15px] font-medium text-[#58468c]">
-                                ${escapeHTML(account.name)}
+                            <h3 class="font-semibold text-[#46237A] truncate">
+                                ${escapeHTML(
+                                    account.name
+                                )}
+                            </h3>
+
+                            <p class="text-sm text-gray-500 truncate">
+                                ${escapeHTML(
+                                    account.description ||
+                                    ""
+                                )}
                             </p>
 
-                            <p class="custom-account-balance mt-1 text-[19px] font-semibold text-[#292929]">
-                                ${formatMoney(account.balance)}
-                            </p>
                         </div>
+
+                    </div>
+
+                    <div class="mt-5">
+
+                        <p class="text-xs text-gray-400">
+                            Balance
+                        </p>
+
+                        <p
+                            data-account-balance="${escapeHTML(
+                                account.id
+                            )}"
+                            class="text-xl font-bold text-gray-900">
+                            ${
+                                balanceVisible
+                                    ? formatMoney(
+                                        account.balance
+                                    )
+                                    : "₦ ••••••"
+                            }
+                        </p>
+
                     </div>
                 `;
 
-
-                container.appendChild(card);
+                accountsContainer.appendChild(
+                    card
+                );
             }
         );
 
-
         /*
-           Attach funding buttons.
+           Attach Fund buttons for newly rendered
+           custom accounts.
         */
 
-        container
+        accountsContainer
             .querySelectorAll(
-                "[data-fund-account-id]"
+                "[data-account-fund]"
             )
             .forEach(button => {
 
                 button.addEventListener(
                     "click",
-                    event => {
+                    () => {
 
-                        event.stopPropagation();
-
-                        const accountId =
+                        openFundModal(
                             button.dataset
-                                .fundAccountId;
-
-                        openFundingModal(
-                            accountId
+                                .accountFund
                         );
                     }
                 );
             });
-
-
-        renderBalances();
     }
 
-
     /* =====================================================
-       14. ACCOUNT CREATED SUCCESS BUTTONS
+       11. ADD ACCOUNT
     ===================================================== */
 
-    document
-        .getElementById(
-            "createdAccountGoBack"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                closeModal(
-                    "accountCreatedSuccessModal"
-                );
-            }
+    const addAccountButton =
+        document.getElementById(
+            "addAccountButton"
         );
 
+    const addAccountModal =
+        document.getElementById(
+            "addAccountModal"
+        );
 
-    document
-        .getElementById(
-            "createdAccountFundButton"
-        )
-        ?.addEventListener(
+    const addAccountForm =
+        document.getElementById(
+            "addAccountForm"
+        );
+
+    const cancelAddAccountBtn =
+        document.getElementById(
+            "cancelAddAccountBtn"
+        );
+
+    function openModal(modal) {
+
+        if (!modal) return;
+
+        modal.classList.remove(
+            "hidden"
+        );
+
+        modal.classList.add(
+            "flex"
+        );
+    }
+
+    function closeModal(modal) {
+
+        if (!modal) return;
+
+        modal.classList.add(
+            "hidden"
+        );
+
+        modal.classList.remove(
+            "flex"
+        );
+    }
+
+    if (addAccountButton) {
+
+        addAccountButton.addEventListener(
             "click",
-            () => {
+            () =>
+                openModal(
+                    addAccountModal
+                )
+        );
+    }
 
-                if (!newlyCreatedAccount) {
-                    closeModal(
-                        "accountCreatedSuccessModal"
-                    );
-                    return;
+    if (cancelAddAccountBtn) {
+
+        cancelAddAccountBtn.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    addAccountModal
+                )
+        );
+    }
+
+    if (addAccountForm) {
+
+        addAccountForm.addEventListener(
+            "submit",
+            event => {
+
+                event.preventDefault();
+
+                const name =
+                    document
+                        .getElementById(
+                            "accountName"
+                        )
+                        ?.value
+                        .trim();
+
+                const description =
+                    document
+                        .getElementById(
+                            "accountDescription"
+                        )
+                        ?.value
+                        .trim();
+
+                if (!name) return;
+
+                const newAccount = {
+
+                    id:
+                        generateId(
+                            "account"
+                        ),
+
+                    name,
+
+                    description:
+                        description || "",
+
+                    balance: 0,
+
+                    transactions: [],
+
+                    createdAt:
+                        new Date().toISOString()
+                };
+
+                /*
+                   IMPORTANT:
+                   PUSH INTO EXISTING ARRAY.
+                   Do not replace currentUser.accounts.
+                */
+
+                if (
+                    !Array.isArray(
+                        currentUser.accounts
+                    )
+                ) {
+
+                    currentUser.accounts = [];
                 }
 
-
-                const accountId =
-                    newlyCreatedAccount.id;
-
-
-                closeModal(
-                    "accountCreatedSuccessModal"
+                currentUser.accounts.push(
+                    newAccount
                 );
 
+                saveUser();
 
-                setTimeout(() => {
+                addAccountForm.reset();
 
-                    openFundingModal(
-                        accountId
+                closeModal(
+                    addAccountModal
+                );
+
+                renderCustomAccounts();
+                renderBalances();
+
+                /*
+                   CREATED SUCCESS MODAL
+                */
+
+                let successModal =
+                    document.getElementById(
+                        "accountCreatedSuccessModal"
                     );
 
-                }, 200);
+                if (!successModal) {
+
+                    successModal =
+                        document.createElement(
+                            "div"
+                        );
+
+                    successModal.id =
+                        "accountCreatedSuccessModal";
+
+                    successModal.className =
+                        "fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-4";
+
+                    successModal.innerHTML = `
+
+                        <div class="bg-white rounded-3xl p-6 max-w-md w-full text-center">
+
+                            <div class="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center text-green-600 text-2xl">
+
+                                <i class="fa-solid fa-check"></i>
+
+                            </div>
+
+                            <h3 class="mt-4 text-xl font-bold">
+                                Account Created
+                            </h3>
+
+                            <p
+                                id="createdAccountMessage"
+                                class="mt-2 text-gray-500">
+                            </p>
+
+                            <div class="mt-6 flex gap-3">
+
+                                <button
+                                    type="button"
+                                    id="accountCreatedBackBtn"
+                                    class="flex-1 py-3 rounded-xl border border-gray-200">
+                                    Go Back
+                                </button>
+
+                                <button
+                                    type="button"
+                                    id="accountCreatedFundBtn"
+                                    class="flex-1 py-3 rounded-xl bg-[#087f5b] text-white">
+                                    Fund Account
+                                </button>
+
+                            </div>
+
+                        </div>
+                    `;
+
+                    document.body.appendChild(
+                        successModal
+                    );
+
+                    document
+                        .getElementById(
+                            "accountCreatedBackBtn"
+                        )
+                        ?.addEventListener(
+                            "click",
+                            () =>
+                                closeModal(
+                                    successModal
+                                )
+                        );
+
+                    document
+                        .getElementById(
+                            "accountCreatedFundBtn"
+                        )
+                        ?.addEventListener(
+                            "click",
+                            () => {
+
+                                closeModal(
+                                    successModal
+                                );
+
+                                openFundModal(
+                                    newAccount.id
+                                );
+                            }
+                        );
+                }
+
+                const createdMessage =
+                    document.getElementById(
+                        "createdAccountMessage"
+                    );
+
+                if (createdMessage) {
+
+                    createdMessage.textContent =
+                        `${name} has been created successfully.`;
+                }
+
+                openModal(
+                    successModal
+                );
             }
         );
-
+    }
 
     /* =====================================================
-       15. FUND WALLET
+       12. FUND WALLET MODAL
     ===================================================== */
 
     const fundWalletModal =
@@ -1135,1341 +1047,831 @@ addAccountForm?.addEventListener("submit", (event) => {
             "creditCardSection"
         );
 
+    const directPayOption =
+        document.getElementById(
+            "directPayOption"
+        );
 
-    let selectedFundingAccountId = null;
+    let selectedFundingAccountId =
+        null;
 
-
-    /*
-       Open funding modal.
-
-       accountId:
-       - null = main wallet
-       - custom account id = custom account
-    */
-
-    function openFundingModal(accountId = null) {
+    function openFundModal(
+        accountId = null
+    ) {
 
         selectedFundingAccountId =
-            accountId || null;
+            accountId;
 
-
-        fundWalletForm?.reset();
-
-
-        const directPayOption =
-            document.getElementById(
-                "directPayOption"
-            );
+        openModal(
+            fundWalletModal
+        );
 
         if (directPayOption) {
-            directPayOption.checked = true;
+
+            directPayOption.checked =
+                true;
         }
 
-
         if (directPaySection) {
+
             directPaySection.classList.remove(
                 "hidden"
             );
         }
 
-
         if (creditCardSection) {
+
             creditCardSection.classList.add(
                 "hidden"
             );
         }
+    }
 
+    if (cancelFundWalletBtn) {
 
-        openModal(
-            "fundWalletModal"
+        cancelFundWalletBtn.addEventListener(
+            "click",
+            () =>
+                closeModal(
+                    fundWalletModal
+                )
         );
     }
 
-
-    cancelFundWalletBtn?.addEventListener(
-        "click",
-        () => {
-
-            closeModal(
-                "fundWalletModal"
-            );
-
-            selectedFundingAccountId =
-                null;
-        }
-    );
-
-
     /* =====================================================
-       16. FUNDING METHOD SWITCH
+       13. FUNDING METHOD
     ===================================================== */
 
-    const paymentMethods =
-        document.querySelectorAll(
-            'input[name="paymentMethod"]'
-        );
+    document
+        .querySelectorAll(
+            'input[name="fundMethod"]'
+        )
+        .forEach(input => {
 
-
-    paymentMethods.forEach(
-        radio => {
-
-            radio.addEventListener(
+            input.addEventListener(
                 "change",
                 () => {
 
                     if (
-                        radio.value ===
-                        "directPay"
+                        input.value ===
+                        "creditCard"
                     ) {
 
                         directPaySection
                             ?.classList
-                            .remove("hidden");
+                            .add(
+                                "hidden"
+                            );
 
                         creditCardSection
                             ?.classList
-                            .add("hidden");
+                            .remove(
+                                "hidden"
+                            );
 
                     } else {
 
                         directPaySection
                             ?.classList
-                            .add("hidden");
+                            .remove(
+                                "hidden"
+                            );
 
                         creditCardSection
                             ?.classList
-                            .remove("hidden");
+                            .add(
+                                "hidden"
+                            );
                     }
                 }
             );
-        }
-    );
-
+        });
 
     /* =====================================================
-       17. CARD NUMBER FORMAT
+       14. FUND ACCOUNT
     ===================================================== */
 
-    const cardNumber =
-        document.getElementById(
-            "cardNumber"
-        );
+    if (fundWalletForm) {
 
+        fundWalletForm.addEventListener(
+            "submit",
+            event => {
 
-    cardNumber?.addEventListener(
-        "input",
-        () => {
+                event.preventDefault();
 
-            let value =
-                cardNumber.value
-                    .replace(/\D/g, "")
-                    .substring(0, 16);
+                const method =
+                    document.querySelector(
+                        'input[name="fundMethod"]:checked'
+                    )?.value ||
+                    "directPay";
 
-            value =
-                value.match(/.{1,4}/g)
-                    ?.join(" ") || "";
+                const amountInput =
+                    method === "creditCard"
+                        ? document.getElementById(
+                            "cardAmount"
+                        )
+                        : document.getElementById(
+                            "directPayAmount"
+                        );
 
-            cardNumber.value =
-                value;
-        }
-    );
+                const amount =
+                    Number(
+                        amountInput?.value
+                    );
 
+                if (
+                    !Number.isFinite(
+                        amount
+                    ) ||
+                    amount <= 0
+                ) {
+                    return;
+                }
 
-    /* =====================================================
-       18. CARD EXPIRY FORMAT
-    ===================================================== */
+                /* =========================================
+                   FIND TARGET CUSTOM ACCOUNT
+                ========================================= */
 
-    const cardExpiry =
-        document.getElementById(
-            "cardExpiry"
-        );
+                const targetAccount =
+                    selectedFundingAccountId
+                        ? currentUser.accounts.find(
+                            account =>
+                                String(
+                                    account.id
+                                ) ===
+                                String(
+                                    selectedFundingAccountId
+                                )
+                        )
+                        : null;
 
+                const now =
+                    new Date().toISOString();
 
-    cardExpiry?.addEventListener(
-        "input",
-        () => {
+                /* =========================================
+                   UPDATE TARGET ACCOUNT
+                ========================================= */
 
-            let value =
-                cardExpiry.value
-                    .replace(/\D/g, "")
-                    .substring(0, 4);
+                if (targetAccount) {
 
+                    targetAccount.balance =
+                        Number(
+                            targetAccount.balance
+                        ) || 0;
 
-            if (value.length > 2) {
+                    targetAccount.balance +=
+                        amount;
 
-                value =
-                    value.substring(0, 2) +
-                    "/" +
-                    value.substring(2);
+                    if (
+                        !Array.isArray(
+                            targetAccount.transactions
+                        )
+                    ) {
+
+                        targetAccount.transactions =
+                            [];
+                    }
+
+                    targetAccount.transactions.push({
+
+                        id:
+                            generateId(
+                                "txn"
+                            ),
+
+                        type:
+                            "deposit",
+
+                        transactionType:
+                            "deposit",
+
+                        category:
+                            "income",
+
+                        title:
+                            "Account Funding",
+
+                        description:
+                            `Deposit into ${targetAccount.name}`,
+
+                        amount,
+
+                        account:
+                            targetAccount.name,
+
+                        paymentMethod:
+                            method ===
+                            "creditCard"
+                                ? "Credit Card"
+                                : "Direct Pay",
+
+                        status:
+                            "completed",
+
+                        createdAt:
+                            now
+                    });
+
+                } else {
+
+                    /*
+                       Main Account funding.
+                       currentUser.balance remains
+                       Main Account balance only.
+                    */
+
+                    currentUser.balance =
+                        Number(
+                            currentUser.balance
+                        ) || 0;
+
+                    currentUser.balance +=
+                        amount;
+                }
+
+                /* =========================================
+                   INCOME
+                   DO NOT CHANGE THIS LOGIC
+                ========================================= */
+
+                currentUser.income =
+                    Number(
+                        currentUser.income
+                    ) || 0;
+
+                currentUser.income +=
+                    amount;
+
+                /* =========================================
+                   MAIN TRANSACTION
+                ========================================= */
+
+                const transaction = {
+
+                    id:
+                        generateId(
+                            "txn"
+                        ),
+
+                    type:
+                        "deposit",
+
+                    transactionType:
+                        "deposit",
+
+                    category:
+                        "income",
+
+                    title:
+                        "Account Funding",
+
+                    description:
+                        targetAccount
+                            ? `Deposit into ${targetAccount.name}`
+                            : "Deposit into Main Account",
+
+                    amount,
+
+                    account:
+                        targetAccount
+                            ? targetAccount.name
+                            : "Main Account",
+
+                    paymentMethod:
+                        method ===
+                        "creditCard"
+                            ? "Credit Card"
+                            : "Direct Pay",
+
+                    status:
+                        "completed",
+
+                    createdAt:
+                        now
+                };
+
+                currentUser.transactions.push(
+                    transaction
+                );
+
+                /* =========================================
+                   NOTIFICATION
+                ========================================= */
+
+                currentUser.notifications.unshift({
+
+                    id:
+                        generateId(
+                            "notification"
+                        ),
+
+                    title:
+                        "Deposit Successful",
+
+                    message:
+                        `${formatMoney(
+                            amount
+                        )} was added to ${
+                            targetAccount
+                                ? targetAccount.name
+                                : "Main Account"
+                        }.`, 
+
+                    type:
+                        "success",
+
+                    read:
+                        false,
+
+                    transactionId:
+                        transaction.id,
+
+                    createdAt:
+                        now
+                });
+
+                /* =========================================
+                   SAVE
+                ========================================= */
+
+                saveUser();
+
+                /* =========================================
+                   REFRESH UI
+                ========================================= */
+
+                renderCustomAccounts();
+                renderBalances();
+                renderStatistics();
+
+                /*
+                   IMPORTANT:
+                   renderTransactions() itself only displays
+                   the latest 5 transactions.
+                */
+
+                renderTransactions();
+
+                renderNotifications();
+
+                closeModal(
+                    fundWalletModal
+                );
+
+                fundWalletForm.reset();
+
+                /* =========================================
+                   SUCCESS MODAL
+                ========================================= */
+
+                const successModal =
+                    document.getElementById(
+                        "fundSuccessModal"
+                    );
+
+                openModal(
+                    successModal
+                );
             }
-
-
-            cardExpiry.value =
-                value;
-        }
-    );
-
+        );
+    }
 
     /* =====================================================
-       19. CARD CVC
+       15. TRANSACTION TYPE
     ===================================================== */
 
-    const cardCvc =
+    function getTransactionType(
+        transaction
+    ) {
+
+        const type =
+            String(
+                transaction.transactionType ||
+                transaction.type ||
+                transaction.category ||
+                transaction.direction ||
+                ""
+            ).toLowerCase();
+
+        if (
+            type.includes("withdraw") ||
+            type.includes("expense")
+        ) {
+
+            return "expense";
+        }
+
+        if (
+            type.includes("deposit") ||
+            type.includes("income")
+        ) {
+
+            return "income";
+        }
+
+        return "neutral";
+    }
+
+    /* =====================================================
+       16. TRANSACTIONS
+       -----------------------------------------------------
+       IMPORTANT:
+       ONLY THE LATEST 5 ARE DISPLAYED ON OVERVIEW.
+
+       currentUser.transactions is NOT modified.
+
+       Therefore:
+       - Transaction 1-5 -> Overview
+       - Transaction 6+ -> hidden on Overview
+       - ALL transactions remain stored
+       - Transactions page can show everything
+    ===================================================== */
+
+    const transactionsContainer =
         document.getElementById(
-            "cardCvc"
+            "transactionsContainer"
         );
 
+    const transactionsEmptyState =
+        document.getElementById(
+            "transactionsEmptyState"
+        );
 
-    cardCvc?.addEventListener(
-        "input",
-        () => {
+    function renderTransactions(
+        transactions =
+            currentUser.transactions
+    ) {
 
-            cardCvc.value =
-                cardCvc.value
-                    .replace(/\D/g, "")
-                    .substring(0, 3);
-        }
-    );
-
-
-    /* =====================================================
-       20. DIRECT PAY VALIDATION
-    ===================================================== */
-
-    function getFundingAmount() {
-
-        const selectedMethod =
-            document.querySelector(
-                'input[name="paymentMethod"]:checked'
-            )?.value;
-
-
-        let amount = 0;
-
-
-        if (
-            selectedMethod ===
-            "directPay"
-        ) {
-
-            amount =
-                Number(
-                    document.getElementById(
-                        "directPayAmount"
-                    )?.value
-                );
-
-        } else {
-
-            amount =
-                Number(
-                    document.getElementById(
-                        "cardAmount"
-                    )?.value
-                );
-        }
-
-
-        return {
-            amount,
-            method: selectedMethod
-        };
-    }
-/* =====================================================
-   21. FUND WALLET SUBMIT
-   -----------------------------------------------------
-   Deposit/Funding transaction:
-   - Green + icon
-   - Positive amount
-   - transactionType: "deposit"
-   - direction: "credit"
-===================================================== */
-
-fundWalletForm?.addEventListener(
-    "submit",
-    event => {
-
-        event.preventDefault();
-
-
-        const {
-            amount,
-            method
-        } = getFundingAmount();
-
-
-        if (
-            !amount ||
-            amount <= 0
-        ) {
+        if (!transactionsContainer) {
             return;
         }
 
-
         /*
-           Credit card validation.
+           Clear ONLY the transaction display.
         */
+
+        transactionsContainer.innerHTML =
+            "";
 
         if (
-            method ===
-            "creditCard"
+            !transactions ||
+            transactions.length === 0
         ) {
 
-            const number =
-                document
-                    .getElementById(
-                        "cardNumber"
-                    )
-                    ?.value
-                    .replace(/\s/g, "");
+            if (transactionsEmptyState) {
 
-            const holder =
-                document
-                    .getElementById(
-                        "cardHolderName"
-                    )
-                    ?.value
-                    .trim();
-
-            const expiry =
-                document
-                    .getElementById(
-                        "cardExpiry"
-                    )
-                    ?.value
-                    .trim();
-
-            const cvc =
-                document
-                    .getElementById(
-                        "cardCvc"
-                    )
-                    ?.value
-                    .trim();
-
-
-            if (
-                !number ||
-                number.length < 16 ||
-                !holder ||
-                !/^\d{2}\/\d{2}$/.test(expiry) ||
-                !/^\d{3}$/.test(cvc)
-            ) {
-                return;
-            }
-
-
-            /*
-               Store only safe card information.
-               Never store CVC.
-            */
-
-            const existingCard =
-                currentUser.cards.find(
-                    card =>
-                        card.lastFour ===
-                        number.slice(-4)
+                transactionsEmptyState.classList.remove(
+                    "hidden"
                 );
-
-
-            if (!existingCard) {
-
-                currentUser.cards.push({
-
-                    id:
-                        generateId("card"),
-
-                    holder,
-
-                    lastFour:
-                        number.slice(-4),
-
-                    expiryDate:
-                        expiry,
-
-                    addedAt:
-                        new Date().toISOString()
-                });
-            }
-        }
-
-
-        /* =================================================
-           DETERMINE TARGET ACCOUNT
-        ================================================= */
-
-        let targetAccountName =
-            "Main Account";
-
-
-        let targetAccount = null;
-
-
-        if (selectedFundingAccountId) {
-
-            targetAccount =
-                currentUser.accounts.find(
-                    account =>
-                        account.id ===
-                        selectedFundingAccountId
-                );
-
-
-            if (targetAccount) {
-
-                targetAccountName =
-                    targetAccount.name;
-            }
-        }
-
-
-        /* =================================================
-           UPDATE BALANCE
-        ================================================= */
-
-        if (targetAccount) {
-
-            /*
-               Funding a custom account.
-            */
-
-            targetAccount.balance =
-                Number(targetAccount.balance) || 0;
-
-            targetAccount.balance += amount;
-
-
-            /*
-               Make sure its transaction history exists.
-            */
-
-            if (
-                !Array.isArray(
-                    targetAccount.transactions
-                )
-            ) {
-
-                targetAccount.transactions = [];
             }
 
-        } else {
-
-            /*
-               Funding the main account.
-            */
-
-            currentUser.balance =
-                Number(currentUser.balance) || 0;
-
-            currentUser.balance += amount;
+            return;
         }
-
-
-        /*
-           Income represents money coming into
-           the user's banking system.
-        */
-
-        currentUser.income =
-            Number(currentUser.income) || 0;
-
-        currentUser.income += amount;
-
-
-        /* =================================================
-           CREATE ONE CONSISTENT DEPOSIT TRANSACTION
-        ================================================= */
-
-        const transactionId =
-            generateId("transaction");
-
-        const transactionDate =
-            new Date().toISOString();
-
-
-        const transaction = {
-
-            id:
-                transactionId,
-
-            /*
-               Main transaction classification.
-            */
-
-            type:
-                "deposit",
-
-            transactionType:
-                "deposit",
-
-            category:
-                "deposit",
-
-            direction:
-                "credit",
-
-
-            /*
-               Display information.
-            */
-
-            name:
-                "Account Funding",
-
-            title:
-                "Deposit",
-
-            description:
-                `Deposit to ${targetAccountName}`,
-
-
-            /*
-               Money.
-            */
-
-            amount:
-                amount,
-
-
-            /*
-               Payment information.
-            */
-
-            paymentMethod:
-                method,
-
-            accountId:
-                selectedFundingAccountId || null,
-
-            accountName:
-                targetAccountName,
-
-
-            /*
-               Dates.
-            */
-
-            date:
-                transactionDate,
-
-            createdAt:
-                transactionDate,
-
-
-            /*
-               Status.
-            */
-
-            status:
-                "successful"
-        };
-
-
-        /*
-           Save transaction to the main
-           transaction history.
-        */
-
-        currentUser.transactions.unshift(
-            transaction
-        );
-
-
-        /* =================================================
-           SAVE TRANSACTION TO CUSTOM ACCOUNT
-        ================================================= */
-
-        if (targetAccount) {
-
-            targetAccount.transactions.unshift({
-
-                id:
-                    transactionId,
-
-                type:
-                    "deposit",
-
-                transactionType:
-                    "deposit",
-
-                category:
-                    "deposit",
-
-                direction:
-                    "credit",
-
-                name:
-                    "Account Funding",
-
-                title:
-                    "Deposit",
-
-                description:
-                    `Deposit to ${targetAccount.name}`,
-
-                amount:
-                    amount,
-
-                paymentMethod:
-                    method,
-
-                accountId:
-                    targetAccount.id,
-
-                accountName:
-                    targetAccount.name,
-
-                date:
-                    transactionDate,
-
-                createdAt:
-                    transactionDate,
-
-                status:
-                    "successful"
-            });
-        }
-
-
-        /* =================================================
-           CREATE NOTIFICATION
-        ================================================= */
-
-        currentUser.notifications.unshift({
-
-            id:
-                generateId(
-                    "notification"
-                ),
-
-            title:
-                "Deposit Successful",
-
-            message:
-                `${formatMoney(amount)} was deposited into ${targetAccountName}.`,
-
-            type:
-                "deposit",
-
-            transactionId:
-                transactionId,
-
-            read:
-                false,
-
-            createdAt:
-                transactionDate
-        });
-
-
-        /* =================================================
-           SAVE EVERYTHING
-        ================================================= */
-
-        saveUser();
-
-
-        /* =================================================
-           UPDATE DASHBOARD
-        ================================================= */
-
-        renderBalances();
-
-        renderStatistics();
-
-        renderTransactions();
-
-        renderNotifications();
-
-
-        /* =================================================
-           CLOSE FUNDING MODAL
-        ================================================= */
-
-        closeModal(
-            "fundWalletModal"
-        );
-
-
-        /* =================================================
-           SUCCESS MODAL
-        ================================================= */
-
-        const successAmount =
-            document.getElementById(
-                "depositSuccessAmount"
-            );
-
-        const successMessage =
-            document.getElementById(
-                "depositSuccessMessage"
-            );
-
-
-        if (successAmount) {
-
-            successAmount.textContent =
-                formatMoney(amount);
-        }
-
-
-        if (successMessage) {
-
-            successMessage.textContent =
-                `${formatMoney(amount)} has been successfully deposited into ${targetAccountName}.`;
-        }
-
-
-        setTimeout(() => {
-
-            openModal(
-                "depositSuccessModal"
-            );
-
-        }, 200);
-
-
-        selectedFundingAccountId =
-            null;
-    }
-);
-
-
-/* =====================================================
-   22. TRANSACTIONS
-===================================================== */
-
-const transactionsContainer =
-    document.getElementById(
-        "transactionsContainer"
-    );
-
-const transactionsEmptyState =
-    document.getElementById(
-        "transactionsEmptyState"
-    );
-
-
-/* =====================================================
-   GET TRANSACTION TYPE
-===================================================== */
-
-function getTransactionType(transaction) {
-
-    const transactionType =
-        String(
-            transaction?.transactionType ||
-            ""
-        ).toLowerCase();
-
-
-    const type =
-        String(
-            transaction?.type ||
-            ""
-        ).toLowerCase();
-
-
-    const category =
-        String(
-            transaction?.category ||
-            ""
-        ).toLowerCase();
-
-
-    /*
-       Always prioritize the explicit
-       transactionType.
-    */
-
-    if (
-        transactionType ===
-        "deposit"
-    ) {
-
-        return "deposit";
-    }
-
-
-    if (
-        transactionType ===
-        "withdrawal"
-    ) {
-
-        return "withdrawal";
-    }
-
-
-    if (
-        transactionType ===
-        "expense"
-    ) {
-
-        return "withdrawal";
-    }
-
-
-    if (
-        type ===
-        "deposit" ||
-        type ===
-        "income"
-    ) {
-
-        return "deposit";
-    }
-
-
-    if (
-        type ===
-        "withdrawal" ||
-        type ===
-        "expense"
-    ) {
-
-        return "withdrawal";
-    }
-
-
-    if (
-        category ===
-        "deposit"
-    ) {
-
-        return "deposit";
-    }
-
-
-    if (
-        category ===
-        "withdrawal" ||
-        category ===
-        "expense"
-    ) {
-
-        return "withdrawal";
-    }
-
-
-    /*
-       Finally use direction.
-    */
-
-    if (
-        transaction.direction ===
-        "credit"
-    ) {
-
-        return "deposit";
-    }
-
-
-    if (
-        transaction.direction ===
-        "debit"
-    ) {
-
-        return "withdrawal";
-    }
-
-
-    return "other";
-}
-
-
-/* =====================================================
-   CHECK DEPOSIT
-===================================================== */
-
-function isDepositTransaction(
-    transaction
-) {
-
-    return (
-        getTransactionType(
-            transaction
-        ) === "deposit"
-    );
-}
-
-
-/* =====================================================
-   CHECK WITHDRAWAL
-===================================================== */
-
-function isWithdrawalTransaction(
-    transaction
-) {
-
-    const type =
-        getTransactionType(
-            transaction
-        );
-
-
-    return (
-        type === "withdrawal"
-    );
-}
-
-
-/* =====================================================
-   TRANSACTION ICON
-===================================================== */
-
-function getTransactionIconHTML(
-    transaction
-) {
-
-    const isDeposit =
-        isDepositTransaction(
-            transaction
-        );
-
-
-    const isWithdrawal =
-        isWithdrawalTransaction(
-            transaction
-        );
-
-
-    /*
-       DEPOSIT
-       Green + icon.
-    */
-
-    if (isDeposit) {
-
-        return `
-
-            <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e7f8f1] text-[#20b486]"
-            >
-
-                <i
-                    class="fa-solid fa-plus text-sm"
-                ></i>
-
-            </div>
-
-        `;
-    }
-
-
-    /*
-       WITHDRAWAL
-       Red - icon.
-    */
-
-    if (isWithdrawal) {
-
-        return `
-
-            <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#fff0f1] text-[#ef5260]"
-            >
-
-                <i
-                    class="fa-solid fa-minus text-sm"
-                ></i>
-
-            </div>
-
-        `;
-    }
-
-
-    /*
-       OTHER TRANSACTIONS
-       Neutral icon.
-    */
-
-    return `
-
-        <div
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f0f2f1] text-[#777]"
-        >
-
-            <i
-                class="fa-solid fa-arrow-right-arrow-left text-sm"
-            ></i>
-
-        </div>
-
-    `;
-}
-
-
-/* =====================================================
-   TRANSACTION AMOUNT
-===================================================== */
-
-function getTransactionAmountHTML(
-    transaction
-) {
-
-    const amount =
-        Number(
-            transaction.amount
-        ) || 0;
-
-
-    const isDeposit =
-        isDepositTransaction(
-            transaction
-        );
-
-
-    const isWithdrawal =
-        isWithdrawalTransaction(
-            transaction
-        );
-
-
-    /*
-       DEPOSIT
-       +₦10,000.00
-    */
-
-    if (isDeposit) {
-
-        return `
-
-            <span
-                class="font-semibold text-[#20b486]"
-            >
-                +${balanceVisible
-                    ? formatMoney(amount)
-                    : "₦ ••••••"
-                }
-            </span>
-
-        `;
-    }
-
-
-    /*
-       WITHDRAWAL
-       -₦10,000.00
-    */
-
-    if (isWithdrawal) {
-
-        return `
-
-            <span
-                class="font-semibold text-[#ef5260]"
-            >
-                -${balanceVisible
-                    ? formatMoney(amount)
-                    : "₦ ••••••"
-                }
-            </span>
-
-        `;
-    }
-
-
-    /*
-       OTHER
-    */
-
-    return `
-
-        <span
-            class="font-semibold text-[#555]"
-        >
-            ${balanceVisible
-                ? formatMoney(amount)
-                : "₦ ••••••"
-            }
-        </span>
-
-    `;
-}
-
-
-/* =====================================================
-   RENDER TRANSACTIONS
-===================================================== */
-
-function renderTransactions(
-    transactions =
-        currentUser.transactions
-) {
-
-    if (!transactionsContainer) {
-        return;
-    }
-
-
-    /*
-       Remove existing transaction rows.
-    */
-
-    transactionsContainer
-        .querySelectorAll(
-            ".transaction-row"
-        )
-        .forEach(row => {
-
-            row.remove();
-
-        });
-
-
-    /*
-       Empty state.
-    */
-
-    if (
-        !transactions ||
-        transactions.length === 0
-    ) {
 
         if (transactionsEmptyState) {
 
-            transactionsEmptyState.classList.remove(
+            transactionsEmptyState.classList.add(
                 "hidden"
             );
         }
 
-        return;
-    }
+        /*
+           Sort newest first.
+        */
 
+        const sorted =
+            [...transactions]
+                .sort(
+                    (a, b) => {
 
-    if (transactionsEmptyState) {
+                        const dateA =
+                            new Date(
+                                a.createdAt ||
+                                a.date ||
+                                0
+                            ).getTime();
 
-        transactionsEmptyState.classList.add(
-            "hidden"
-        );
-    }
+                        const dateB =
+                            new Date(
+                                b.createdAt ||
+                                b.date ||
+                                0
+                            ).getTime();
 
-
-    /*
-       Show latest 8 transactions.
-    */
-
-    const latest =
-        transactions.slice(
-            0,
-            8
-        );
-
-
-    latest.forEach(
-        transaction => {
-
-            const row =
-                document.createElement(
-                    "button"
+                        return (
+                            dateB -
+                            dateA
+                        );
+                    }
                 );
 
+        /*
+           SHOW ONLY 5 ON OVERVIEW.
+        */
 
-            row.type =
-                "button";
+        const latestFive =
+            sorted.slice(
+                0,
+                5
+            );
 
+        latestFive.forEach(
+            transaction => {
 
-            row.className =
-                "transaction-row flex w-full items-center justify-between border-b border-[#edf1ef] py-4 text-left transition hover:bg-[#f7fbf9]";
-
-
-            const title =
-                transaction.title ||
-                transaction.name ||
-                transaction.description ||
-                "Transaction";
-
-
-            const secondaryText =
-                transaction.accountName ||
-                transaction.description ||
-                formatDateTime(
-                    transaction.date ||
-                    transaction.createdAt
-                );
-
-
-            row.innerHTML = `
-
-                <div class="flex min-w-0 items-center gap-3">
-
-                    ${getTransactionIconHTML(
+                const type =
+                    getTransactionType(
                         transaction
-                    )}
+                    );
 
-                    <div class="min-w-0">
+                const row =
+                    document.createElement(
+                        "button"
+                    );
 
-                        <p
-                            class="truncate text-[13px] font-semibold text-[#292929]"
-                        >
-                            ${escapeHTML(title)}
+                row.type =
+                    "button";
+
+                row.className =
+                    "w-full flex items-center justify-between gap-4 py-4 border-b border-gray-100 text-left hover:bg-gray-50";
+
+                row.innerHTML = `
+
+                    <div class="flex items-center gap-3 min-w-0">
+
+                        <div class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${
+                            type === "income"
+                                ? "bg-green-100 text-green-600"
+                                : type === "expense"
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-gray-100 text-gray-600"
+                        }">
+
+                            <i class="fa-solid ${
+                                type === "income"
+                                    ? "fa-arrow-down"
+                                    : type === "expense"
+                                        ? "fa-arrow-up"
+                                        : "fa-receipt"
+                            }"></i>
+
+                        </div>
+
+                        <div class="min-w-0">
+
+                            <p class="font-medium text-gray-800 truncate">
+
+                                ${escapeHTML(
+                                    transaction.title ||
+                                    "Transaction"
+                                )}
+
+                            </p>
+
+                            <p class="text-xs text-gray-400">
+
+                                ${escapeHTML(
+                                    formatDateTime(
+                                        transaction.createdAt ||
+                                        transaction.date
+                                    )
+                                )}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="text-right shrink-0">
+
+                        <p class="font-semibold ${
+                            type === "income"
+                                ? "text-green-600"
+                                : type === "expense"
+                                    ? "text-red-600"
+                                    : "text-gray-700"
+                        }">
+
+                            ${
+                                type ===
+                                "expense"
+                                    ? "-"
+                                    : "+"
+                            }${formatMoney(
+                                transaction.amount
+                            )}
+
                         </p>
 
-                        <p
-                            class="mt-1 truncate text-[10px] text-[#888]"
-                        >
+                        <p class="text-xs text-gray-400 truncate max-w-[130px]">
+
                             ${escapeHTML(
-                                secondaryText
+                                transaction.account ||
+                                ""
                             )}
+
                         </p>
 
                     </div>
 
-                </div>
+                `;
 
-
-                <div
-                    class="ml-3 shrink-0 text-right"
-                >
-
-                    <p class="text-[13px]">
-
-                        ${getTransactionAmountHTML(
+                row.addEventListener(
+                    "click",
+                    () =>
+                        showTransactionDetails(
                             transaction
-                        )}
+                        )
+                );
 
-                    </p>
-
-                    <p
-                        class="mt-1 text-[9px] text-[#999]"
-                    >
-                        ${formatDate(
-                            transaction.date ||
-                            transaction.createdAt
-                        )}
-                    </p>
-
-                </div>
-
-            `;
-
-
-            row.addEventListener(
-                "click",
-                () => {
-
-                    showTransactionDetails(
-                        transaction
-                    );
-
-                }
-            );
-
-
-            transactionsContainer.appendChild(
-                row
-            );
-
-        }
-    );
-}
-
+                transactionsContainer.appendChild(
+                    row
+                );
+            }
+        );
+    }
 
     /* =====================================================
-       23. TRANSACTION DETAILS MODAL
+       17. TRANSACTION DETAILS
     ===================================================== */
 
     function showTransactionDetails(
         transaction
     ) {
 
-        const name =
+        let modal =
             document.getElementById(
-                "transactionModalName"
+                "transactionDetailsModal"
             );
 
-        const amount =
-            document.getElementById(
-                "transactionModalAmount"
+        if (!modal) {
+
+            modal =
+                document.createElement(
+                    "div"
+                );
+
+            modal.id =
+                "transactionDetailsModal";
+
+            modal.className =
+                "fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-4";
+
+            modal.innerHTML = `
+
+                <div class="bg-white rounded-3xl p-6 max-w-md w-full">
+
+                    <div class="flex items-center justify-between">
+
+                        <h3 class="text-xl font-bold">
+                            Transaction Details
+                        </h3>
+
+                        <button
+                            type="button"
+                            id="closeTransactionDetails"
+                            class="text-gray-400 text-xl">
+
+                            <i class="fa-solid fa-xmark"></i>
+
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="transactionDetailsContent"
+                        class="mt-5 space-y-3">
+                    </div>
+
+                </div>
+            `;
+
+            document.body.appendChild(
+                modal
             );
 
-        const date =
-            document.getElementById(
-                "transactionModalDate"
-            );
-
-        const type =
-            document.getElementById(
-                "transactionModalType"
-            );
-
-
-        const transactionAmount =
-            Number(
-                transaction.amount
-            ) || 0;
-
-
-        if (name) {
-
-            name.textContent =
-                transaction.title ||
-                transaction.name ||
-                transaction.description ||
-                "Transaction";
-        }
-
-
-        if (amount) {
-
-            amount.textContent =
-                formatMoney(
-                    transactionAmount
+            document
+                .getElementById(
+                    "closeTransactionDetails"
+                )
+                ?.addEventListener(
+                    "click",
+                    () =>
+                        closeModal(
+                            modal
+                        )
                 );
         }
 
+        const content =
+            document.getElementById(
+                "transactionDetailsContent"
+            );
 
-        if (date) {
+        if (content) {
 
-            date.textContent =
-                formatDateTime(
-                    transaction.date ||
-                    transaction.createdAt
-                );
+            content.innerHTML = `
+
+                <div class="flex justify-between gap-4">
+
+                    <span class="text-gray-500">
+                        Title
+                    </span>
+
+                    <span class="font-medium text-right">
+                        ${escapeHTML(
+                            transaction.title ||
+                            "Transaction"
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between gap-4">
+
+                    <span class="text-gray-500">
+                        Amount
+                    </span>
+
+                    <span class="font-semibold text-right">
+                        ${formatMoney(
+                            transaction.amount
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between gap-4">
+
+                    <span class="text-gray-500">
+                        Account
+                    </span>
+
+                    <span class="font-medium text-right">
+                        ${escapeHTML(
+                            transaction.account ||
+                            "—"
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between gap-4">
+
+                    <span class="text-gray-500">
+                        Payment Method
+                    </span>
+
+                    <span class="font-medium text-right">
+                        ${escapeHTML(
+                            transaction.paymentMethod ||
+                            "—"
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between gap-4">
+
+                    <span class="text-gray-500">
+                        Status
+                    </span>
+
+                    <span class="font-medium text-right">
+                        ${escapeHTML(
+                            transaction.status ||
+                            "completed"
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="flex justify-between gap-4">
+
+                    <span class="text-gray-500">
+                        Date
+                    </span>
+
+                    <span class="font-medium text-right">
+                        ${escapeHTML(
+                            formatDateTime(
+                                transaction.createdAt ||
+                                transaction.date
+                            )
+                        )}
+                    </span>
+
+                </div>
+            `;
         }
-
-
-        if (type) {
-
-            type.textContent =
-                transaction.transactionType ||
-                transaction.type ||
-                "Transaction";
-        }
-
 
         openModal(
-            "transactionModal"
+            modal
         );
     }
 
-
     /* =====================================================
-       24. VIEW ALL TRANSACTIONS
-    ===================================================== */
-
-    document
-        .getElementById(
-            "viewAllTransactionsButton"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                /*
-                   If you later create transactions.html,
-                   this will take the user there.
-                */
-
-                window.location.href =
-                    "./transactions.html";
-            }
-        );
-
-
-    /* =====================================================
-       25. NOTIFICATION DROPDOWN
+       18. NOTIFICATIONS
     ===================================================== */
 
     const notificationButton =
@@ -2482,52 +1884,60 @@ function renderTransactions(
             "notificationDot"
         );
 
+    let notificationDropdown =
+        null;
 
-    let notificationDropdown = null;
+    function renderNotifications() {
 
+        const unread =
+            currentUser.notifications.filter(
+                notification =>
+                    !notification.read
+            ).length;
 
-    function createNotificationDropdown() {
+        if (notificationDot) {
 
-        if (
-            document.getElementById(
-                "notificationDropdown"
-            )
-        ) {
+            notificationDot.textContent =
+                unread > 99
+                    ? "99+"
+                    : unread;
 
-            notificationDropdown =
-                document.getElementById(
-                    "notificationDropdown"
-                );
-
-            return;
+            notificationDot.classList.toggle(
+                "hidden",
+                unread === 0
+            );
         }
 
+        if (!notificationDropdown) {
 
-        notificationDropdown =
-            document.createElement("div");
+            notificationDropdown =
+                document.createElement(
+                    "div"
+                );
 
-        notificationDropdown.id =
-            "notificationDropdown";
+            notificationDropdown.id =
+                "notificationDropdown";
 
-        notificationDropdown.className =
-            "fixed right-5 top-[82px] z-[150] hidden w-[350px] max-w-[calc(100vw-40px)] overflow-hidden rounded-2xl border border-[#e5ece9] bg-white shadow-[0_15px_50px_rgba(0,0,0,0.12)]";
+            notificationDropdown.className =
+                "fixed z-50 hidden w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden";
 
+            document.body.appendChild(
+                notificationDropdown
+            );
+        }
 
         notificationDropdown.innerHTML = `
 
-            <div class="flex items-center justify-between border-b border-[#edf1ef] px-5 py-4">
+            <div class="flex items-center justify-between px-4 py-4 border-b">
 
                 <div>
 
-                    <h3 class="text-sm font-bold text-[#292929]">
+                    <h3 class="font-semibold text-gray-800">
                         Notifications
                     </h3>
 
-                    <p
-                        id="notificationUnreadText"
-                        class="mt-1 text-[10px] text-[#888]"
-                    >
-                        No unread notifications
+                    <p class="text-xs text-gray-400">
+                        ${unread} unread
                     </p>
 
                 </div>
@@ -2535,326 +1945,213 @@ function renderTransactions(
                 <button
                     type="button"
                     id="markAllNotificationsRead"
-                    class="text-[10px] font-semibold text-[#20b486] hover:underline"
-                >
+                    class="text-sm text-[#087f5b]">
+
                     Mark all as read
+
                 </button>
 
             </div>
 
-            <div
-                id="notificationList"
-                class="max-h-[420px] overflow-y-auto"
-            ></div>
+            <div class="max-h-[420px] overflow-y-auto">
 
+                ${
+                    currentUser.notifications.length
+
+                        ? currentUser.notifications
+                            .slice(
+                                0,
+                                15
+                            )
+                            .map(
+                                notification =>
+                                    `
+
+                                <button
+                                    type="button"
+                                    data-notification-id="${escapeHTML(
+                                        notification.id
+                                    )}"
+                                    class="w-full text-left px-4 py-4 border-b hover:bg-gray-50 ${
+                                        notification.read
+                                            ? ""
+                                            : "bg-green-50/40"
+                                    }">
+
+                                    <div class="flex gap-3">
+
+                                        <div class="w-9 h-9 shrink-0 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+
+                                            <i class="fa-solid fa-bell"></i>
+
+                                        </div>
+
+                                        <div class="flex-1">
+
+                                            <p class="font-medium text-sm text-gray-800">
+
+                                                ${escapeHTML(
+                                                    notification.title
+                                                )}
+
+                                            </p>
+
+                                            <p class="text-xs text-gray-500 mt-1">
+
+                                                ${escapeHTML(
+                                                    notification.message
+                                                )}
+
+                                            </p>
+
+                                            <p class="text-[11px] text-gray-400 mt-1">
+
+                                                ${escapeHTML(
+                                                    formatDateTime(
+                                                        notification.createdAt
+                                                    )
+                                                )}
+
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                </button>
+
+                            `
+                            )
+                            .join("")
+
+                        : `
+
+                            <div class="px-4 py-10 text-center text-gray-400 text-sm">
+
+                                No notifications yet.
+
+                            </div>
+
+                        `
+                }
+
+            </div>
         `;
 
-
-        document.body.appendChild(
-            notificationDropdown
-        );
-
-
-        document
-            .getElementById(
-                "markAllNotificationsRead"
+        notificationDropdown
+            .querySelector(
+                "#markAllNotificationsRead"
             )
             ?.addEventListener(
                 "click",
                 () => {
 
-                    currentUser.notifications
-                        .forEach(notification => {
-                            notification.read = true;
-                        });
-
+                    currentUser.notifications.forEach(
+                        notification =>
+                            notification.read =
+                                true
+                    );
 
                     saveUser();
 
                     renderNotifications();
                 }
             );
-    }
 
-
-    createNotificationDropdown();
-
-
-    function renderNotifications() {
-
-        if (!notificationDropdown) {
-            createNotificationDropdown();
-        }
-
-
-        const list =
-            document.getElementById(
-                "notificationList"
-            );
-
-        const unreadText =
-            document.getElementById(
-                "notificationUnreadText"
-            );
-
-
-        if (!list) return;
-
-
-        const unreadCount =
-            currentUser.notifications.filter(
-                notification =>
-                    !notification.read
-            ).length;
-
-
-        /*
-           Notification icon count.
-        */
-
-        let countElement =
-            document.getElementById(
-                "notificationCount"
-            );
-
-
-        if (!countElement) {
-
-            countElement =
-                document.createElement("span");
-
-            countElement.id =
-                "notificationCount";
-
-            countElement.className =
-                "absolute -right-1 -top-1 flex min-h-[17px] min-w-[17px] items-center justify-center rounded-full bg-[#ef5260] px-1 text-[8px] font-bold text-white";
-
-            notificationButton?.appendChild(
-                countElement
-            );
-        }
-
-
-        if (unreadCount > 0) {
-
-            countElement.textContent =
-                unreadCount > 99
-                    ? "99+"
-                    : unreadCount;
-
-            countElement.classList.remove(
-                "hidden"
-            );
-
-            notificationDot?.classList.add(
-                "hidden"
-            );
-
-        } else {
-
-            countElement.classList.add(
-                "hidden"
-            );
-
-            notificationDot?.classList.add(
-                "hidden"
-            );
-        }
-
-
-        if (unreadText) {
-
-            unreadText.textContent =
-                unreadCount === 0
-                    ? "No unread notifications"
-                    : `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`;
-        }
-
-
-        list.innerHTML = "";
-
-
-        if (
-            currentUser.notifications.length === 0
-        ) {
-
-            list.innerHTML = `
-
-                <div class="px-5 py-12 text-center">
-
-                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#f0f7f4] text-[#20b486]">
-
-                        <i class="fa-regular fa-bell"></i>
-
-                    </div>
-
-                    <p class="mt-3 text-sm font-semibold text-[#555]">
-                        No notifications
-                    </p>
-
-                    <p class="mt-1 text-xs text-[#999]">
-                        New account activity will appear here.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-        }
-
-
-        currentUser.notifications
-            .slice(0, 30)
-            .forEach(
-                notification => {
-
-                    const item =
-                        document.createElement("button");
-
-                    item.type =
-                        "button";
-
-                    item.className =
-                        `flex w-full gap-3 border-b border-[#edf1ef] px-5 py-4 text-left transition hover:bg-[#f7fbf9] ${
-                            notification.read
-                                ? "bg-white"
-                                : "bg-[#f1fbf7]"
-                        }`;
-
-
-                    item.innerHTML = `
-
-                        <div class="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
-                            notification.read
-                                ? "bg-[#f0f2f1] text-[#777]"
-                                : "bg-[#dff7ed] text-[#20b486]"
-                        }">
-
-                            <i class="fa-solid fa-bell text-xs"></i>
-
-                        </div>
-
-                        <div class="min-w-0 flex-1">
-
-                            <div class="flex items-start justify-between gap-2">
-
-                                <p class="text-[12px] font-semibold text-[#292929]">
-                                    ${escapeHTML(
-                                        notification.title ||
-                                        "Notification"
-                                    )}
-                                </p>
-
-                                ${
-                                    !notification.read
-                                        ? `<span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#20b486]"></span>`
-                                        : ""
-                                }
-
-                            </div>
-
-                            <p class="mt-1 text-[11px] leading-5 text-[#777]">
-                                ${escapeHTML(
-                                    notification.message ||
-                                    ""
-                                )}
-                            </p>
-
-                            <p class="mt-1 text-[9px] text-[#aaa]">
-                                ${formatDateTime(
-                                    notification.createdAt
-                                )}
-                            </p>
-
-                        </div>
-                    `;
-
-
-                    item.addEventListener(
-                        "click",
-                        () => {
-
-                            notification.read =
-                                true;
-
-                            saveUser();
-
-                            renderNotifications();
-
-
-                            if (
-                                notification.transactionId
-                            ) {
-
-                                const transaction =
-                                    currentUser.transactions.find(
-                                        item =>
-                                            item.id ===
+        notificationDropdown
+            .querySelectorAll(
+                "[data-notification-id]"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const notification =
+                            currentUser.notifications.find(
+                                item =>
+                                    String(
+                                        item.id
+                                    ) ===
+                                    String(
+                                        button
+                                            .dataset
+                                            .notificationId
+                                    )
+                            );
+
+                        if (!notification)
+                            return;
+
+                        notification.read =
+                            true;
+
+                        saveUser();
+
+                        renderNotifications();
+
+                        if (
+                            notification.transactionId
+                        ) {
+
+                            const transaction =
+                                currentUser.transactions.find(
+                                    item =>
+                                        String(
+                                            item.id
+                                        ) ===
+                                        String(
                                             notification.transactionId
-                                    );
+                                        )
+                                );
 
+                            if (transaction) {
 
-                                if (transaction) {
-
-                                    closeNotificationDropdown();
-
-                                    showTransactionDetails(
-                                        transaction
-                                    );
-                                }
+                                showTransactionDetails(
+                                    transaction
+                                );
                             }
                         }
-                    );
+                    }
+                );
+            });
+    }
 
+    if (notificationButton) {
 
-                    list.appendChild(item);
+        notificationButton.addEventListener(
+            "click",
+            event => {
+
+                event.stopPropagation();
+
+                if (
+                    !notificationDropdown
+                ) {
+
+                    renderNotifications();
                 }
-            );
-    }
 
+                const rect =
+                    notificationButton.getBoundingClientRect();
 
-    function openNotificationDropdown() {
+                notificationDropdown.style.top =
+                    `${rect.bottom + 10}px`;
 
-        notificationDropdown?.classList.remove(
-            "hidden"
-        );
-    }
+                notificationDropdown.style.right =
+                    `${Math.max(
+                        16,
+                        window.innerWidth -
+                            rect.right
+                    )}px`;
 
-
-    function closeNotificationDropdown() {
-
-        notificationDropdown?.classList.add(
-            "hidden"
-        );
-    }
-
-
-    notificationButton?.addEventListener(
-        "click",
-        event => {
-
-            event.stopPropagation();
-
-            const isHidden =
-                notificationDropdown?.classList.contains(
+                notificationDropdown.classList.toggle(
                     "hidden"
                 );
-
-
-            if (isHidden) {
-
-                renderNotifications();
-
-                openNotificationDropdown();
-
-            } else {
-
-                closeNotificationDropdown();
             }
-        }
-    );
-
+        );
+    }
 
     document.addEventListener(
         "click",
@@ -2865,19 +2162,19 @@ function renderTransactions(
                 !notificationDropdown.contains(
                     event.target
                 ) &&
-                !notificationButton?.contains(
-                    event.target
-                )
+                event.target !==
+                    notificationButton
             ) {
 
-                closeNotificationDropdown();
+                notificationDropdown.classList.add(
+                    "hidden"
+                );
             }
         }
     );
 
-
     /* =====================================================
-       26. SEARCH
+       19. SEARCH
     ===================================================== */
 
     const searchButton =
@@ -2885,188 +2182,81 @@ function renderTransactions(
             "searchButton"
         );
 
+    let searchInput =
+        null;
 
-    let searchWrapper = null;
-    let searchInput = null;
-    let searchResults = null;
-
+    let searchResults =
+        null;
 
     function createSearchUI() {
 
-        if (
-            document.getElementById(
-                "dashboardSearchWrapper"
-            )
-        ) {
+        if (searchInput) return;
 
-            searchWrapper =
-                document.getElementById(
-                    "dashboardSearchWrapper"
-                );
+        const wrapper =
+            document.createElement(
+                "div"
+            );
 
-            searchInput =
-                document.getElementById(
-                    "dashboardSearchInput"
-                );
+        wrapper.className =
+            "relative w-full max-w-md";
 
-            searchResults =
-                document.getElementById(
-                    "dashboardSearchResults"
-                );
+        wrapper.innerHTML = `
 
-            return;
-        }
-
-
-        searchWrapper =
-            document.createElement("div");
-
-        searchWrapper.id =
-            "dashboardSearchWrapper";
-
-        searchWrapper.className =
-            "fixed right-5 top-[70px] z-[150] w-[390px] max-w-[calc(100vw-40px)]";
-
-
-        searchWrapper.innerHTML = `
-
-            <div class="relative">
-
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[#888]"></i>
-
-                <input
-                    id="dashboardSearchInput"
-                    type="text"
-                    autocomplete="off"
-                    placeholder="Search transactions or accounts..."
-                    class="h-12 w-full rounded-xl border border-[#dfe8e4] bg-white pl-11 pr-10 text-sm text-[#333] shadow-lg outline-none focus:border-[#20b486]"
-                >
-
-                <button
-                    type="button"
-                    id="closeDashboardSearch"
-                    class="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-[#777] hover:bg-[#f0f4f2]"
-                >
-
-                    <i class="fa-solid fa-xmark text-xs"></i>
-
-                </button>
-
-            </div>
+            <input
+                id="overviewSearchInput"
+                type="search"
+                placeholder="Search transactions or accounts..."
+                class="w-full rounded-xl border border-gray-200 px-4 py-3 pr-10 outline-none focus:ring-2 focus:ring-green-200"
+            />
 
             <div
-                id="dashboardSearchResults"
-                class="mt-2 hidden max-h-[420px] overflow-y-auto rounded-xl border border-[#e5ece9] bg-white shadow-xl"
-            ></div>
+                id="overviewSearchResults"
+                class="absolute z-40 left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 hidden overflow-hidden">
+            </div>
 
         `;
 
+        if (
+            searchButton &&
+            searchButton.parentElement
+        ) {
 
-        document.body.appendChild(
-            searchWrapper
-        );
+            searchButton.parentElement.appendChild(
+                wrapper
+            );
 
+        } else {
+
+            document.body.appendChild(
+                wrapper
+            );
+        }
 
         searchInput =
-            document.getElementById(
-                "dashboardSearchInput"
+            wrapper.querySelector(
+                "#overviewSearchInput"
             );
 
         searchResults =
-            document.getElementById(
-                "dashboardSearchResults"
+            wrapper.querySelector(
+                "#overviewSearchResults"
             );
 
-
-        document
-            .getElementById(
-                "closeDashboardSearch"
-            )
-            ?.addEventListener(
-                "click",
-                closeSearch
-            );
-
-
-        searchInput?.addEventListener(
+        searchInput.addEventListener(
             "input",
-            () => {
-
-                performSearch(
-                    searchInput.value
-                );
-            }
-        );
-
-
-        searchInput?.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key ===
-                    "Escape"
-                ) {
-
-                    closeSearch();
-                }
-            }
+            runSearch
         );
     }
 
-
-    function openSearch() {
-
-        createSearchUI();
-
-        searchWrapper?.classList.remove(
-            "hidden"
-        );
-
-        setTimeout(() => {
-
-            searchInput?.focus();
-
-        }, 50);
-    }
-
-
-    function closeSearch() {
-
-        searchWrapper?.classList.add(
-            "hidden"
-        );
-
-        if (searchResults) {
-
-            searchResults.classList.add(
-                "hidden"
-            );
-        }
-    }
-
-
-    searchButton?.addEventListener(
-        "click",
-        event => {
-
-            event.stopPropagation();
-
-            openSearch();
-        }
-    );
-
-
-    function performSearch(value) {
+    function runSearch() {
 
         const query =
-            String(value || "")
+            searchInput?.value
                 .trim()
                 .toLowerCase();
 
-
-        if (!searchResults) return;
-
+        if (!searchResults)
+            return;
 
         if (!query) {
 
@@ -3080,321 +2270,141 @@ function renderTransactions(
             return;
         }
 
+        const accountResults =
+            currentUser.accounts.filter(
+                account =>
+                    String(
+                        account.name ||
+                        ""
+                    )
+                        .toLowerCase()
+                        .includes(
+                            query
+                        )
+            );
+
+        const transactionResults =
+            currentUser.transactions.filter(
+                transaction =>
+
+                    String(
+                        transaction.title ||
+                        ""
+                    )
+                        .toLowerCase()
+                        .includes(
+                            query
+                        ) ||
+
+                    String(
+                        transaction.description ||
+                        ""
+                    )
+                        .toLowerCase()
+                        .includes(
+                            query
+                        ) ||
+
+                    String(
+                        transaction.account ||
+                        ""
+                    )
+                        .toLowerCase()
+                        .includes(
+                            query
+                        )
+            );
+
+        const html = [];
+
+        accountResults.forEach(
+            account => {
+
+                html.push(`
+
+                    <button
+                        type="button"
+                        data-search-account="${escapeHTML(
+                            account.id
+                        )}"
+                        class="w-full text-left px-4 py-3 border-b hover:bg-gray-50">
+
+                        <p class="font-medium">
+                            ${escapeHTML(
+                                account.name
+                            )}
+                        </p>
+
+                        <p class="text-xs text-gray-400">
+
+                            Account · ${formatMoney(
+                                account.balance
+                            )}
+
+                        </p>
+
+                    </button>
+
+                `);
+            }
+        );
+
+        transactionResults
+            .slice(
+                0,
+                10
+            )
+            .forEach(
+                transaction => {
+
+                    html.push(`
+
+                        <button
+                            type="button"
+                            data-search-transaction="${escapeHTML(
+                                transaction.id
+                            )}"
+                            class="w-full text-left px-4 py-3 border-b hover:bg-gray-50">
+
+                            <p class="font-medium">
+
+                                ${escapeHTML(
+                                    transaction.title ||
+                                    "Transaction"
+                                )}
+
+                            </p>
+
+                            <p class="text-xs text-gray-400">
+
+                                ${formatMoney(
+                                    transaction.amount
+                                )}
+
+                            </p>
+
+                        </button>
+
+                    `);
+                }
+            );
+
+        searchResults.innerHTML =
+            html.length
+                ? html.join("")
+                : `
+
+                    <div class="px-4 py-5 text-sm text-gray-400">
+
+                        No results found.
+
+                    </div>
+
+                `;
 
         searchResults.classList.remove(
             "hidden"
         );
-
-
-        const matchingAccounts =
-            currentUser.accounts.filter(
-                account =>
-                    String(
-                        account.name || ""
-                    )
-                        .toLowerCase()
-                        .includes(query) ||
-
-                    String(
-                        account.description || ""
-                    )
-                        .toLowerCase()
-                        .includes(query)
-            );
-
-
-        const matchingTransactions =
-            currentUser.transactions.filter(
-                transaction => {
-
-                    const searchable = [
-
-                        transaction.name,
-
-                        transaction.title,
-
-                        transaction.description,
-
-                        transaction.accountName,
-
-                        transaction.paymentMethod,
-
-                        transaction.type,
-
-                        transaction.transactionType,
-
-                        transaction.category
-
-                    ]
-                        .filter(Boolean)
-                        .join(" ")
-                        .toLowerCase();
-
-
-                    return searchable.includes(
-                        query
-                    );
-                }
-            );
-
-
-        if (
-            matchingAccounts.length === 0 &&
-            matchingTransactions.length === 0
-        ) {
-
-            searchResults.innerHTML = `
-
-                <div class="px-5 py-10 text-center">
-
-                    <i class="fa-solid fa-magnifying-glass text-xl text-[#aaa]"></i>
-
-                    <p class="mt-3 text-sm font-semibold text-[#555]">
-                        No results found
-                    </p>
-
-                    <p class="mt-1 text-xs text-[#999]">
-                        Try another account or transaction.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-        }
-
-
-        let html = "";
-
-
-        if (
-            matchingAccounts.length > 0
-        ) {
-
-            html += `
-
-                <div class="border-b border-[#edf1ef]">
-
-                    <div class="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-[#999]">
-                        Accounts
-                    </div>
-
-            `;
-
-
-            matchingAccounts
-                .slice(0, 5)
-                .forEach(account => {
-
-                    html += `
-
-                        <button
-                            type="button"
-                            data-search-account="${account.id}"
-                            class="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-[#f6faf8]"
-                        >
-
-                            <div class="flex min-w-0 items-center gap-3">
-
-                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#dff7ed] text-[#20b486]">
-
-                                    <i class="fa-regular fa-credit-card text-xs"></i>
-
-                                </div>
-
-                                <div class="min-w-0">
-
-                                    <p class="truncate text-xs font-semibold text-[#333]">
-                                        ${escapeHTML(account.name)}
-                                    </p>
-
-                                    <p class="truncate text-[10px] text-[#999]">
-                                        ${escapeHTML(account.description)}
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                            <span class="ml-3 shrink-0 text-xs font-semibold text-[#20b486]">
-                                ${formatMoney(account.balance)}
-                            </span>
-
-                        </button>
-                    `;
-                });
-
-
-            html += `</div>`;
-        }
-
-
-        if (
-            matchingTransactions.length > 0
-        ) {
-
-            html += `
-
-                <div>
-
-                    <div class="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-[#999]">
-                        Transactions
-                    </div>
-
-            `;
-
-
-            matchingTransactions
-                .slice(0, 8)
-                .forEach(transaction => {
-
-                    const amount =
-                        Number(
-                            transaction.amount
-                        ) || 0;
-
-
-                    const type =
-                        getTransactionType(
-                            transaction
-                        );
-
-
-                    const isExpense =
-                        type === "expense" ||
-                        type === "withdrawal" ||
-                        transaction.direction ===
-                            "debit";
-
-
-                    html += `
-
-                        <button
-                            type="button"
-                            data-search-transaction="${transaction.id}"
-                            class="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-[#f6faf8]"
-                        >
-
-                            <div class="flex min-w-0 items-center gap-3">
-
-                                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                                    isExpense
-                                        ? "bg-[#fff0f1] text-[#ef5260]"
-                                        : "bg-[#e7f8f1] text-[#20b486]"
-                                }">
-
-                                    <i class="fa-solid ${
-                                        isExpense
-                                            ? "fa-arrow-up-right-from-square"
-                                            : "fa-arrow-down-left"
-                                    } text-xs"></i>
-
-                                </div>
-
-                                <div class="min-w-0">
-
-                                    <p class="truncate text-xs font-semibold text-[#333]">
-                                        ${escapeHTML(
-                                            transaction.title ||
-                                            transaction.name ||
-                                            "Transaction"
-                                        )}
-                                    </p>
-
-                                    <p class="truncate text-[10px] text-[#999]">
-                                        ${formatDate(
-                                            transaction.date ||
-                                            transaction.createdAt
-                                        )}
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                            <span class="ml-3 shrink-0 text-xs font-semibold ${
-                                isExpense
-                                    ? "text-[#ef5260]"
-                                    : "text-[#20b486]"
-                            }">
-
-                                ${isExpense ? "-" : "+"}
-                                ${formatMoney(amount)}
-
-                            </span>
-
-                        </button>
-                    `;
-                });
-
-
-            html += `</div>`;
-        }
-
-
-        searchResults.innerHTML =
-            html;
-
-
-        /*
-           Account results.
-        */
-
-        searchResults
-            .querySelectorAll(
-                "[data-search-account]"
-            )
-            .forEach(button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const id =
-                            button.dataset
-                                .searchAccount;
-
-                        const card =
-                            document.querySelector(
-                                `[data-account-id="${id}"]`
-                            );
-
-
-                        closeSearch();
-
-
-                        if (card) {
-
-                            card.scrollIntoView({
-                                behavior: "smooth",
-                                block: "center"
-                            });
-
-
-                            card.classList.add(
-                                "ring-2",
-                                "ring-[#20b486]"
-                            );
-
-
-                            setTimeout(() => {
-
-                                card.classList.remove(
-                                    "ring-2",
-                                    "ring-[#20b486]"
-                                );
-
-                            }, 1800);
-                        }
-                    }
-                );
-            });
-
-
-        /*
-           Transaction results.
-        */
 
         searchResults
             .querySelectorAll(
@@ -3406,21 +2416,19 @@ function renderTransactions(
                     "click",
                     () => {
 
-                        const id =
-                            button.dataset
-                                .searchTransaction;
-
-
                         const transaction =
                             currentUser.transactions.find(
                                 item =>
-                                    item.id === id
+                                    String(
+                                        item.id
+                                    ) ===
+                                    String(
+                                        button.dataset
+                                            .searchTransaction
+                                    )
                             );
 
-
                         if (transaction) {
-
-                            closeSearch();
 
                             showTransactionDetails(
                                 transaction
@@ -3431,244 +2439,206 @@ function renderTransactions(
             });
     }
 
+    if (searchButton) {
 
-    /* =====================================================
-       27. DATE FILTERS
-    ===================================================== */
-
-    const dateFilterButton =
-        document.getElementById(
-            "dateFilterButton"
-        );
-
-    const dateFilterText =
-        document.getElementById(
-            "dateFilterText"
-        );
-
-
-    const statisticsFilterButton =
-        document.getElementById(
-            "statisticsFilterButton"
-        );
-
-    const statisticsFilterText =
-        document.getElementById(
-            "statisticsFilterText"
-        );
-
-
-    /*
-       Simple dropdown for date filters.
-    */
-
-    function createDateFilter(
-        button,
-        textElement,
-        onSelect
-    ) {
-
-        if (!button) return;
-
-
-        let dropdown = null;
-
-
-        button.addEventListener(
-            "click",
-            event => {
-
-                event.stopPropagation();
-
-
-                if (dropdown) {
-
-                    dropdown.remove();
-
-                    dropdown = null;
-
-                    return;
-                }
-
-
-                dropdown =
-                    document.createElement("div");
-
-
-                dropdown.className =
-                    "absolute z-[120] mt-2 w-[150px] overflow-hidden rounded-xl border border-[#e5ece9] bg-white shadow-xl";
-
-
-                const options = [
-                    "Today",
-                    "This Week",
-                    "This Month",
-                    "This Year"
-                ];
-
-
-                options.forEach(option => {
-
-                    const item =
-                        document.createElement("button");
-
-                    item.type =
-                        "button";
-
-                    item.className =
-                        "block w-full px-4 py-3 text-left text-xs text-[#555] hover:bg-[#f2f8f5]";
-
-
-                    item.textContent =
-                        option;
-
-
-                    item.addEventListener(
-                        "click",
-                        () => {
-
-                            if (textElement) {
-                                textElement.textContent =
-                                    option;
-                            }
-
-
-                            onSelect(option);
-
-
-                            dropdown?.remove();
-
-                            dropdown =
-                                null;
-                        }
-                    );
-
-
-                    dropdown.appendChild(
-                        item
-                    );
-                });
-
-
-                button.parentElement.style.position =
-                    "relative";
-
-
-                button.parentElement.appendChild(
-                    dropdown
-                );
-            }
-        );
-
-
-        document.addEventListener(
+        searchButton.addEventListener(
             "click",
             () => {
 
-                dropdown?.remove();
+                createSearchUI();
 
-                dropdown = null;
+                searchInput?.focus();
             }
         );
     }
 
-
-    createDateFilter(
-        dateFilterButton,
-        dateFilterText,
-        () => {}
-    );
-
-
-    createDateFilter(
-        statisticsFilterButton,
-        statisticsFilterText,
-        () => {}
-    );
-
-
     /* =====================================================
-       28. PRO MODAL
+       20. DATE FILTER
     ===================================================== */
 
-    document
-        .getElementById(
-            "upgradeProButton"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                openModal(
-                    "upgradeModal"
-                );
-            }
+    const dateFilter =
+        document.getElementById(
+            "dateFilter"
         );
 
+    if (dateFilter) {
 
-    document
-        .getElementById(
-            "continueUpgradeButton"
-        )
-        ?.addEventListener(
-            "click",
+        dateFilter.addEventListener(
+            "change",
             () => {
+
+                const value =
+                    dateFilter.value;
+
+                if (!value) {
+
+                    renderTransactions();
+
+                    return;
+                }
+
+                const now =
+                    new Date();
+
+                let startDate =
+                    new Date();
+
+                if (
+                    value ===
+                    "today"
+                ) {
+
+                    startDate =
+                        new Date(
+                            now.getFullYear(),
+                            now.getMonth(),
+                            now.getDate()
+                        );
+
+                } else if (
+                    value ===
+                    "7days"
+                ) {
+
+                    startDate.setDate(
+                        now.getDate() -
+                        7
+                    );
+
+                } else if (
+                    value ===
+                    "30days"
+                ) {
+
+                    startDate.setDate(
+                        now.getDate() -
+                        30
+                    );
+                }
+
+                const filtered =
+                    currentUser.transactions.filter(
+                        transaction => {
+
+                            const transactionDate =
+                                new Date(
+                                    transaction.createdAt ||
+                                    transaction.date
+                                );
+
+                            return (
+                                transactionDate >=
+                                startDate
+                            );
+                        }
+                    );
 
                 /*
-                   PRO functionality can be connected
-                   here later.
+                   Even filtered results are limited
+                   to the latest 5 on Overview.
                 */
 
-                closeModal(
-                    "upgradeModal"
+                renderTransactions(
+                    filtered
                 );
             }
         );
-
+    }
 
     /* =====================================================
-       29. LOGOUT
+       21. UPGRADE MODAL
     ===================================================== */
 
-    document
-        .getElementById(
-            "logoutButton"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                openModal(
-                    "logoutModal"
-                );
-            }
+    const upgradeButton =
+        document.getElementById(
+            "upgradeButton"
         );
 
-
-    document
-        .getElementById(
-            "confirmLogoutButton"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                sessionStorage.removeItem(
-                    "currentUser"
-                );
-
-                localStorage.removeItem(
-                    "currentUser"
-                );
-
-                window.location.href =
-                    "./index.html";
-            }
+    const upgradeModal =
+        document.getElementById(
+            "upgradeModal"
         );
 
+    const closeUpgradeModal =
+        document.getElementById(
+            "closeUpgradeModal"
+        );
+
+    upgradeButton?.addEventListener(
+        "click",
+        () =>
+            openModal(
+                upgradeModal
+            )
+    );
+
+    closeUpgradeModal?.addEventListener(
+        "click",
+        () =>
+            closeModal(
+                upgradeModal
+            )
+    );
 
     /* =====================================================
-       30. MOBILE SIDEBAR
+       22. LOGOUT
+    ===================================================== */
+
+    const logoutButton =
+        document.getElementById(
+            "logoutButton"
+        );
+
+    const logoutModal =
+        document.getElementById(
+            "logoutModal"
+        );
+
+    const cancelLogoutBtn =
+        document.getElementById(
+            "cancelLogoutBtn"
+        );
+
+    const confirmLogoutBtn =
+        document.getElementById(
+            "confirmLogoutBtn"
+        );
+
+    logoutButton?.addEventListener(
+        "click",
+        () =>
+            openModal(
+                logoutModal
+            )
+    );
+
+    cancelLogoutBtn?.addEventListener(
+        "click",
+        () =>
+            closeModal(
+                logoutModal
+            )
+    );
+
+    confirmLogoutBtn?.addEventListener(
+        "click",
+        () => {
+
+            sessionStorage.removeItem(
+                "currentUser"
+            );
+
+            localStorage.removeItem(
+                "currentUser"
+            );
+
+            window.location.href =
+                "./login.html";
+        }
+    );
+
+    /* =====================================================
+       23. MOBILE SIDEBAR
     ===================================================== */
 
     const mobileMenuButton =
@@ -3686,54 +2656,41 @@ function renderTransactions(
             "sidebarOverlay"
         );
 
+    function toggleSidebar() {
 
-    function openSidebar() {
-
-        sidebar?.classList.remove(
+        sidebar?.classList.toggle(
             "-translate-x-full"
         );
 
-        sidebarOverlay?.classList.remove(
+        sidebarOverlay?.classList.toggle(
             "hidden"
         );
-
-        document.body.classList.add(
-            "overflow-hidden"
-        );
     }
-
-
-    function closeSidebar() {
-
-        sidebar?.classList.add(
-            "-translate-x-full"
-        );
-
-        sidebarOverlay?.classList.add(
-            "hidden"
-        );
-
-        document.body.classList.remove(
-            "overflow-hidden"
-        );
-    }
-
 
     mobileMenuButton?.addEventListener(
         "click",
-        openSidebar
+        toggleSidebar
     );
-
 
     sidebarOverlay?.addEventListener(
         "click",
-        closeSidebar
+        toggleSidebar
     );
 
-
     /* =====================================================
-       31. SIDEBAR NAVIGATION
+       24. NAVIGATION
     ===================================================== */
+
+    document
+        .getElementById(
+            "overviewNav"
+        )
+        ?.addEventListener(
+            "click",
+            () =>
+                window.location.href =
+                    "./overview.html"
+        );
 
     document
         .getElementById(
@@ -3741,27 +2698,10 @@ function renderTransactions(
         )
         ?.addEventListener(
             "click",
-            () => {
-
+            () =>
                 window.location.href =
-                    "./account.html";
-            }
+                    "./account.html"
         );
-
-
-    document
-        .getElementById(
-            "profileNav"
-        )
-        ?.addEventListener(
-            "click",
-            () => {
-
-                window.location.href =
-                    "./profile.html";
-            }
-        );
-
 
     document
         .getElementById(
@@ -3769,17 +2709,21 @@ function renderTransactions(
         )
         ?.addEventListener(
             "click",
-            () => {
-
+            () =>
                 window.location.href =
-                    "./transactions.html";
-            }
+                    "./transactions.html"
         );
 
-
-    /* =====================================================
-       32. HEADER PROFILE
-    ===================================================== */
+    document
+        .getElementById(
+            "profileNav"
+        )
+        ?.addEventListener(
+            "click",
+            () =>
+                window.location.href =
+                    "./profile.html"
+        );
 
     document
         .getElementById(
@@ -3787,72 +2731,24 @@ function renderTransactions(
         )
         ?.addEventListener(
             "click",
-            event => {
-
-                /*
-                   Prevent the nested <a> from causing
-                   double navigation.
-                */
-
-                const link =
-                    event.currentTarget
-                        .querySelector("a");
-
-                if (link) {
-                    window.location.href =
-                        link.href;
-                }
-            }
+            () =>
+                window.location.href =
+                    "./profile.html"
         );
 
-
     /* =====================================================
-       33. CLOSE MODALS WITH ESCAPE
+       25. INITIAL RENDER
     ===================================================== */
 
-    document.addEventListener(
-        "keydown",
-        event => {
+    /*
+       IMPORTANT ORDER:
 
-            if (
-                event.key !==
-                "Escape"
-            ) {
-                return;
-            }
-
-
-            document
-                .querySelectorAll(
-                    ".modal, #fundWalletModal, #addAccountModal, #accountCreatedSuccessModal, #depositSuccessModal"
-                )
-                .forEach(modal => {
-
-                    if (
-                        !modal.classList.contains(
-                            "hidden"
-                        )
-                    ) {
-
-                        closeModal(
-                            modal.id
-                        );
-                    }
-                });
-
-
-            closeSearch();
-
-            closeNotificationDropdown();
-
-            closeSidebar();
-        }
-    );
-
-
-    /* =====================================================
-       34. INITIAL RENDER
-    ===================================================== */
+       1. Custom accounts
+       2. Balances
+       3. Statistics
+       4. Latest 5 transactions
+       5. Notifications
+    */
 
     renderCustomAccounts();
 
@@ -3864,14 +2760,10 @@ function renderTransactions(
 
     renderNotifications();
 
-
-    /* =====================================================
-       35. FINAL SAVE
-       -----------------------------------------------------
-       Save only after normalization. This makes sure old
-       users receive the new arrays without losing data.
-    ===================================================== */
+    /*
+       Save normalized user data.
+       This does NOT remove custom accounts.
+    */
 
     saveUser();
-
 });

@@ -13,6 +13,7 @@
    ✓ School Savings
    ✓ Holiday Plan
    ✓ Custom Accounts
+   ✓ Aggregate Current Balance
    ✓ Fund Account
    ✓ Direct Pay
    ✓ Credit Card
@@ -83,7 +84,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (
             sessionUser.email &&
             user.email &&
-            user.email.toLowerCase() === sessionUser.email.toLowerCase()
+            user.email.toLowerCase() ===
+            sessionUser.email.toLowerCase()
         ) {
             return true;
         }
@@ -106,40 +108,65 @@ document.addEventListener("DOMContentLoaded", () => {
        3. NORMALIZE USER DATA
     ===================================================== */
 
-    currentUser.balance =
-        Number(currentUser.balance) || 0;
+    function normalizeCurrentUser() {
 
-    currentUser.income =
-        Number(currentUser.income) || 0;
+        currentUser.balance =
+            Number(currentUser.balance) || 0;
 
-    currentUser.expense =
-        Number(currentUser.expense) || 0;
+        currentUser.income =
+            Number(currentUser.income) || 0;
 
-    currentUser.schoolSavings =
-        Number(currentUser.schoolSavings) || 0;
+        currentUser.expense =
+            Number(currentUser.expense) || 0;
 
-    currentUser.holidayBalance =
-        Number(currentUser.holidayBalance) || 0;
+        currentUser.schoolSavings =
+            Number(currentUser.schoolSavings) || 0;
 
-    currentUser.transactions =
-        Array.isArray(currentUser.transactions)
-            ? currentUser.transactions
-            : [];
+        currentUser.holidayBalance =
+            Number(currentUser.holidayBalance) || 0;
 
-    currentUser.notifications =
-        Array.isArray(currentUser.notifications)
-            ? currentUser.notifications
-            : [];
+        currentUser.transactions =
+            Array.isArray(currentUser.transactions)
+                ? currentUser.transactions
+                : [];
 
-    currentUser.accounts =
-        Array.isArray(currentUser.accounts)
-            ? currentUser.accounts
-            : [];
+        currentUser.notifications =
+            Array.isArray(currentUser.notifications)
+                ? currentUser.notifications
+                : [];
 
-    currentUser.cards =
-        Array.isArray(currentUser.cards)
-            ? currentUser.cards
-            : [];
+        currentUser.accounts =
+            Array.isArray(currentUser.accounts)
+                ? currentUser.accounts
+                : [];
+
+        currentUser.cards =
+            Array.isArray(currentUser.cards)
+                ? currentUser.cards
+                : [];
+
+
+        /*
+           IMPORTANT:
+
+           Every custom account must have a numeric balance.
+           This makes the aggregate Current Balance reliable.
+        */
+
+        currentUser.accounts.forEach(account => {
+
+            account.balance =
+                Number(account.balance) || 0;
+
+            account.transactions =
+                Array.isArray(account.transactions)
+                    ? account.transactions
+                    : [];
+
+        });
+    }
+
+    normalizeCurrentUser();
 
 
     /* =====================================================
@@ -166,7 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (
                 currentUser.id &&
                 user.id &&
-                String(user.id) === String(currentUser.id)
+                String(user.id) ===
+                String(currentUser.id)
             ) {
                 return true;
             }
@@ -374,13 +402,19 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (accountId) {
 
             case "main":
-                return Number(currentUser.balance) || 0;
+                return Number(
+                    currentUser.balance
+                ) || 0;
 
             case "schoolSavings":
-                return Number(currentUser.schoolSavings) || 0;
+                return Number(
+                    currentUser.schoolSavings
+                ) || 0;
 
             case "holidaySavings":
-                return Number(currentUser.holidayBalance) || 0;
+                return Number(
+                    currentUser.holidayBalance
+                ) || 0;
 
             default: {
 
@@ -399,25 +433,49 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    function setAccountBalance(accountId, newBalance) {
+    function setAccountBalance(
+        accountId,
+        newBalance
+    ) {
 
         const balance =
-            Math.max(0, Number(newBalance) || 0);
+            Math.max(
+                0,
+                Number(newBalance) || 0
+            );
 
 
         switch (accountId) {
 
             case "main":
-                currentUser.balance = balance;
+
+                /*
+                   IMPORTANT:
+                   currentUser.balance is ONLY
+                   the Main Account balance.
+                */
+
+                currentUser.balance =
+                    balance;
+
                 break;
+
 
             case "schoolSavings":
-                currentUser.schoolSavings = balance;
+
+                currentUser.schoolSavings =
+                    balance;
+
                 break;
 
+
             case "holidaySavings":
-                currentUser.holidayBalance = balance;
+
+                currentUser.holidayBalance =
+                    balance;
+
                 break;
+
 
             default: {
 
@@ -429,12 +487,67 @@ document.addEventListener("DOMContentLoaded", () => {
                     );
 
                 if (account) {
-                    account.balance = balance;
+                    account.balance =
+                        balance;
                 }
 
                 break;
             }
         }
+    }
+
+
+    /* =====================================================
+       8. IMPORTANT CURRENT BALANCE CALCULATION
+       -----------------------------------------------------
+       Current Balance is the TOTAL of every account.
+
+       Main Account
+       + School Savings
+       + Holiday Plan
+       + Custom Accounts
+    ===================================================== */
+
+    function calculateCurrentBalance() {
+
+        const mainAccount =
+            Number(currentUser.balance) || 0;
+
+
+        const schoolSavings =
+            Number(currentUser.schoolSavings) || 0;
+
+
+        const holidayBalance =
+            Number(currentUser.holidayBalance) || 0;
+
+
+        const customAccountsTotal =
+            Array.isArray(currentUser.accounts)
+                ? currentUser.accounts.reduce(
+                    (total, account) => {
+
+                        return (
+                            total +
+                            (
+                                Number(
+                                    account.balance
+                                ) || 0
+                            )
+                        );
+
+                    },
+                    0
+                )
+                : 0;
+
+
+        return (
+            mainAccount +
+            schoolSavings +
+            holidayBalance +
+            customAccountsTotal
+        );
     }
 
 
@@ -458,25 +571,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       8. HEADER
+       9. HEADER
     ===================================================== */
 
     function renderHeader() {
 
         const nameElement =
-            document.getElementById("headerUserName");
+            document.getElementById(
+                "headerUserName"
+            );
+
 
         const accountElement =
-            document.getElementById("headerAccountNumber");
+            document.getElementById(
+                "headerAccountNumber"
+            );
 
 
         if (nameElement) {
+
             nameElement.textContent =
                 getUserName();
         }
 
 
         if (accountElement) {
+
             accountElement.textContent =
                 getAccountNumber();
         }
@@ -492,6 +612,7 @@ document.addEventListener("DOMContentLoaded", () => {
             profileImage &&
             currentUser.profileImage
         ) {
+
             profileImage.src =
                 currentUser.profileImage;
         }
@@ -499,13 +620,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       9. BALANCE VISIBILITY
+       10. BALANCE VISIBILITY
     ===================================================== */
 
     const hiddenBalances = {};
 
 
     function renderBalances() {
+
+        /*
+           -------------------------------------------------
+           INDIVIDUAL ACCOUNT BALANCES
+           -------------------------------------------------
+        */
 
         document
             .querySelectorAll(
@@ -516,11 +643,29 @@ document.addEventListener("DOMContentLoaded", () => {
                 const accountId =
                     element.dataset.balance;
 
+
+                /*
+                   "current" is reserved for the
+                   aggregate Current Balance.
+                */
+
+                if (
+                    accountId === "current" ||
+                    accountId === "total"
+                ) {
+                    return;
+                }
+
+
                 const balance =
-                    getAccountBalance(accountId);
+                    getAccountBalance(
+                        accountId
+                    );
 
 
-                if (hiddenBalances[accountId]) {
+                if (
+                    hiddenBalances[accountId]
+                ) {
 
                     element.textContent =
                         "₦ ••••••";
@@ -528,9 +673,95 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
 
                     element.textContent =
-                        formatMoney(balance);
+                        formatMoney(
+                            balance
+                        );
                 }
             });
+
+
+        /*
+           -------------------------------------------------
+           AGGREGATE CURRENT BALANCE
+           -------------------------------------------------
+        */
+
+        const currentBalance =
+            calculateCurrentBalance();
+
+
+        /*
+           Support the IDs commonly used by
+           your Overview / Accounts HTML.
+        */
+
+        const currentBalanceElements =
+            new Set();
+
+
+        const currentBalanceById = [
+            "currentBalance",
+            "totalCurrentBalance",
+            "accountCurrentBalance"
+        ];
+
+
+        currentBalanceById.forEach(id => {
+
+            const element =
+                document.getElementById(id);
+
+            if (element) {
+                currentBalanceElements.add(
+                    element
+                );
+            }
+        });
+
+
+        document
+            .querySelectorAll(
+                "[data-current-balance]"
+            )
+            .forEach(element => {
+
+                currentBalanceElements.add(
+                    element
+                );
+            });
+
+
+        document
+            .querySelectorAll(
+                '[data-balance="current"], [data-balance="total"]'
+            )
+            .forEach(element => {
+
+                currentBalanceElements.add(
+                    element
+                );
+            });
+
+
+        currentBalanceElements.forEach(
+            element => {
+
+                if (
+                    hiddenBalances.currentBalance
+                ) {
+
+                    element.textContent =
+                        "₦ ••••••";
+
+                } else {
+
+                    element.textContent =
+                        formatMoney(
+                            currentBalance
+                        );
+                }
+            }
+        );
 
 
         updateBalanceEyes();
@@ -548,6 +779,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const accountId =
                     button.dataset.balanceToggle;
 
+
                 const icon =
                     button.querySelector("i");
 
@@ -557,7 +789,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
 
-                if (hiddenBalances[accountId]) {
+                /*
+                   Current Balance eye can use:
+                   data-balance-toggle="current"
+                   or
+                   data-balance-toggle="total"
+                */
+
+                const visibilityKey =
+                    (
+                        accountId === "current" ||
+                        accountId === "total"
+                    )
+                        ? "currentBalance"
+                        : accountId;
+
+
+                if (
+                    hiddenBalances[
+                        visibilityKey
+                    ]
+                ) {
 
                     icon.className =
                         "fa-regular fa-eye text-[12px]";
@@ -600,8 +852,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 button.dataset.balanceToggle;
 
 
-            hiddenBalances[accountId] =
-                !hiddenBalances[accountId];
+            const visibilityKey =
+                (
+                    accountId === "current" ||
+                    accountId === "total"
+                )
+                    ? "currentBalance"
+                    : accountId;
+
+
+            hiddenBalances[
+                visibilityKey
+            ] =
+                !hiddenBalances[
+                    visibilityKey
+                ];
 
 
             renderBalances();
@@ -610,13 +875,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       10. MODAL HELPERS
+       11. MODAL HELPERS
     ===================================================== */
 
     function openModal(id) {
 
         const modal =
             document.getElementById(id);
+
 
         if (!modal) {
             return;
@@ -637,6 +903,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const modal =
             document.getElementById(id);
+
 
         if (!modal) {
             return;
@@ -676,14 +943,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 modal &&
                 event.target === modal
             ) {
-                closeModal(modal.id);
+
+                closeModal(
+                    modal.id
+                );
             }
         }
     );
 
 
     /* =====================================================
-       11. ADD ACCOUNT
+       12. ADD ACCOUNT
     ===================================================== */
 
     const addAccountButton =
@@ -721,6 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         "addAccountForm"
                     );
 
+
                 if (form) {
                     form.reset();
                 }
@@ -731,7 +1002,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         "accountNameError"
                     );
 
+
                 if (error) {
+
                     error.classList.add(
                         "hidden"
                     );
@@ -749,7 +1022,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     function closeAddAccount() {
-        closeModal("addAccountModal");
+
+        closeModal(
+            "addAccountModal"
+        );
     }
 
 
@@ -785,15 +1061,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         "accountNameInput"
                     );
 
+
                 const typeInput =
                     document.getElementById(
                         "accountTypeInput"
                     );
 
+
                 const descriptionInput =
                     document.getElementById(
                         "accountDescriptionInput"
                     );
+
 
                 const errorElement =
                     document.getElementById(
@@ -804,11 +1083,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 const name =
                     nameInput?.value.trim() || "";
 
+
                 const type =
-                    typeInput?.value || "savings";
+                    typeInput?.value ||
+                    "savings";
+
 
                 const description =
-                    descriptionInput?.value.trim() || "";
+                    descriptionInput?.value.trim() ||
+                    "";
 
 
                 if (!name) {
@@ -841,7 +1124,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const account = {
 
-                    id: generateId("account"),
+                    id:
+                        generateId(
+                            "account"
+                        ),
 
                     name,
 
@@ -901,7 +1187,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       12. CUSTOM ACCOUNT RENDERING
+       13. CUSTOM ACCOUNT RENDERING
     ===================================================== */
 
     function renderCustomAccounts() {
@@ -910,7 +1196,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .querySelectorAll(
                 ".custom-account-card"
             )
-            .forEach(card => card.remove());
+            .forEach(
+                card => card.remove()
+            );
 
 
         const grid =
@@ -925,7 +1213,10 @@ document.addEventListener("DOMContentLoaded", () => {
             );
 
 
-        if (!grid || !addButton) {
+        if (
+            !grid ||
+            !addButton
+        ) {
             return;
         }
 
@@ -1014,7 +1305,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       13. ACCOUNT CREATED MODAL
+       14. ACCOUNT CREATED MODAL
     ===================================================== */
 
     let newlyCreatedAccountId = null;
@@ -1038,7 +1329,8 @@ document.addEventListener("DOMContentLoaded", () => {
             "click",
             () => {
 
-                newlyCreatedAccountId = null;
+                newlyCreatedAccountId =
+                    null;
 
                 closeModal(
                     "accountCreatedModal"
@@ -1067,9 +1359,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     setTimeout(
                         () => {
+
                             openFundingModal(
                                 accountId
                             );
+
                         },
                         150
                     );
@@ -1080,14 +1374,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       14. FUNDING STATE
+       15. FUNDING STATE
     ===================================================== */
 
     let selectedFundingAccountId =
         "main";
 
 
-    function openFundingModal(accountId) {
+    function openFundingModal(
+        accountId
+    ) {
 
         selectedFundingAccountId =
             accountId || "main";
@@ -1104,15 +1400,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 "directPayTarget"
             );
 
+
         const creditCardTarget =
             document.getElementById(
                 "creditCardTarget"
             );
 
+
         const directPayAccountName =
             document.getElementById(
                 "directPayAccountName"
             );
+
 
         const creditCardAccountName =
             document.getElementById(
@@ -1135,12 +1434,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         if (directPayAccountName) {
+
             directPayAccountName.textContent =
                 targetName;
         }
 
 
         if (creditCardAccountName) {
+
             creditCardAccountName.textContent =
                 targetName;
         }
@@ -1162,10 +1463,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 "fundWalletForm"
             );
 
+
         const directForm =
             document.getElementById(
                 "directPayForm"
             );
+
 
         const creditForm =
             document.getElementById(
@@ -1183,6 +1486,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "directPaySection"
             );
 
+
         const creditSection =
             document.getElementById(
                 "creditCardSection"
@@ -1192,6 +1496,7 @@ document.addEventListener("DOMContentLoaded", () => {
         directSection?.classList.remove(
             "hidden"
         );
+
 
         creditSection?.classList.add(
             "hidden"
@@ -1203,14 +1508,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 "directPayOption"
             );
 
+
         if (directOption) {
+
             directOption.checked = true;
         }
     }
 
 
     /* =====================================================
-       15. FUND BUTTONS
+       16. FUND BUTTONS
     ===================================================== */
 
     document.addEventListener(
@@ -1242,7 +1549,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       16. PAYMENT METHOD SWITCH
+       17. PAYMENT METHOD SWITCH
     ===================================================== */
 
     const directPayOption =
@@ -1263,6 +1570,7 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById(
                 "directPaySection"
             );
+
 
         const creditSection =
             document.getElementById(
@@ -1308,7 +1616,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       17. FUND WALLET SUBMIT
+       18. FUND WALLET SUBMIT
     ===================================================== */
 
     const fundWalletForm =
@@ -1339,13 +1647,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     paymentMethod ===
                     "directPay"
                 ) {
-
-                    /*
-                       IMPORTANT:
-                       There are duplicate IDs in your HTML.
-                       The first #directPayAmount belongs
-                       to the main Fund Wallet modal.
-                    */
 
                     const amountInput =
                         fundWalletForm.querySelector(
@@ -1411,7 +1712,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       18. CARD VALIDATION
+       19. CARD VALIDATION
     ===================================================== */
 
     function validateFundingCard() {
@@ -1420,28 +1721,32 @@ document.addEventListener("DOMContentLoaded", () => {
             fundWalletForm?.querySelector(
                 "#cardNumber"
             )?.value
-                ?.replace(/\s/g, "") || "";
+                ?.replace(/\s/g, "") ||
+            "";
 
 
         const cardHolder =
             fundWalletForm?.querySelector(
                 "#cardHolderName"
             )?.value
-                ?.trim() || "";
+                ?.trim() ||
+            "";
 
 
         const expiry =
             fundWalletForm?.querySelector(
                 "#cardExpiry"
             )?.value
-                ?.trim() || "";
+                ?.trim() ||
+            "";
 
 
         const cvc =
             fundWalletForm?.querySelector(
                 "#cardCvc"
             )?.value
-                ?.trim() || "";
+                ?.trim() ||
+            "";
 
 
         if (
@@ -1501,7 +1806,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       19. COMPLETE DEPOSIT
+       20. COMPLETE DEPOSIT
     ===================================================== */
 
     function completeDeposit(
@@ -1511,11 +1816,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
 
         const targetAccount =
-            getAccountName(accountId);
+            getAccountName(
+                accountId
+            );
 
 
         const oldBalance =
-            getAccountBalance(accountId);
+            getAccountBalance(
+                accountId
+            );
 
 
         const newBalance =
@@ -1523,7 +1832,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-           Update selected account.
+           Update selected account only.
+
+           IMPORTANT:
+           We DO NOT add the amount to
+           currentUser.balance unless the selected
+           account is actually Main Account.
         */
 
         setAccountBalance(
@@ -1533,34 +1847,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-           Income is global and represents
-           money entering Reen Bank.
+           Income remains GLOBAL.
+
+           This is intentionally unchanged.
         */
 
         currentUser.income =
-            (Number(currentUser.income) || 0) +
+            (Number(
+                currentUser.income
+            ) || 0) +
             amount;
 
 
         const transactionId =
-            generateId("transaction");
+            generateId(
+                "transaction"
+            );
 
 
         const now =
             new Date().toISOString();
 
-
-        /*
-           IMPORTANT TRANSACTION SCHEMA
-           This matches the Overview page.
-
-           Deposit:
-           type = deposit
-           transactionType = deposit
-           category = deposit
-           direction = credit
-           amount = positive
-        */
 
         const transaction = {
 
@@ -1603,13 +1910,10 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-           Also store it inside custom account
-           transaction history.
-        */
-
         const customAccount =
-            getAccountObject(accountId);
+            getAccountObject(
+                accountId
+            );
 
 
         if (customAccount) {
@@ -1632,19 +1936,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /*
-           Notification
-        */
-
         currentUser.notifications.unshift({
 
-            id: generateId(
-                "notification"
-            ),
+            id:
+                generateId(
+                    "notification"
+                ),
 
             type: "deposit",
 
-            title: "Deposit Successful",
+            title:
+                "Deposit Successful",
 
             message:
                 `${formatMoney(amount)} was added to ${targetAccount}.`,
@@ -1665,11 +1967,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
 
+        /*
+           Save everything BEFORE rendering.
+        */
+
         saveUser();
 
 
+        /*
+           IMPORTANT:
+           renderBalances() now recalculates:
+
+           Main
+           + School
+           + Holiday
+           + Custom
+        */
+
         renderBalances();
+
         renderTransactions();
+
         renderNotifications();
 
 
@@ -1686,7 +2004,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       20. DEPOSIT SUCCESS
+       21. DEPOSIT SUCCESS
     ===================================================== */
 
     function showDepositSuccess(
@@ -1744,7 +2062,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       21. DIRECT PAY BUTTON / MODAL
+       22. DIRECT PAY BUTTON / MODAL
     ===================================================== */
 
     const closeDirectPayModal =
@@ -1765,7 +2083,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       22. CREDIT CARD BUTTON / MODAL
+       23. CREDIT CARD BUTTON / MODAL
     ===================================================== */
 
     const closeCreditCardModal =
@@ -1786,7 +2104,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       23. CANCEL FUNDING
+       24. CANCEL FUNDING
     ===================================================== */
 
     const cancelFundWalletBtn =
@@ -1807,7 +2125,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       24. TRANSACTION TYPE HELPERS
+       25. TRANSACTION TYPE HELPERS
     ===================================================== */
 
     function getTransactionType(
@@ -2014,7 +2332,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       25. TRANSACTION STATUS
+       26. TRANSACTION STATUS
     ===================================================== */
 
     function getStatusClass(status) {
@@ -2058,7 +2376,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       26. RENDER TRANSACTIONS
+       27. RENDER TRANSACTIONS
     ===================================================== */
 
     function renderTransactions(
@@ -2076,10 +2394,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-
-        /*
-           Remove the static Figma demo rows.
-        */
 
         container.innerHTML = "";
 
@@ -2272,7 +2586,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       27. WITHDRAW STATE
+       28. WITHDRAW STATE
     ===================================================== */
 
     let selectedWithdrawAccountId =
@@ -2280,7 +2594,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       28. OPEN WITHDRAW
+       29. OPEN WITHDRAW
     ===================================================== */
 
     document.addEventListener(
@@ -2388,7 +2702,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (title) {
 
             title.textContent =
-                `Withdraw`;
+                "Withdraw";
         }
 
 
@@ -2399,7 +2713,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       29. CANCEL WITHDRAW
+       30. CANCEL WITHDRAW
     ===================================================== */
 
     const cancelWithdrawBtn =
@@ -2420,7 +2734,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       30. WITHDRAW SUBMIT
+       31. WITHDRAW SUBMIT
     ===================================================== */
 
     const withdrawForm =
@@ -2443,15 +2757,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         "withdrawAmount"
                     );
 
+
                 const accountNumberInput =
                     document.getElementById(
                         "withdrawAccountNumber"
                     );
 
+
                 const accountNameInput =
                     document.getElementById(
                         "withdrawAccountName"
                     );
+
 
                 const bankInput =
                     document.getElementById(
@@ -2467,16 +2784,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 const accountNumber =
                     accountNumberInput?.value
-                        ?.replace(/\D/g, "") || "";
+                        ?.replace(/\D/g, "") ||
+                    "";
 
 
                 const accountName =
                     accountNameInput?.value
-                        ?.trim() || "";
+                        ?.trim() ||
+                    "";
 
 
                 const bank =
-                    bankInput?.value || "";
+                    bankInput?.value ||
+                    "";
 
 
                 const availableBalance =
@@ -2484,10 +2804,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         selectedWithdrawAccountId
                     );
 
-
-                /* -----------------------------------------
-                   VALIDATION
-                ----------------------------------------- */
 
                 if (
                     !amount ||
@@ -2575,32 +2891,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       31. COMPLETE WITHDRAWAL
+       32. COMPLETE WITHDRAWAL
     ===================================================== */
 
     function completeWithdrawal(data) {
 
         const {
-
             accountId,
-
             amount,
-
             accountNumber,
-
             accountName,
-
             bank
-
         } = data;
 
 
         const accountNameInternal =
-            getAccountName(accountId);
+            getAccountName(
+                accountId
+            );
 
 
         const oldBalance =
-            getAccountBalance(accountId);
+            getAccountBalance(
+                accountId
+            );
 
 
         if (
@@ -2618,7 +2932,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-           Subtract money from selected account.
+           Subtract only from the selected account.
         */
 
         setAccountBalance(
@@ -2628,36 +2942,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         /*
-           Add to global expense.
+           Expense remains GLOBAL.
+
+           This is intentionally unchanged.
         */
 
         currentUser.expense =
-            (Number(currentUser.expense) || 0) +
+            (Number(
+                currentUser.expense
+            ) || 0) +
             amount;
 
 
         const transactionId =
-            generateId("transaction");
+            generateId(
+                "transaction"
+            );
 
 
         const now =
             new Date().toISOString();
 
-
-        /*
-           IMPORTANT TRANSACTION SCHEMA
-           This is deliberately compatible
-           with the Overview page.
-
-           Withdrawal:
-           type = withdrawal
-           transactionType = withdrawal
-           category = withdrawal
-           direction = debit
-           amount = POSITIVE
-
-           The renderer adds the "-" sign.
-        */
 
         const transaction = {
 
@@ -2706,11 +3011,6 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-        /*
-           Save transaction inside
-           custom account too.
-        */
-
         const customAccount =
             getAccountObject(
                 accountId
@@ -2737,17 +3037,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
 
-        /*
-           Notification
-        */
-
         currentUser.notifications.unshift({
 
-            id: generateId(
-                "notification"
-            ),
+            id:
+                generateId(
+                    "notification"
+                ),
 
-            type: "withdrawal",
+            type:
+                "withdrawal",
 
             title:
                 "Withdrawal Successful",
@@ -2774,8 +3072,15 @@ document.addEventListener("DOMContentLoaded", () => {
         saveUser();
 
 
+        /*
+           Current Balance is automatically
+           recalculated here.
+        */
+
         renderBalances();
+
         renderTransactions();
+
         renderNotifications();
 
 
@@ -2792,7 +3097,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       32. WITHDRAW SUCCESS
+       33. WITHDRAW SUCCESS
     ===================================================== */
 
     function showWithdrawalSuccess(
@@ -2852,23 +3157,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       33. TRANSACTION DETAILS
+       34. TRANSACTION DETAILS
     ===================================================== */
 
     function showTransactionDetails(
         transaction
     ) {
-
-        /*
-           Your current accounts.html does not contain
-           a dedicated transaction-details modal.
-
-           If one is added later, this function can
-           automatically populate it.
-
-           For now, the row itself remains functional
-           without generating a browser alert.
-        */
 
         const type =
             getTransactionType(
@@ -2883,12 +3177,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? "Withdrawal"
                     : "Transaction";
 
-
-        /*
-           If Overview transaction modal exists
-           because the same JS/page structure is reused,
-           populate it.
-        */
 
         const modal =
             document.getElementById(
@@ -2906,15 +3194,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 "transactionModalName"
             );
 
+
         const amountElement =
             document.getElementById(
                 "transactionModalAmount"
             );
 
+
         const dateElement =
             document.getElementById(
                 "transactionModalDate"
             );
+
 
         const typeElement =
             document.getElementById(
@@ -2968,7 +3259,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       34. NOTIFICATIONS
+       35. NOTIFICATIONS
     ===================================================== */
 
     function renderNotifications() {
@@ -3166,7 +3457,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       35. NOTIFICATION BUTTON
+       36. NOTIFICATION BUTTON
     ===================================================== */
 
     const notificationButton =
@@ -3227,7 +3518,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       36. MARK ALL NOTIFICATIONS READ
+       37. MARK ALL NOTIFICATIONS READ
     ===================================================== */
 
     const markAllNotificationsButton =
@@ -3243,6 +3534,7 @@ document.addEventListener("DOMContentLoaded", () => {
             currentUser.notifications
                 .forEach(
                     notification => {
+
                         notification.read =
                             true;
                     }
@@ -3257,7 +3549,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       37. SEARCH
+       38. SEARCH
     ===================================================== */
 
     const globalSearchInput =
@@ -3301,13 +3593,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 .toLowerCase();
 
 
-        const accountResults =
-            [];
+        const accountResults = [];
 
-
-        /*
-           Built-in accounts
-        */
 
         [
             {
@@ -3344,10 +3631,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
 
-        /*
-           Custom accounts
-        */
-
         currentUser.accounts
             .forEach(account => {
 
@@ -3356,7 +3639,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         .toLowerCase()
                         .includes(search) ||
                     String(
-                        account.description || ""
+                        account.description ||
+                        ""
                     )
                         .toLowerCase()
                         .includes(search)
@@ -3375,10 +3659,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
-
-        /*
-           Transactions
-        */
 
         const transactionResults =
             currentUser.transactions
@@ -3675,7 +3955,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       38. VIEW ALL TRANSACTIONS
+       39. VIEW ALL TRANSACTIONS
     ===================================================== */
 
     const viewAllTransactionsButton =
@@ -3695,7 +3975,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       39. PROFILE BUTTON
+       40. PROFILE BUTTON
     ===================================================== */
 
     const profileButton =
@@ -3715,7 +3995,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       40. SIDEBAR NAVIGATION
+       41. SIDEBAR NAVIGATION
     ===================================================== */
 
     const overviewLink =
@@ -3766,15 +4046,8 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
 
-    /*
-       The actual <a> elements already contain
-       their correct href values, so no extra
-       navigation logic is necessary.
-    */
-
-
     /* =====================================================
-       41. MOBILE SIDEBAR
+       42. MOBILE SIDEBAR
     ===================================================== */
 
     const mobileMenuButton =
@@ -3847,7 +4120,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       42. MOBILE LOGOUT
+       43. MOBILE LOGOUT
     ===================================================== */
 
     const mobileLogoutButton =
@@ -3870,7 +4143,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       43. LOGOUT
+       44. LOGOUT
     ===================================================== */
 
     const logoutButton =
@@ -3921,6 +4194,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "currentUser"
             );
 
+
             localStorage.removeItem(
                 "currentUser"
             );
@@ -3933,7 +4207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       44. ERROR MODAL
+       45. ERROR MODAL
     ===================================================== */
 
     function showError(
@@ -3991,7 +4265,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       45. ESCAPE KEY
+       46. ESCAPE KEY
     ===================================================== */
 
     document.addEventListener(
@@ -4015,6 +4289,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (
                         modal.id
                     ) {
+
                         closeModal(
                             modal.id
                         );
@@ -4038,14 +4313,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       46. FORMAT CARD NUMBER
+       47. FORMAT CARD NUMBER
     ===================================================== */
-
-    /*
-       Use the specific input inside the main
-       Fund Wallet form to avoid conflicts caused
-       by duplicate IDs in the HTML.
-    */
 
     const fundingCardNumber =
         fundWalletForm?.querySelector(
@@ -4065,7 +4334,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             value =
                 value.match(/.{1,4}/g)
-                    ?.join(" ") || "";
+                    ?.join(" ") ||
+                "";
 
 
             event.target.value =
@@ -4075,7 +4345,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       47. FORMAT FUNDING EXPIRY
+       48. FORMAT FUNDING EXPIRY
     ===================================================== */
 
     const fundingCardExpiry =
@@ -4112,7 +4382,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       48. FORMAT CVC
+       49. FORMAT CVC
     ===================================================== */
 
     const fundingCvc =
@@ -4134,7 +4404,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       49. WITHDRAW ACCOUNT NUMBER
+       50. WITHDRAW ACCOUNT NUMBER
     ===================================================== */
 
     const withdrawAccountNumber =
@@ -4156,8 +4426,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       50. INITIAL RENDER
+       51. INITIAL RENDER
     ===================================================== */
+
+    normalizeCurrentUser();
 
     renderHeader();
 
@@ -4173,7 +4445,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
-       51. CROSS-PAGE STORAGE SYNCHRONIZATION
+       52. CROSS-PAGE STORAGE SYNCHRONIZATION
     ===================================================== */
 
     window.addEventListener(
@@ -4204,9 +4476,11 @@ document.addEventListener("DOMContentLoaded", () => {
                                 currentUser.id &&
                                 user.id
                             ) {
+
                                 return String(
                                     user.id
-                                ) === String(
+                                ) ===
+                                String(
                                     currentUser.id
                                 );
                             }
@@ -4231,58 +4505,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     updatedUser;
 
 
-                currentUser.balance =
-                    Number(
-                        currentUser.balance
-                    ) || 0;
-
-
-                currentUser.income =
-                    Number(
-                        currentUser.income
-                    ) || 0;
-
-
-                currentUser.expense =
-                    Number(
-                        currentUser.expense
-                    ) || 0;
-
-
-                currentUser.schoolSavings =
-                    Number(
-                        currentUser.schoolSavings
-                    ) || 0;
-
-
-                currentUser.holidayBalance =
-                    Number(
-                        currentUser.holidayBalance
-                    ) || 0;
-
-
-                currentUser.transactions =
-                    Array.isArray(
-                        currentUser.transactions
-                    )
-                        ? currentUser.transactions
-                        : [];
-
-
-                currentUser.notifications =
-                    Array.isArray(
-                        currentUser.notifications
-                    )
-                        ? currentUser.notifications
-                        : [];
-
-
-                currentUser.accounts =
-                    Array.isArray(
-                        currentUser.accounts
-                    )
-                        ? currentUser.accounts
-                        : [];
+                normalizeCurrentUser();
 
 
                 renderHeader();
