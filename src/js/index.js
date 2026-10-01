@@ -56,6 +56,119 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    /* =========================================================
+   FAQ — SELECT QUESTION AND DISPLAY ANSWER
+========================================================= */
+
+const faqDisplayQuestion =
+    document.getElementById("faqDisplayQuestion");
+
+const faqDisplayAnswer =
+    document.getElementById("faqDisplayAnswer");
+
+const faqOptions =
+    document.querySelectorAll(".faq-option");
+
+
+if (
+    faqDisplayQuestion &&
+    faqDisplayAnswer &&
+    faqOptions.length
+) {
+
+    faqOptions.forEach((option) => {
+
+        option.addEventListener("click", () => {
+
+            const question =
+                option.dataset.question;
+
+            const answer =
+                option.dataset.answer;
+
+
+            if (!question || !answer) {
+                return;
+            }
+
+
+            /* ---------------------------------------------
+               Fade old content out
+            --------------------------------------------- */
+
+            faqDisplayQuestion.classList.add(
+                "opacity-0"
+            );
+
+            faqDisplayAnswer.classList.add(
+                "opacity-0"
+            );
+
+
+            /* ---------------------------------------------
+               Update selected question
+            --------------------------------------------- */
+
+            faqOptions.forEach((item) => {
+
+                item.classList.remove(
+                    "text-[#2CC48A]"
+                );
+
+                item.classList.add(
+                    "text-[#46237A]"
+                );
+
+                item.setAttribute(
+                    "aria-selected",
+                    "false"
+                );
+
+            });
+
+
+            option.classList.remove(
+                "text-[#46237A]"
+            );
+
+            option.classList.add(
+                "text-[#2CC48A]"
+            );
+
+            option.setAttribute(
+                "aria-selected",
+                "true"
+            );
+
+
+            /* ---------------------------------------------
+               Update left panel
+            --------------------------------------------- */
+
+            setTimeout(() => {
+
+                faqDisplayQuestion.textContent =
+                    question;
+
+                faqDisplayAnswer.textContent =
+                    answer;
+
+
+                faqDisplayQuestion.classList.remove(
+                    "opacity-0"
+                );
+
+                faqDisplayAnswer.classList.remove(
+                    "opacity-0"
+                );
+
+            }, 150);
+
+        });
+
+    });
+
+}
 
     // =================================================
     // SMOOTH SCROLLING

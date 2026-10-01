@@ -30,7 +30,7 @@
             <div class="flex items-center gap-8 lg:gap-12">
 
                 <!-- Logo -->
-                 
+
                 <a href="#">
                     <img
                         src="./asset/images/logo.png"
@@ -418,112 +418,168 @@
 
     </section>
 
+    <!-- FAQ SECTION -->
+    <section
+    id="faq"
+    class="bg-[#D4F3E7] bg-[url('./asset/images/faq.png')] bg-contain bg-center bg-no-repeat px-5 py-12 sm:px-8 sm:py-14 lg:px-12 lg:py-20"
+>
+    <div class="mx-auto max-w-[1200px]">
 
-    <!-- ===================================================== -->
-    <!-- FAQ -->
-    <!-- ===================================================== -->
+        <!-- FAQ TITLE -->
+        <h2
+            class="mb-8 text-5xl font-semibold text-[#292929] sm:mb-10"
+        >
+            FAQs
+        </h2>
 
-    <section class="bg-[#D4F3E7] px-5 py-12 sm:px-8 sm:py-14 lg:px-12 lg:py-[50px]">
+        <!-- FAQ CONTENT -->
+        <div
+            class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16"
+        >
 
-        <div class="mx-auto max-w-[1200px]">
+            <!-- LEFT — SELECTED QUESTION + ANSWER -->
+            <div
+                id="faqDisplay"
+                class="max-w-[410px]"
+            >
 
-            <h2 class="mb-8 text-3xl font-semibold text-[#292929] sm:mb-10">
-                FAQs
-            </h2>
+                <h3
+                    id="faqDisplayQuestion"
+                    class="text-base font-semibold leading-6 text-[#2CC48A] underline transition-opacity duration-200 sm:text-2xl"
+                >
+                    How do I sign up for an account with
+                    <br class="hidden sm:block">
+                    Reen Bank?
+                </h3>
+
+                <p
+                    id="faqDisplayAnswer"
+                    class="mt-6 text-xs leading-6 text-gray-700 transition-opacity duration-200 sm:text-base sm:leading-7"
+                >
+                    You can sign up for an account with Reen Bank online by
+                    visiting our website and filling out the online application
+                    form. Once your application is approved, you will receive
+                    instructions for setting up your account and accessing our
+                    online banking platform.
+                </p>
+
+            </div>
 
 
-            <div class="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+            <!-- RIGHT — FAQ QUESTIONS -->
+            <div
+                id="faqList"
+                class="flex max-w-[500px] flex-col gap-5"
+            >
 
-                <!-- Main FAQ -->
-                <div class="max-w-[410px]">
+                <!-- QUESTION 1 -->
+                <button
+                    type="button"
+                    class="faq-option group flex w-full items-center justify-between gap-5 text-left font-bold text-[#2CC48A] transition-all duration-200"
+                    data-question="How do I sign up for an account with Reen Bank?"
+                    data-answer="You can sign up for an account with Reen Bank online by visiting our website and filling out the online application form. Once your application is approved, you will receive instructions for setting up your account and accessing our online banking platform."
+                    aria-selected="true"
+                >
+                    <span class="faq-option-text leading-6 underline">
+                        How do I sign up for an account with Reen Bank?
+                    </span>
 
-                    <a
-                        href="#"
-                        class="block text-base font-semibold leading-6 text-[#2CC48A] underline decoration-1 underline-offset-2 transition hover:opacity-70 sm:text-lg"
+                    <span
+                        class="faq-option-arrow shrink-0 text-base transition-transform duration-200"
                     >
-                        How do I sign up for an account with
-                        <br class="hidden sm:block">
-                        Reen Bank?
-                    </a>
-
-                    <p class="mt-6 text-xs leading-6 text-gray-700 sm:text-sm sm:leading-7">
-                        You can sign up for an account with Reen Bank online by
-                        visiting our website and filling out the online application
-                        form. Once your application is approved, you will receive
-                        instructions for setting up your account and accessing our
-                        online banking platform.
-                    </p>
-
-                </div>
+                        →
+                    </span>
+                </button>
 
 
-                <!-- FAQ Links -->
-                <div class="flex max-w-[500px] flex-col gap-5">
+                <!-- QUESTION 2 -->
+                <button
+                    type="button"
+                    class="faq-option group flex w-full items-center justify-between gap-5 text-left font-bold text-[#46237A] transition-all duration-200"
+                    data-question="What types of accounts does Reen Bank offer?"
+                    data-answer="Reen Bank offers a variety of accounts to suit your financial needs, including savings accounts, checking accounts, and credit cards. We also offer loans, investment services, and other financial products."
+                    aria-selected="false"
+                >
+                    <span class="faq-option-text leading-6 underline">
+                        What types of accounts does Reen Bank offer?
+                    </span>
 
-                    <a
-                        href="#"
-                        class="flex items-center justify-between gap-5 text-sm font-bold text-[#46237A]"
+                    <span
+                        class="faq-option-arrow shrink-0 text-base transition-transform duration-200"
                     >
-                        <span class="underline decoration-1 underline-offset-2">
-                            What types of accounts does Reen Bank offer?
-                        </span>
-
-                        <span class="shrink-0 text-2xl">
-                            →
-                        </span>
-                    </a>
+                        →
+                    </span>
+                </button>
 
 
-                    <a
-                        href="#"
-                        class="flex items-center justify-between gap-5 text-sm font-bold text-[#46237A]"
+                <!-- QUESTION 3 -->
+                <button
+                    type="button"
+                    class="faq-option group flex w-full items-center justify-between gap-5 text-left font-bold text-[#46237A] transition-all duration-200"
+                    data-question="Is Reen Bank FDIC insured?"
+                    data-answer="Yes, Reen Bank is FDIC insured, which means that your deposits are insured up to $250,000 per depositor, per insured bank, for each account ownership category."
+                    aria-selected="false"
+                >
+                    <span class="faq-option-text leading-6 underline">
+                        Is Reen Bank FDIC insured?
+                    </span>
+
+                    <span
+                        class="faq-option-arrow shrink-0 text-base transition-transform duration-200"
                     >
-                        <span class="underline decoration-1 underline-offset-2">
-                            Is Reen Bank FDIC insured?
-                        </span>
-
-                        <span class="shrink-0 text-2xl">
-                            →
-                        </span>
-                    </a>
+                        →
+                    </span>
+                </button>
 
 
-                    <a
-                        href="#"
-                        class="flex items-center justify-between gap-5 text-sm font-bold text-[#46237A]"
+                <!-- QUESTION 4 -->
+                <button
+                    type="button"
+                    class="faq-option group flex w-full items-center justify-between gap-5 text-left font-bold text-[#46237A] transition-all duration-200"
+                    data-question="How can I access my Reen Bank account online?"
+                    data-answer="You can access your Reen Bank account online by logging into our secure online banking platform using your username and password. From there, you can view your account balances, transfer funds, pay bills, and more."
+                    aria-selected="false"
+                >
+                    <span class="faq-option-text leading-6 underline">
+                        How can I access my Reen Bank account online?
+                    </span>
+
+                    <span
+                        class="faq-option-arrow shrink-0 text-base transition-transform duration-200"
                     >
-                        <span class="underline decoration-1 underline-offset-2">
-                            How can I access my Reen Bank account online?
-                        </span>
-
-                        <span class="shrink-0 text-2xl">
-                            →
-                        </span>
-                    </a>
+                        →
+                    </span>
+                </button>
 
 
-                    <a
-                        href="#"
-                        class="flex items-center justify-between gap-5 text-sm font-bold leading-6 text-[#46237A]"
+                <!-- QUESTION 5 -->
+                <button
+                    type="button"
+                    class="faq-option group flex w-full items-center justify-between gap-5 text-left font-bold text-[#46237A] transition-all duration-200"
+                    data-question="What security measures does Reen Bank have in place to protect my financial information?"
+                    data-answer="Reen Bank takes the security of your financial information seriously and has a number of measures in place to protect against unauthorized access and fraud. These measures include encryption, two-factor authentication, fraud detection, and regular security updates and monitoring."
+                    aria-selected="false"
+                >
+                    <span class="faq-option-text leading-6 underline">
+                        What security measures does Reen Bank have in place
+                        to protect my financial information?
+                    </span>
+
+                    <span
+                        class="faq-option-arrow shrink-0 text-base transition-transform duration-200"
                     >
-                        <span class="max-w-[400px] underline decoration-1 underline-offset-2">
-                            What security measures does Reen Bank have
-                            in place to protect my financial information?
-                        </span>
-
-                        <span class="shrink-0 text-2xl">
-                            →
-                        </span>
-                    </a>
-
-                </div>
+                        →
+                    </span>
+                </button>
 
             </div>
 
         </div>
 
-    </section>
+    </div>
+</section>
 
+ 
 
     <!-- ===================================================== -->
     <!-- SUPPORTED SERVICES -->
@@ -590,7 +646,7 @@
 
                 <!-- LEFT SECTION -->
                 <div
-                class="w-full lg:w-[45%] bg-[#d9f5ed] px-10 sm:px-16 lg:px-[6.3%] py-12 lg:py-[6.5%] flex flex-col justify-between"
+                class="w-full lg:w-[45%] px-10 sm:px-16 lg:px-[6.3%] py-12 lg:py-[6.5%] flex flex-col justify-between"
                 >
 
                 <!-- Links -->
@@ -739,15 +795,6 @@
                         items-center
                     "
                     >
-
-                <!-- Dark image overlay -->
-                        <div
-                            class="
-                            absolute
-                            inset-0
-                            bg-black/55
-                            "
-                        ></div>
 
 
                         <!-- CONTENT -->
